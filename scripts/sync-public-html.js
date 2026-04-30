@@ -17,4 +17,18 @@ for (const entry of entriesToSync) {
   fs.cpSync(source, target, { recursive: true });
 }
 
+function removeSourceMaps(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      removeSourceMaps(fullPath);
+    } else if (entry.name.endsWith('.map')) {
+      fs.rmSync(fullPath, { force: true });
+    }
+  }
+}
+
+removeSourceMaps(path.join(root, 'static'));
+
 console.log('Synced static public_html files to the repository root.');
