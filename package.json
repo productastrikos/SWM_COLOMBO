@@ -1,0 +1,21 @@
+{
+  "name": "colombo-waste-management-platform",
+  "version": "1.0.0",
+  "description": "Smart Waste Management Command & Control Platform - Colombo Region, Sri Lanka",
+  "private": true,
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "build:netlify": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm start",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "seed": "cd server && node seed.js",
+    "start": "cd server && node index.js"
+  },
+  "dependencies": {
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
