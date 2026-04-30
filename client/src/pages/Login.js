@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
 import { login } from '../services/api';
 
+const demoUsers = {
+  admin: { password: 'admin123', role: 'admin', fullName: 'System Administrator', department: 'IT & Operations' },
+  operator: { password: 'operator123', role: 'operator', fullName: 'Chaminda Bandara', department: 'Collection Operations' },
+  analyst: { password: 'analyst123', role: 'analyst', fullName: 'Nethmi Perera', department: 'Data Analytics' },
+  fieldworker: { password: 'field123', role: 'field_worker', fullName: 'Tharaka Silva', department: 'Field Operations' },
+};
+
+function getDemoLogin(username, password) {
+  const normalized = username.trim().toLowerCase();
+  const demo = demoUsers[normalized];
+  if (!demo || demo.password !== password) return null;
+  return {
+    token: `static-demo-token-${normalized}`,
+    user: {
+      id: normalized,
+      username: normalized,
+      email: `${normalized}@cwm.lk`,
+      role: demo.role,
+      fullName: demo.fullName,
+      department: demo.department,
+    },
+  };
+}
+
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +39,12 @@ export default function Login({ onLogin }) {
       const res = await login(username, password);
       onLogin(res.data.user, res.data.token);
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      const demoLogin = getDemoLogin(username, password);
+      if (demoLogin) {
+        onLogin(demoLogin.user, demoLogin.token);
+      } else {
+        setError(err.response?.data?.error || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }

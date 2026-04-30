@@ -47,3 +47,9 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(71, 85, 105, 0.3);
 }
+
+/* Keep muted gray/slate copy readable across the dark UI. */
+[class*="text-slate-"],
+[class*="text-gray-"] {
+  color: #ffffff !important;
+}

@@ -5,7 +5,8 @@ const isLocalOrigin = /localhost|127\.0\.0\.1|192\.168\.|^10\.|172\.(1[6-9]|2[0-
 const localApiBase = typeof window !== 'undefined'
   ? `${window.location.protocol}//${window.location.hostname}:5000/api`
   : 'http://localhost:5000/api';
-const API_BASE = process.env.REACT_APP_API_URL || (isLocalOrigin ? localApiBase : `${browserOrigin}/.netlify/functions/api`);
+const productionApiBase = browserOrigin ? `${browserOrigin}/api` : 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL || (isLocalOrigin ? localApiBase : productionApiBase);
 
 const api = axios.create({
   baseURL: API_BASE,

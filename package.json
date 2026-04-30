@@ -3,19 +3,35 @@
   "version": "1.0.0",
   "description": "Smart Waste Management Command & Control Platform - Colombo Region, Sri Lanka",
   "private": true,
+  "main": "app.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "install:all": "cd server && npm install && cd ../client && npm install",
+    "build": "npm install --prefix client && npm run build --prefix client",
+    "build:hostinger": "npm run build",
+    "build:public_html": "npm run build && node scripts/sync-public-html.js",
     "build:netlify": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm start",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "seed": "cd server && node seed.js",
-    "start": "cd server && node index.js"
+    "start": "node app.js"
   },
   "dependencies": {
-    "serverless-http": "^3.2.0"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.3",
+    "serverless-http": "^3.2.0",
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.1"
   }
 }
