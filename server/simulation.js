@@ -942,10 +942,10 @@ function generateRandomEvent() {
 // ALERT GENERATION
 // ============================================================================
 function generateAlert(type, category, title, message, zone = null, assetId = null, assetType = null) {
-  const duplicateKey = [category, title, message, zone || '', assetId || ''].join('|').toLowerCase();
+  const duplicateKey = [category, title, zone || '', assetId || ''].join('|').toLowerCase();
   const existingActive = state.alerts.find(a =>
     !a.acknowledged &&
-    [a.category, a.title, a.message, a.zone || '', a.assetId || ''].join('|').toLowerCase() === duplicateKey
+    [a.category, a.title, a.zone || '', a.assetId || ''].join('|').toLowerCase() === duplicateKey
   );
   if (existingActive) return existingActive;
 

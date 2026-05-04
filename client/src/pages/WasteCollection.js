@@ -79,32 +79,32 @@ function EscalationModal({ ward, onClose }) {
 
 /* ── Missed collection alerts — causes aligned with WARD_COVERAGE ── */
 const MISSED_ALERTS = [
-  { id: 'MCR-041', ward: 'Grandpass',     zone: 'Zone 2',  missed: 125, vehicle: 'V-006', reason: 'Vehicle Breakdown', time: '08:15', priority: 'critical' },
-  { id: 'MCR-042', ward: 'Rajagiriya',    zone: 'Zone 5',  missed: 78,  vehicle: 'V-021', reason: 'No RFID Scan',      time: '10:18', priority: 'high'     },
-  { id: 'MCR-043', ward: 'Kirulapone',    zone: 'Zone 5',  missed: 76,  vehicle: 'V-014', reason: 'Driver Absence',    time: '09:44', priority: 'high'     },
-  { id: 'MCR-044', ward: 'Wellawatta',    zone: 'Zone 4',  missed: 27,  vehicle: 'V-009', reason: 'Route Skipped',     time: '09:02', priority: 'high'     },
-  { id: 'MCR-045', ward: 'Bambalapitiya', zone: 'Zone 4',  missed: 27,  vehicle: 'V-011', reason: 'Route Skipped',     time: '10:45', priority: 'low'      },
-  { id: 'MCR-046', ward: 'Pettah',        zone: 'Zone 1',  missed: 26,  vehicle: 'V-002', reason: 'No RFID Scan',      time: '07:42', priority: 'high'     },
-  { id: 'MCR-047', ward: 'Borella',       zone: 'Zone 3',  missed: 25,  vehicle: 'V-003', reason: 'Access Denied',     time: '11:05', priority: 'low'      },
-  { id: 'MCR-048', ward: 'Maradana',      zone: 'Zone 2',  missed: 15,  vehicle: 'V-005', reason: 'No RFID Scan',      time: '10:30', priority: 'low'      },
+  { id: 'MCR-041', ward: 'Grandpass',     zone: 'Zone 2',  missed: 31,  vehicle: 'V-006', reason: 'Vehicle Breakdown', time: '08:15', priority: 'high'     },
+  { id: 'MCR-042', ward: 'Rajagiriya',    zone: 'Zone 5',  missed: 29,  vehicle: 'V-021', reason: 'No RFID Scan',      time: '10:18', priority: 'high'     },
+  { id: 'MCR-043', ward: 'Kirulapone',    zone: 'Zone 5',  missed: 32,  vehicle: 'V-014', reason: 'Driver Absence',    time: '09:44', priority: 'high'     },
+  { id: 'MCR-044', ward: 'Wellawatta',    zone: 'Zone 4',  missed: 18,  vehicle: 'V-009', reason: 'Route Skipped',     time: '09:02', priority: 'low'      },
+  { id: 'MCR-045', ward: 'Bambalapitiya', zone: 'Zone 4',  missed: 10,  vehicle: 'V-011', reason: 'Route Skipped',     time: '10:45', priority: 'low'      },
+  { id: 'MCR-046', ward: 'Pettah',        zone: 'Zone 1',  missed: 20,  vehicle: 'V-002', reason: 'No RFID Scan',      time: '07:42', priority: 'low'      },
+  { id: 'MCR-047', ward: 'Borella',       zone: 'Zone 3',  missed: 15,  vehicle: 'V-003', reason: 'Access Denied',     time: '11:05', priority: 'low'      },
+  { id: 'MCR-048', ward: 'Maradana',      zone: 'Zone 2',  missed: 11,  vehicle: 'V-005', reason: 'No RFID Scan',      time: '10:30', priority: 'low'      },
 ];
 
 const WARD_COVERAGE = [
   { ward: 'Fort',           zone: 'Zone 1',  total: 284, collected: 277, missed: 7,   coverage: 97.5, tonnage: '3.8t', vehicle: 'V-001' },
-  { ward: 'Pettah',         zone: 'Zone 1',  total: 412, collected: 386, missed: 26,  coverage: 93.7, tonnage: '5.4t', vehicle: 'V-002' },
+  { ward: 'Pettah',         zone: 'Zone 1',  total: 412, collected: 392, missed: 20,  coverage: 95.1, tonnage: '5.6t', vehicle: 'V-002' },
   { ward: 'Kotahena',       zone: 'Zone 1',  total: 318, collected: 307, missed: 11,  coverage: 96.5, tonnage: '4.3t', vehicle: 'V-008' },
-  { ward: 'Maradana',       zone: 'Zone 2',  total: 298, collected: 283, missed: 15,  coverage: 95.0, tonnage: '4.1t', vehicle: 'V-005' },
-  { ward: 'Grandpass',      zone: 'Zone 2',  total: 267, collected: 142, missed: 125, coverage: 53.2, tonnage: '2.0t', vehicle: 'V-006' },
+  { ward: 'Maradana',       zone: 'Zone 2',  total: 298, collected: 287, missed: 11,  coverage: 96.3, tonnage: '4.1t', vehicle: 'V-005' },
+  { ward: 'Grandpass',      zone: 'Zone 2',  total: 267, collected: 236, missed: 31,  coverage: 88.4, tonnage: '3.3t', vehicle: 'V-006' },
   { ward: 'Dematagoda',     zone: 'Zone 2',  total: 251, collected: 244, missed: 7,   coverage: 97.2, tonnage: '3.5t', vehicle: 'V-010' },
   { ward: 'Slave Island',   zone: 'Zone 3',  total: 196, collected: 190, missed: 6,   coverage: 96.9, tonnage: '2.7t', vehicle: 'V-004' },
-  { ward: 'Borella',        zone: 'Zone 3',  total: 356, collected: 331, missed: 25,  coverage: 93.0, tonnage: '4.6t', vehicle: 'V-003' },
+  { ward: 'Borella',        zone: 'Zone 3',  total: 356, collected: 341, missed: 15,  coverage: 95.8, tonnage: '4.8t', vehicle: 'V-003' },
   { ward: 'Narahenpita',    zone: 'Zone 3',  total: 274, collected: 267, missed: 7,   coverage: 97.4, tonnage: '3.8t', vehicle: 'V-007' },
   { ward: 'Kollupitiya',    zone: 'Zone 4',  total: 312, collected: 305, missed: 7,   coverage: 97.8, tonnage: '4.3t', vehicle: 'V-001' },
-  { ward: 'Bambalapitiya',  zone: 'Zone 4',  total: 276, collected: 249, missed: 27,  coverage: 90.2, tonnage: '3.6t', vehicle: 'V-011' },
-  { ward: 'Wellawatta',     zone: 'Zone 4',  total: 241, collected: 214, missed: 27,  coverage: 88.8, tonnage: '3.0t', vehicle: 'V-009' },
+  { ward: 'Bambalapitiya',  zone: 'Zone 4',  total: 276, collected: 266, missed: 10,  coverage: 96.4, tonnage: '3.8t', vehicle: 'V-011' },
+  { ward: 'Wellawatta',     zone: 'Zone 4',  total: 241, collected: 223, missed: 18,  coverage: 92.5, tonnage: '3.1t', vehicle: 'V-009' },
   { ward: 'Havelock Town',  zone: 'Zone 5',  total: 302, collected: 289, missed: 13,  coverage: 95.7, tonnage: '4.2t', vehicle: 'V-012' },
-  { ward: 'Kirulapone',     zone: 'Zone 5',  total: 387, collected: 311, missed: 76,  coverage: 80.4, tonnage: '3.3t', vehicle: 'V-014' },
-  { ward: 'Rajagiriya',     zone: 'Zone 5',  total: 445, collected: 367, missed: 78,  coverage: 82.5, tonnage: '3.9t', vehicle: 'V-021' },
+  { ward: 'Kirulapone',     zone: 'Zone 5',  total: 387, collected: 355, missed: 32,  coverage: 91.7, tonnage: '3.8t', vehicle: 'V-014' },
+  { ward: 'Rajagiriya',     zone: 'Zone 5',  total: 445, collected: 416, missed: 29,  coverage: 93.5, tonnage: '4.4t', vehicle: 'V-021' },
 ];
 
 export default function WasteCollection() {
@@ -163,10 +163,10 @@ export default function WasteCollection() {
           desc="Collection points visited vs scheduled across all 15 wards"
           color={parseFloat(overallCoverage) >= 95 ? 'text-emerald-400' : parseFloat(overallCoverage) >= 85 ? 'text-amber-400' : 'text-red-400'}
           rag={parseFloat(overallCoverage) >= 95 ? 'normal' : parseFloat(overallCoverage) >= 85 ? 'warning' : 'critical'}
-          trend={-1.2}
+          trend={0.8}
           onClick={() => setSelectedKPI({
             icon: '🗺️', label: 'Overall Coverage', value: overallCoverage, unit: '%',
-            trend: -1.2, color: 'text-amber-400',
+            trend: 0.8, color: parseFloat(overallCoverage) >= 95 ? 'text-emerald-400' : 'text-amber-400',
             thresholds: { green: 95, amber: 85 }, inverted: false,
             definition: 'Percentage of scheduled door-to-door collection points attended today. Measured via RFID scan logs and GPS route confirmation across all 15 wards in Colombo Municipal Council.',
             subValues: [
@@ -175,7 +175,7 @@ export default function WasteCollection() {
               { label: 'Critical Wards', value: criticalWards },
               { label: 'Target', value: '≥95% daily' },
             ],
-            analysis: 'Coverage is 4.9pts below the 95% SLA — 3 wards are in active breach: Grandpass (53.2%), Kirulapone (80.4%), Rajagiriya (82.5%)|V-006 breakdown at 08:15 is the root cause for Grandpass; driver absence for Kirulapone; route skipping for Rajagiriya — each requires a different response|Deploy standby vehicles to Grandpass Zone 2 immediately — 125 points are recoverable before shift end at 15:00',
+            analysis: `Coverage is at ${overallCoverage}% — on the 95% SLA target. Three wards are in amber recovery: Grandpass (88.4%, V-006 standby deployed), Kirulapone (91.7%, driver returned to duty), Rajagiriya (93.5%, afternoon sweep dispatched)|V-009 standby has recovered 82% of the original Grandpass misses — 31 points remain for the afternoon window|Zones 1, 3, and 4 are all at or above 95.8%; Kollupitiya (97.8%), Fort (97.5%), and Dematagoda (97.2%) are leading the network`,
             target: '95%+ daily door-to-door coverage',
           })} />
         <KPICard icon="✅" label="Points Collected" value={totalCollected.toLocaleString()}
@@ -197,36 +197,38 @@ export default function WasteCollection() {
           })} />
         <KPICard icon="⚠️" label="Missed Points" value={totalMissed.toLocaleString()}
           desc="Scheduled stops not serviced — pending follow-up dispatch"
-          color="text-red-400" rag="critical" trend={8.5}
+          color={totalMissed <= 150 ? 'text-emerald-400' : totalMissed <= 350 ? 'text-amber-400' : 'text-red-400'}
+          rag={totalMissed <= 150 ? 'normal' : totalMissed <= 350 ? 'warning' : 'critical'} trend={-3.2}
           onClick={() => setSelectedKPI({
             icon: '⚠️', label: 'Missed Points', value: totalMissed, unit: 'pts',
-            trend: 8.5, color: 'text-red-400',
-            thresholds: { green: 50, amber: 200 }, inverted: true,
+            trend: -3.2, color: totalMissed <= 150 ? 'text-emerald-400' : totalMissed <= 350 ? 'text-amber-400' : 'text-red-400',
+            thresholds: { green: 150, amber: 350 }, inverted: true,
             definition: 'Scheduled collection stops not attended within the planned time window. Detected via RFID non-scan events and GPS geo-fence miss analysis. Each unresolved miss escalates to a citizen complaint within 4 hours.',
             subValues: [
-              { label: 'Critical Priority', value: '125 pts (Grandpass)' },
-              { label: 'High Priority', value: '154 pts (3 wards)' },
-              { label: 'Vehicle Breakdown', value: '125 pts (V-006)' },
+              { label: 'High Priority', value: '92 pts (Grandpass, Kirulapone, Rajagiriya)' },
+              { label: 'Standard Priority', value: `${totalMissed - 92} pts (12 wards)` },
+              { label: 'Vehicle Breakdown', value: '31 pts (V-006, Grandpass)' },
               { label: 'Auto-Dispatched', value: '3 vehicles' },
             ],
-            analysis: 'Three failure modes are driving today\'s misses: mechanical breakdown (V-006, 125 pts in Grandpass), driver absence (76 pts in Kirulapone), route skipping (27 pts each in Wellawatta and Rajagiriya)|Each failure type needs a different fix — deploy standby for breakdown, confirm roster cover for absence, issue accountability report for route skip|Resolving Grandpass alone recovers 30% of all missed points; prioritise it above all other interventions',
-            target: '<50 missed points per day (<1.2% of schedule)',
+            analysis: `Missed points are at ${totalMissed} across 15 wards — within the amber operating range. Three wards account for 41% of all misses: Grandpass (31 pts, V-006 in maintenance), Kirulapone (32 pts, driver absence recovery), Rajagiriya (29 pts, afternoon sweep assigned)|Remaining ${totalMissed - 92} missed points are distributed across 12 wards with low individual counts — standard RFID scan delays and minor route congestion, all auto-dispatched for same-day closure|System is tracking to close the majority of missed points before 15:00 shift end`,
+            target: '<150 missed points per day (<3.2% of schedule)',
           })} />
         <KPICard icon="🚨" label="Critical Wards" value={criticalWards}
           desc="Wards with <85% coverage requiring urgent intervention"
-          color="text-red-400" rag="critical"
+          color={criticalWards === 0 ? 'text-emerald-400' : criticalWards <= 2 ? 'text-amber-400' : 'text-red-400'}
+          rag={criticalWards === 0 ? 'normal' : criticalWards <= 2 ? 'warning' : 'critical'}
           onClick={() => setSelectedKPI({
             icon: '🚨', label: 'Critical Wards', value: criticalWards, unit: 'wards',
-            trend: 1, color: 'text-red-400',
+            trend: -3, color: criticalWards === 0 ? 'text-emerald-400' : criticalWards <= 2 ? 'text-amber-400' : 'text-red-400',
             thresholds: { green: 0, amber: 2 }, inverted: true,
             definition: 'Wards where collection coverage has fallen below the 85% SLA threshold. Each critical ward triggers a formal escalation and mandatory supervisor response within 2 hours.',
             subValues: [
-              { label: 'Grandpass (Z2)', value: '53.2% — V-006 breakdown' },
-              { label: 'Kirulapone (Z5)', value: '80.4% — driver absence' },
-              { label: 'Rajagiriya (Z5)', value: '82.5% — route skip' },
+              { label: 'Grandpass (Z2)', value: '88.4% — V-006 recovery in progress' },
+              { label: 'Kirulapone (Z5)', value: '91.7% — driver returned, route active' },
+              { label: 'Rajagiriya (Z5)', value: '93.5% — afternoon dispatch assigned' },
               { label: 'SLA Threshold', value: '≥85% per ward' },
             ],
-            analysis: 'Grandpass is in severe breach at 53.2% — the V-006 breakdown stranded 125 points at 08:15 and no standby deployment has been confirmed|Kirulapone and Rajagiriya are both above 80% — recoverable with afternoon dispatch but need supervisor sign-off|Zero critical wards is the daily target; 3 active breaches is a major operational failure that must be closed before 15:00',
+            analysis: 'No wards are below the 85% SLA threshold — all 15 wards are in amber or green status. The three wards in recovery (Grandpass, Kirulapone, Rajagiriya) are trending toward daily target by 15:00|V-009 standby deployment to Grandpass has been the key recovery lever — without it, Zone 2 would have remained below 85% coverage|Maintaining 0 critical wards requires active standby deployment; the current 1-vehicle-per-zone contingency rule is working',
             target: '0 wards below 85% coverage SLA',
           })} />
         <KPICard icon="📅" label="Scheduled Points" value={totalScheduled.toLocaleString()}

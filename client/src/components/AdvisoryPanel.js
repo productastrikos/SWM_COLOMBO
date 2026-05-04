@@ -47,26 +47,26 @@ const STATIC_ADVISORIES = [
   // ── ADV-001 · CRITICAL · Collection Coverage / Vehicle Breakdown ──────────
   {
     advisoryId:'ADV-001', priority:'critical',
-    title:'V-006 breakdown halted Zone 2 route — 125 Grandpass collection points unserved; overall coverage dropped to 88.5%',
+    title:'V-006 maintenance hold impacted Zone 2 route — 31 Grandpass collection points remain open; V-009 standby recovery has addressed 82% of original misses',
     template:'overflow_cluster',
     rootCause:{
       primary:'Vehicle V-006 (8-tonne compactor, Zone 2 primary route) stalled at depot at 08:15 with engine fault code E-214 (oil pressure sensor) and a brake-circuit alert. The vehicle has not moved in 3 h 22 min.',
       contributing:'No backup vehicle was pre-assigned to Zone 2. Single-vehicle dependency turned a mechanical fault into a hard collection failure across the entire Grandpass ward.',
-      systemic:'Three wards are now below the 85% SLA threshold: Grandpass 53.2%, Kirulapone 80.4%, Rajagiriya 82.5%. V-006\'s last service was 12 days ago — the prescribed interval is 10 days.',
+      systemic:'Grandpass ward is at 88.4% coverage — below the 95% daily SLA but above the 85% critical threshold. Kirulapone (91.7%) and Rajagiriya (93.5%) have recovered from earlier disruptions and are tracking to close before 15:00.',
     },
     evidence:[
-      'Zone 2 Grandpass: 142 / 267 pts collected (53.2%) — V-006 stalled at depot, GPS stationary since 08:15',
+      'Zone 2 Grandpass: 236 / 267 pts collected (88.4%) — V-009 standby covering residual route; 31 pts remain for afternoon sweep',
       'V-006 telemetry: engine fault E-214 (oil pressure) + brake sensor alert; odometer 9,870 km (2-day overdue service)',
-      'V-008 completed its Zone 3 route at 11:30 (94.2% coverage) and is available for immediate redeployment',
-      'Citizen complaint queue for Grandpass: 17 new submissions since 09:00 — escalating at ~5 per hour',
+      'V-009 completed its primary route and was redeployed to Grandpass at 10:20 — recovering stops at 11 pts/hr',
+      'Citizen complaint queue for Grandpass: 4 new submissions today — significantly below the earlier spike',
     ],
     recommendations:[
-      'IMMEDIATE — Deploy V-008 to Grandpass Zone 2 now. 125 pts are recoverable before the 15:00 shift close. GPS-optimised residual route attached.',
-      'Issue a 30-min supervisor escalation for Zone 2 with the recovery route pre-loaded in the fleet app.',
-      'Raise an emergency work order for V-006: engine + brake inspection before the vehicle is returned to service.',
+      'IMMEDIATE — Complete the 31 remaining Grandpass stops with V-009 before 15:00. GPS-optimised residual route is pre-loaded in the fleet app.',
+      'Raise a work order for V-006: engine + brake inspection before the vehicle is returned to service.',
       'Assign a standing backup vehicle to Zone 2 from tomorrow — any route with a single-vehicle dependency must have a contingency.',
+      'Review the V-006 service schedule: the vehicle was 2 days past its prescribed 10-day maintenance interval at time of failure.',
     ],
-    impact:{ collection_coverage:'+34%', missed_points:'-125', citizen_complaints:'-~40', estimated_recovery:'Before 15:00' },
+    impact:{ collection_coverage:'+9%', missed_points:'-31', citizen_complaints:'-~40', estimated_recovery:'Before 15:00' },
     actions:[
       { type:'dispatch_crew',   label:'Dispatch V-008 Now' },
       { type:'optimize_routes', label:'Load Recovery Route' },
@@ -82,13 +82,13 @@ const STATIC_ADVISORIES = [
     template:'route_efficiency',
     rootCause:{
       primary:'V-011 (Twin Dumper, South Spine R5) has been GPS-stationary for 34 minutes with its engine running. Driver check-in was acknowledged at 09:45 — no incident reported, no route segment assigned.',
-      contributing:'V-014 (Auto Tipper, Zone 5) reported idle at 09:52 with 0% load and no active route in the current dispatch window. Zone 5 currently has the highest missed-collection count in the network (167 pts).',
+      contributing:'V-014 (Auto Tipper, Zone 5) reported idle at 09:52 with 0% load and no active route in the current dispatch window. Zone 5 currently has 74 missed collections across its three wards.',
       systemic:'Both vehicles share the Zone 5 South Spine with no dynamic load-balancing. The dispatch system is not triggering peak-hour idle alerts. Every idle minute during the 07:00–14:00 window costs approximately 0.14 t of uncollected capacity.',
     },
     evidence:[
       'V-011: idle 34 min, fuel 63%, load 1.1 t / 8.0 t cap (13.7%) — engine on, GPS stationary at Kirulapone depot',
       'V-014: idle 28 min, fuel 42%, 0.0 t load — no active route segment logged since 09:24',
-      'Zone 5 avg bin fill: 71.8% — 167 missed collections today, highest zone miss-rate in the network',
+      'Zone 5 avg bin fill: 69.8% — 74 missed collections today across Havelock Town, Kirulapone, and Rajagiriya',
       '48 bins in the Kirulapone sector are above 70% fill within a 1.2 km radius — within easy reach of V-011',
       'Rajagiriya Ward 15: 31 bins flagged in overflow (> 85%) — V-014 can service in a single pass',
     ],
@@ -106,9 +106,9 @@ const STATIC_ADVISORIES = [
     ],
   },
 
-  // ── ADV-V02 · MEDIUM · Preventive Maintenance Backlog ────────────────────
+  // ── ADV-V02 · LOW · Preventive Maintenance Backlog ────────────────────
   {
-    advisoryId:'ADV-V02', priority:'medium',
+    advisoryId:'ADV-V02', priority:'low',
     title:"Maintenance backlog on 4 vehicles — V-006's breakdown today is the leading indicator; V-009 at highest risk (26 days overdue)",
     template:'complaint_spike',
     rootCause:{
@@ -141,28 +141,28 @@ const STATIC_ADVISORIES = [
   // ── ADV-Z01 · HIGH · Zone 2 Performance — Targeted Improvement Plan ──────
   {
     advisoryId:'ADV-Z01', priority:'high',
-    title:'Zone 2 (Inner North) is the network\'s weakest zone today — 74.5% avg fill, 147 missed collections, 3 wards in breach',
+    title:'Zone 2 (Inner North) recovery in progress — Grandpass at 88.4% coverage; 31 missed collections remaining for afternoon sweep',
     template:'overflow_cluster',
     rootCause:{
-      primary:'Zone 2 covers Maradana, Grandpass, and Dematagoda — three of the highest-density commercial wards in Colombo. With V-006 out of action, Zone 2 is running at 2-vehicle coverage for 267 scheduled points.',
-      contributing:'147 missed collections represent a 21.9% miss rate — the highest by zone in the network today. Grandpass alone accounts for 125 of those misses (53.2% coverage, lowest in the city).',
-      systemic:'Zone 2\'s vehicle-to-collection-point ratio (2 vehicles : 267 pts) is below the minimum operational threshold of 1:100. Zone 3, by contrast, has 3 active vehicles for 192 pts and is at 94.2% coverage — demonstrating the imbalance.',
+      primary:'Zone 2 covers Maradana, Grandpass, and Dematagoda — three of the highest-density commercial wards in Colombo. V-006 is on maintenance hold; V-009 standby has covered 82% of the affected Grandpass route, with 31 points remaining for the afternoon sweep.',
+      contributing:'31 missed collections remain in Grandpass (88.4% coverage). Dematagoda (97.2%) and Maradana (96.3%) are both within SLA, demonstrating that the issue is isolated to the V-006 route.',
+      systemic:'Zone 2\'s vehicle-to-collection-point ratio is recovering. Zone 3 has 3 active vehicles at 96.5% coverage — V-009\'s redeployment to Zone 2 is the primary reason for the improvement from the earlier 53% low.',
     },
     evidence:[
-      'Grandpass: 53.2% coverage — 125 pts missed, avg bin fill 81.3%; 6 bins already in overflow (> 85%)',
-      'Dematagoda: 71.4% coverage, 22 pts missed — 6 bins above overflow threshold; fill trending up 4.2% since 08:00',
-      'Maradana: 84.1% coverage, 12 pts missed — within SLA today, but projected to breach 85% threshold by 14:00 if no action taken',
-      'Zone 2 citizen complaint rate: 23 new submissions today vs a 7-day average of 9 — a 155% spike',
+      'Grandpass: 88.4% coverage — 31 pts remaining; avg bin fill 72.8%; 2 bins above 85% threshold, being serviced',
+      'Dematagoda: 97.2% coverage, 7 pts missed — within SLA, no action required',
+      'Maradana: 96.3% coverage — above SLA; minor RFID scan delays accounted for',
+      'Zone 2 citizen complaint rate: 4 new submissions today — down from earlier spike of 23; recovery is visible to residents',
       'Zone 3 surplus: 94.2% coverage, 3 active vehicles, 0 overflow bins — V-008 is free and deployable now',
     ],
     recommendations:[
-      'IMMEDIATE — Redeploy V-008 from Zone 3 to Grandpass (Zone 2). Zone 3 has margin; Zone 2 does not. This is the single highest-impact action available right now.',
-      'Issue a priority dispatch order for Dematagoda\'s 6 overflow bins — service within 90 min before complaints escalate to formal council notices.',
-      'Assign the Zone 2 supervisor a real-time dashboard alert threshold at 75% coverage — trigger at first sign of breach, not after.',
+      'IMMEDIATE — Complete the 31 remaining Grandpass stops with V-009 before 15:00 shift close.',
+      'Issue a closure note for Dematagoda\'s 2 remaining overflow bins — service on next scheduled pass.',
+      'Assign the Zone 2 supervisor a real-time dashboard alert threshold at 85% coverage — trigger at first sign of breach, not after.',
       'Convene a Zone 2 structural review tomorrow: determine whether the root cause is route design, vehicle count, or driver capacity — each requires a different resolution.',
       'Add a standing contingency: any zone with only 2 vehicles must have an automatic redeployment trigger when coverage drops below 80%.',
     ],
-    impact:{ zone2_coverage:'+28% (projected after V-008 dispatch)', missed_collections:'-103 pts recoverable today', overflow_bins:'-6 bins within 90 min', complaint_reduction:'-~16 tickets' },
+    impact:{ zone2_coverage:'+5% (finalizing recovery)', missed_collections:'-31 pts today', overflow_bins:'-2 bins within 90 min', complaint_reduction:'-~4 tickets' },
     actions:[
       { type:'dispatch_crew',   label:'Redeploy V-008 → Z2' },
       { type:'optimize_routes', label:'Grandpass Recovery Route' },
@@ -275,7 +275,7 @@ const ACTION_FORMS = {
     fields: [
       { key:'title',    label:'Work Order Title',   type:'text',     placeholder:'e.g. Emergency cleanup – Grandpass junction' },
       { key:'team',     label:'Assigned Team',      type:'select',   opts:['Zone Collection Team','Emergency Response','Maintenance Crew','Environmental Officers','Management Review'] },
-      { key:'priority', label:'Priority Level',     type:'select',   opts:['CRITICAL – Same day','HIGH – Within 24 hours','MEDIUM – Within 72 hours','LOW – Scheduled'] },
+      { key:'priority', label:'Priority Level',     type:'select',   opts:['CRITICAL – Same day','HIGH – Within 24 hours','LOW – Scheduled'] },
       { key:'due',      label:'Due Date / Time',    type:'text',     placeholder:'e.g. 2026-04-15 14:00' },
       { key:'desc',     label:'Description',        type:'textarea', placeholder:'Describe the work required in detail...'},
     ],
@@ -417,7 +417,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2.5">
         {merged.map((advisory, idx) => {
           const isExpanded = expandedId === advisory.advisoryId;
-          const pm = PRIORITY_META[advisory.priority] || PRIORITY_META.medium;
+          const pm = PRIORITY_META[advisory.priority] || PRIORITY_META.low;
           const recs = Array.isArray(advisory.recommendations)
             ? advisory.recommendations
             : advisory.recommendations ? Object.values(advisory.recommendations).flat() : [];

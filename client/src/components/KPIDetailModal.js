@@ -185,7 +185,7 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
     }
     return [
       { label: 'NORMAL',   color: 'emerald', desc: `≤ ${green}${u}` },
-      { label: 'WARNING',  color: 'amber',   desc: `> ${green}–${amber}${u}` },
+      { label: 'WARNING',  color: 'amber',   desc: `${green}–${amber}${u}` },
       { label: 'CRITICAL', color: 'red',     desc: `> ${amber}${u}` },
     ];
   }, [kpi]);
