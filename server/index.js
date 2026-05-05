@@ -14,14 +14,11 @@ const path = require('path');
 
 const operations = require('./operationsData');
 
-const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
 const app = express();
-const server = isServerless ? null : http.createServer(app);
-const io = isServerless
-  ? { emit: () => {}, on: () => {} }
-  : new Server(server, {
-      cors: { origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }
-    });
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }
+});
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'cwm_jwt_secret_default';
@@ -302,8 +299,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
 });
 
-if (!isServerless) {
-  io.on('connection', (socket) => {
+io.on('connection', (socket) => {
     socket.emit('initial-state', getSnapshot());
     socket.emit('advisories', operations.getAdvisories());
     socket.emit('data:bins-summary', { bins: operations.getBins() });
@@ -317,12 +313,9 @@ if (!isServerless) {
     io.emit('data:bins-summary', { bins: operations.getBins() });
     io.emit('data:vehicles-summary', { vehicles: operations.getVehicles() });
   }, 30000);
-}
 
-if (!isServerless) {
-  server.listen(PORT, () => {
-    console.log(`Waste management server running on port ${PORT}`);
-  });
-}
+server.listen(PORT, () => {
+  console.log(`Waste management server running on port ${PORT}`);
+});
 
 module.exports = { app, server, io };

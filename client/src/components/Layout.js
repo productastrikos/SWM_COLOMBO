@@ -37,14 +37,12 @@ export default function Layout({ children, user, onLogout }) {
       {/* LEFT SIDEBAR */}
       <div className="w-48 bg-cwm-darker border-r border-cwm-border flex flex-col py-3 shrink-0">
         {/* Logo */}
-        <div className="flex items-center space-x-2 mb-5 px-3 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-xs">CW</span>
-          </div>
-          <div>
-            <p className="text-white font-bold text-xs leading-tight tracking-wide">ASTRIKOS</p>
-            <p className="text-slate-500 text-[9px] leading-tight">Waste Management</p>
-          </div>
+        <div className="flex items-center mb-5 px-3 cursor-pointer" onClick={() => navigate('/')}>
+          <img
+            src="/Logo Transparent Horizontal.png"
+            alt="Astrikos"
+            className="h-10 w-auto object-contain"
+          />
         </div>
 
         {/* Nav Items */}
