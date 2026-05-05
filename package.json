@@ -13,7 +13,7 @@
     "build:hostinger": "npm run build",
     "build:public_html": "npm run build && node scripts/sync-public-html.js",
     "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm start",
+    "dev:client": "cd client && set NODE_OPTIONS=--no-deprecation && npm start",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "seed": "cd server && node seed.js",
     "start": "node app.js"
