@@ -41,7 +41,7 @@ export default function Layout({ children, user, onLogout }) {
           <img
             src="/Logo Transparent Horizontal.png"
             alt="Astrikos"
-            className="h-10 w-auto object-contain"
+            className="h-50 w-120 object-contain"
           />
         </div>
 
@@ -82,13 +82,9 @@ export default function Layout({ children, user, onLogout }) {
       {/* MAIN AREA */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* TOP BAR */}
-        <header className="h-12 bg-cwm-darker border-b border-cwm-border flex items-center px-4 shrink-0">
+        <header className="h-20 bg-cwm-darker border-b border-cwm-border flex items-center px-4 shrink-0">
           <div className="flex items-center space-x-3">
-            <span className="text-cyan-400 font-bold text-sm">ASTRIKOS</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-slate-300 text-sm font-medium">Waste Management Command Center</span>
-            <span className="text-slate-600">—</span>
-            <span className="text-slate-400 text-xs">Colombo Region, Sri Lanka</span>
+            <span className="text-slate-300 text-xl font-medium">Colombo Waste Management Command Center</span>
           </div>
 
           <div className="flex-1" />
