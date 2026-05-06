@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { login } from '../services/api';
 
 const demoUsers = {
-  admin:       { password: 'admin123',    role: 'admin',       fullName: 'Nipun Bandara',         department: 'IT & Operations' },
-  operator:    { password: 'operator123', role: 'operator',    fullName: 'Chaminda Bandara',       department: 'Collection Operations' },
-  analyst:     { password: 'analyst123',  role: 'analyst',     fullName: 'Nethmi Perera',          department: 'Data Analytics' },
-  fieldworker: { password: 'field123',    role: 'field_worker',fullName: 'Tharaka Silva',          department: 'Field Operations' },
+  admin: { password: 'Astrikos2026', role: 'admin', fullName: 'Admin', department: 'IT & Operations' },
 };
 
 function getDemoLogin(username, password) {
@@ -43,7 +40,7 @@ export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
       if (demoLogin) {
         onLogin(demoLogin.user, demoLogin.token);
       } else {
-        setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
+        setError('Invalid credentials. Use username: admin / password: Astrikos2026');
       }
     } finally {
       setLoading(false);
@@ -262,47 +259,7 @@ export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
               </button>
             </form>
 
-            {/* Demo credentials */}
-            <div className="mt-6">
-              <div
-                className="flex items-center gap-3 mb-3"
-                style={{ color: 'var(--cwm-text-faint)' }}
-              >
-                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--cwm-border)' }} />
-                <span className="text-xs whitespace-nowrap">Demo accounts</span>
-                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--cwm-border)' }} />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { user: 'admin',       pass: 'admin123',    role: 'Admin' },
-                  { user: 'operator',    pass: 'operator123', role: 'Operator' },
-                  { user: 'analyst',     pass: 'analyst123',  role: 'Analyst' },
-                  { user: 'fieldworker', pass: 'field123',    role: 'Field Worker' },
-                ].map((cred) => (
-                  <button
-                    key={cred.user}
-                    type="button"
-                    onClick={() => { setUsername(cred.user); setPassword(cred.pass); }}
-                    className="px-3 py-2 rounded-lg text-xs font-medium text-center transition-all"
-                    style={{
-                      background: 'var(--cwm-surface-soft)',
-                      border: '1px solid var(--cwm-border)',
-                      color: 'var(--cwm-text-muted)',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'var(--cwm-surface-raised)';
-                      e.currentTarget.style.color = 'var(--cwm-text)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'var(--cwm-surface-soft)';
-                      e.currentTarget.style.color = 'var(--cwm-text-muted)';
-                    }}
-                  >
-                    {cred.role}
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
