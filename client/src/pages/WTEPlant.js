@@ -1,28 +1,29 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { IcoBolt, IcoTrash, IcoBarChart, IcoThermometer, IcoWind, IcoRecycle } from '../components/KPICard';
 import { DataContext } from '../services/socket';
 import { getWTE } from '../services/api';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, BarElement, Tooltip, Filler } from 'chart.js';
-import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES } from '../components/chartUtils';
+import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, BarElement, Tooltip, Filler);
 
 function GaugeCard({ label, value, max, unit, icon }) {
   const pct = Math.min((value / max) * 100, 100);
   const ragKey = pct >= 70 ? 'normal' : pct >= 40 ? 'warning' : 'critical';
-  const gaugeColor = ragKey === 'critical' ? '#ef4444' : ragKey === 'warning' ? '#f59e0b' : '#10b981';
+  const gaugeColor = ragKey === 'critical' ? getCSSVar('--cwm-danger') : ragKey === 'warning' ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-success');
   const borderColor = ragKey === 'critical' ? 'border-l-red-500' : ragKey === 'warning' ? 'border-l-amber-500' : 'border-l-emerald-500';
   const dotColor    = ragKey === 'critical' ? 'bg-red-400'       : ragKey === 'warning' ? 'bg-amber-400'       : 'bg-emerald-400';
   const badgeStyle  = ragKey === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/25' : ragKey === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/25' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
   const badgeLabel  = ragKey === 'critical' ? 'CRITICAL' : ragKey === 'warning' ? 'WARNING' : 'NORMAL';
   return (
-    <div className={`bg-[#0c1520] border border-white/[0.07] border-l-2 ${borderColor} rounded-xl p-3.5 text-center shadow-sm`}>
+    <div className={`bg-cwm-bg border border-white/[0.07] border-l-2 ${borderColor} rounded-xl p-3.5 text-center shadow-sm`}>
       <div className="flex items-start justify-between mb-2">
         <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-base leading-none">{icon}</div>
         <div className={`w-2 h-2 rounded-full mt-1 ${dotColor}`} />
       </div>
       <div className="relative w-14 h-14 mx-auto mb-2">
         <svg className="w-14 h-14 -rotate-90" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+          <circle cx="32" cy="32" r="28" fill="none" stroke="var(--cwm-chart-grid)" strokeWidth="4" />
           <circle cx="32" cy="32" r="28" fill="none" stroke={gaugeColor} strokeWidth="4"
             strokeDasharray={`${pct * 1.76} 176`} strokeLinecap="round" />
         </svg>
@@ -89,6 +90,15 @@ const SEVEN_DAY_ENERGY = {
   values: [191, 196, 188, 203, 197, 180, 186], // MWh/day (8.2 MW * 24h ≈ 196.8 MWh baseline)
 };
 
+/* ── Static data: 30-day daily energy output (MWh/day) — 4 weeks + 2 days ── */
+const THIRTY_DAY_ENERGY = [
+  184, 189, 194, 198, 192, 177, 183,  // week 1
+  188, 192, 185, 200, 194, 178, 184,  // week 2
+  190, 195, 187, 202, 196, 179, 185,  // week 3
+  191, 196, 188, 203, 197, 180, 186,  // week 4 (= SEVEN_DAY_ENERGY)
+  193, 199,                           // +2 days
+];
+
 /* ── Static data: Downtime log (3.2% = ~46 min/day) ── */
 const DOWNTIME_LOG = [
   { event: 'FRN-02 feed rate adjustment',   duration: 18, date: 'Today 06:20',    category: 'maintenance' },
@@ -126,12 +136,15 @@ export default function WTEPlant() {
   const plant = wte || {};
   const k = kpis || {};
 
-  const basePowerVals = Array.from({ length: 24 }, (_, i) => {
+  const basePowerVals = useMemo(() => Array.from({ length: 24 }, (_, i) => {
     // Simulate power output peaking mid-day; RAG: <6 red, 6-8 amber, >=8 green
     const base = 7 + Math.sin((i - 6) * Math.PI / 12) * 2;
-    return Math.max(3, parseFloat((base + (Math.random() - 0.5) * 1.2).toFixed(2)));
-  });
-  const powerVals = resampleSeries(basePowerVals, activePowerFrame.points);
+    return Math.max(3, parseFloat((base + (Math.sin(i * 7.3) * 0.6)).toFixed(2)));
+  }), []);
+  const powerVals = resampleSeries(
+    activePowerFrame.dataWindow ? basePowerVals.slice(-activePowerFrame.dataWindow) : basePowerVals,
+    activePowerFrame.points
+  );
   const powerOutputData = {
     labels: buildTimeframeLabels(activePowerFrame.value, activePowerFrame.points),
     datasets: [{
@@ -146,8 +159,13 @@ export default function WTEPlant() {
     labels: buildTimeframeLabels(activeEnergyFrame.value, activeEnergyFrame.points),
     datasets: [{
       label: 'Energy Output (MWh)',
-      data: resampleSeries(SEVEN_DAY_ENERGY.values, activeEnergyFrame.points),
-      backgroundColor: 'rgba(6,182,212,0.65)',
+      data: resampleSeries(
+        activeEnergyFrame.dataWindow
+          ? THIRTY_DAY_ENERGY.slice(-activeEnergyFrame.dataWindow)
+          : THIRTY_DAY_ENERGY,
+        activeEnergyFrame.points
+      ),
+      backgroundColor: getChartTokens().accentBg,
       borderColor: CHART_PALETTES.area.cyan.border,
       borderRadius: 4,
     }]
@@ -158,7 +176,7 @@ export default function WTEPlant() {
     datasets: [{
       label: 'Tonnes',
       data: WASTE_INPUT.map(w => w.tonnes),
-      backgroundColor: 'rgba(6,182,212,0.55)',
+      backgroundColor: getChartTokens().accentBg,
       borderColor: CHART_PALETTES.area.cyan.border,
       borderWidth: 1,
       borderRadius: 4,
@@ -203,12 +221,12 @@ export default function WTEPlant() {
 
       {/* KPI Gauges */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-        <GaugeCard icon="⚡" label="Power Output" value={k.wteOutput || plant.powerOutput || plant.energyOutput || 8.2} max={12} unit="MW" />
-        <GaugeCard icon="🗑️" label="Daily Intake" value={k.wteIntake || plant.dailyIntake || plant.currentIntake || 620} max={700} unit="tons" />
-        <GaugeCard icon="📊" label="Efficiency" value={k.wteEfficiency || plant.efficiency || 82} max={100} unit="%" />
-        <GaugeCard icon="🌡️" label="Avg Temp" value={plant.avgTemperature || plant.furnaceTemp || 850} max={1200} unit="°C" />
-        <GaugeCard icon="💨" label="Emission Index" value={plant.emissionIndex || 72} max={100} unit="/100" />
-        <GaugeCard icon="🔄" label="Uptime" value={plant.uptime || 96.8} max={100} unit="%" />
+        <GaugeCard icon={<IcoBolt />} label="Power Output" value={k.wteOutput || plant.powerOutput || plant.energyOutput || 8.2} max={12} unit="MW" />
+        <GaugeCard icon={<IcoTrash />} label="Daily Intake" value={k.wteIntake || plant.dailyIntake || plant.currentIntake || 620} max={700} unit="tons" />
+        <GaugeCard icon={<IcoBarChart />} label="Efficiency" value={k.wteEfficiency || plant.efficiency || 82} max={100} unit="%" />
+        <GaugeCard icon={<IcoThermometer />} label="Avg Temp" value={plant.avgTemperature || plant.furnaceTemp || 850} max={1200} unit="°C" />
+        <GaugeCard icon={<IcoWind />} label="Emission Index" value={plant.emissionIndex || 72} max={100} unit="/100" />
+        <GaugeCard icon={<IcoRecycle />} label="Uptime" value={plant.uptime || 96.8} max={100} unit="%" />
       </div>
 
       {/* Charts */}
@@ -223,12 +241,9 @@ export default function WTEPlant() {
               responsive: true, maintainAspectRatio: false,
               plugins: {
                 legend: { display: false },
-                tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
+                tooltip: { ...chartTooltip() },
               },
-              scales: {
-                x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } }
-              }
+              scales: chartScales({ x: { grid: { display: false } } })
             }} />
           </div>
         </div>
@@ -240,7 +255,7 @@ export default function WTEPlant() {
                 responsive: true, maintainAspectRatio: false, cutout: '65%',
                 plugins: {
                   legend: { display: false },
-                  tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}% of limit` } }
+                  tooltip: { ...chartTooltip(), callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}% of limit` } }
                 }
               }} />
             </div>
@@ -327,12 +342,9 @@ export default function WTEPlant() {
                 responsive: true, maintainAspectRatio: false, indexAxis: 'y',
                 plugins: {
                   legend: { display: false },
-                  tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
+                  tooltip: { ...chartTooltip() },
                 },
-                scales: {
-                  x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-                  y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                }
+                scales: chartScales({ x: { grid: { display: false } }, y: { grid: { display: false } } })
               }} />
             </div>
             <div className="space-y-1.5">
@@ -371,12 +383,9 @@ export default function WTEPlant() {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                   legend: { display: false },
-                  tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
+                  tooltip: { ...chartTooltip() },
                 },
-                scales: {
-                  x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                  y: { min: 170, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 }, callback: v => `${v}` } }
-                }
+                scales: chartScales({ x: { grid: { display: false } }, y: { min: 170, ticks: { callback: v => `${v}` } } })
               }} />
             </div>
             <p className="text-[10px] text-slate-500 mt-2 text-center">Weekly avg: {(SEVEN_DAY_ENERGY.values.reduce((a, b) => a + b, 0) / 7).toFixed(1)} MWh/day · Baseline target: 196.8 MWh/day (8.2 MW × 24h)</p>

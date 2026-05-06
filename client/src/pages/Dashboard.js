@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import DigitalTwin from './DigitalTwin';
 import { DataContext } from '../services/socket';
 import KPIDetailModal from '../components/KPIDetailModal';
-import KPICard from '../components/KPICard';
+import KPICard, { IcoCoverage, IcoAlert, IcoRoute, IcoTrash, IcoRecycle, IcoBarChart } from '../components/KPICard';
 import ZoneFilterBar from '../components/ZoneFilterBar';
-import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES } from '../components/chartUtils';
+import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from '../components/chartUtils';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
@@ -77,27 +77,17 @@ function dedupeAlerts(list = []) {
   });
 }
 
-const chartDefaults = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1e293b',
-      borderColor: '#334155',
-      borderWidth: 1,
-      titleColor: '#e2e8f0',
-      bodyColor: '#94a3b8',
-      padding: 8,
-      titleFont: { size: 11 },
-      bodyFont: { size: 10 },
-    }
-  },
-  scales: {
-    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-  }
-};
+function makeChartDefaults() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: chartTooltip({ titleFont: { size: 11 }, bodyFont: { size: 10 } }),
+    },
+    scales: chartScales(),
+  };
+}
 
 // Realistic 24-hour collection profile: low overnight, ramp up at 06:00, peak 08-10 & 14-16, drop off at night
 const COLLECTION_PROFILE = [18,12,8,5,10,42,78,91,95,89,82,74,61,58,72,88,86,79,62,44,38,31,24,19];
@@ -110,6 +100,7 @@ const VEHICLE_ENROUTE_PROFILE = [3,2,2,1,2,5,9,14,16,15,13,11,9,10,12,15,14,11,7
 function MiniChart({ title, subtitle, type, data, height = 120, showLegend = false, yMax, yLabel, thresholds, onInfo, timeframes, defaultTimeframe }) {
   const ChartComp = type === 'doughnut' ? Doughnut : type === 'bar' ? Bar : Line;
   const [selectedTimeframe, setSelectedTimeframe] = useState(defaultTimeframe || timeframes?.[0]?.value);
+  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
   const activeFrame = timeframes ? getTimeframeOption(timeframes, selectedTimeframe) : null;
   const displayData = useMemo(() => {
     if (!activeFrame || type === 'doughnut') return data;
@@ -117,7 +108,10 @@ function MiniChart({ title, subtitle, type, data, height = 120, showLegend = fal
       labels: buildTimeframeLabels(activeFrame.value, activeFrame.points),
       datasets: data.datasets.map((ds) => ({
         ...ds,
-        data: resampleSeries(ds.data, activeFrame.points),
+        data: resampleSeries(
+          activeFrame.dataWindow ? ds.data.slice(-activeFrame.dataWindow) : ds.data,
+          activeFrame.points
+        ),
       })),
     };
   }, [activeFrame, data, type]);
@@ -128,36 +122,37 @@ function MiniChart({ title, subtitle, type, data, height = 120, showLegend = fal
     if (type === 'doughnut' || type === 'bar' || !thresholds) return displayData;
     const nLabels = displayData.labels?.length || 24;
     const extra = [];
+    const t = getChartTokens();
     if (thresholds.normalLine != null) extra.push({
       label: '–– Normal', data: Array(nLabels).fill(thresholds.normalLine),
-      borderColor: 'rgba(16,185,129,0.50)', borderWidth: 1.5, borderDash: [6, 4],
+      borderColor: t.successBar, borderWidth: 1.5, borderDash: [6, 4],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     if (thresholds.warningLine != null) extra.push({
       label: '–– Warning', data: Array(nLabels).fill(thresholds.warningLine),
-      borderColor: 'rgba(245,158,11,0.50)', borderWidth: 1.5, borderDash: [4, 3],
+      borderColor: t.warningBar, borderWidth: 1.5, borderDash: [4, 3],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     if (thresholds.criticalLine != null) extra.push({
       label: '–– Critical', data: Array(nLabels).fill(thresholds.criticalLine),
-      borderColor: 'rgba(239,68,68,0.50)', borderWidth: 1.5, borderDash: [3, 3],
+      borderColor: t.dangerBar, borderWidth: 1.5, borderDash: [3, 3],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     return { ...displayData, datasets: [...displayData.datasets, ...extra] };
-  }, [displayData, type, thresholds]);
+  }, [displayData, type, thresholds, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const legendCfg = showLegend ? {
     display: true,
     position: type === 'doughnut' ? 'right' : 'top',
     labels: {
-      color: '#64748b', font: { size: 8 }, boxWidth: 8, usePointStyle: true, padding: 4,
+      color: getChartTokens().legendColor, font: { size: 8 }, boxWidth: 8, usePointStyle: true, padding: 4,
       filter: (item) => !item.text.startsWith('––'),
     },
   } : { display: false };
 
   // Doughnut tooltip: show % of total instead of raw value
   const doughnutTooltip = {
-    ...chartDefaults.plugins.tooltip,
+    ...chartTooltip(),
     callbacks: {
       label: (ctx) => {
         const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -167,27 +162,29 @@ function MiniChart({ title, subtitle, type, data, height = 120, showLegend = fal
     }
   };
 
+  const cd = makeChartDefaults();
+  const tOpts = getChartTokens();
   const opts = type === 'doughnut' ? {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: legendCfg, tooltip: doughnutTooltip },
     cutout: '65%'
   } : {
-    ...chartDefaults,
-    plugins: { ...chartDefaults.plugins, legend: legendCfg },
+    ...cd,
+    plugins: { ...cd.plugins, legend: legendCfg },
     // Bar charts use the fullWidthLinePlugin — pass threshold values as fullWidthLines option
     ...(type === 'bar' && thresholds ? {
       fullWidthLines: [
-        ...(thresholds.normalLine  != null ? [{ value: thresholds.normalLine,  color: 'rgba(16,185,129,0.60)', dash: [6, 4] }] : []),
-        ...(thresholds.warningLine != null ? [{ value: thresholds.warningLine, color: 'rgba(245,158,11,0.60)', dash: [4, 3] }] : []),
-        ...(thresholds.criticalLine!= null ? [{ value: thresholds.criticalLine,color: 'rgba(239,68,68,0.60)',  dash: [3, 3] }] : []),
+        ...(thresholds.normalLine  != null ? [{ value: thresholds.normalLine,  color: tOpts.successBar, dash: [6, 4] }] : []),
+        ...(thresholds.warningLine != null ? [{ value: thresholds.warningLine, color: tOpts.warningBar, dash: [4, 3] }] : []),
+        ...(thresholds.criticalLine!= null ? [{ value: thresholds.criticalLine,color: tOpts.dangerBar,  dash: [3, 3] }] : []),
       ],
     } : {}),
     scales: {
-      x: { ...chartDefaults.scales.x },
+      x: { ...cd.scales.x },
       y: {
-        ...chartDefaults.scales.y,
+        ...cd.scales.y,
         ...(yMax ? { max: yMax } : {}),
-        ...(yLabel ? { title: { display: true, text: yLabel, color: '#475569', font: { size: 8 } } } : {}),
+        ...(yLabel ? { title: { display: true, text: yLabel, color: getCSSVar('--cwm-text-faint'), font: { size: 8 } } } : {}),
       },
     },
   };
@@ -230,7 +227,7 @@ function DigitalTwinPreview() {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate("/digital-twin")}
-            className="px-3 py-1.5 bg-cwm-accent/20 border border-cwm-accent/40 rounded-lg text-[10px] text-cyan-400 hover:bg-cwm-accent/30 transition-colors font-medium"
+            className="cwm-btn px-3 py-1.5 text-[10px] font-medium"
           >
             Open Full Map →
           </button>
@@ -287,8 +284,10 @@ function ZoneStatusRow({ zone }) {
 }
 
 function GraphInfoPanel({ chart, onClose }) {
+  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
+
   const doughnutTooltip = useMemo(() => ({
-    ...chartDefaults.plugins.tooltip,
+    ...chartTooltip(),
     callbacks: {
       label: (ctx) => {
         const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -296,37 +295,40 @@ function GraphInfoPanel({ chart, onClose }) {
         return ` ${ctx.label}: ${pct}%`;
       }
     }
-  }), []);
+  }), [isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayData = useMemo(() => {
     // Bar charts use fullWidthLinePlugin — skip threshold datasets for bar type
     if (!chart || chart.type === 'doughnut' || chart.type === 'bar' || !chart.thresholds) return chart?.data;
     const nLabels = chart.data.labels?.length || 24;
     const extra = [];
+    const tDis = getChartTokens();
     if (chart.thresholds.normalLine != null) extra.push({
       label: '–– Normal', data: Array(nLabels).fill(chart.thresholds.normalLine),
-      borderColor: 'rgba(16,185,129,0.50)', borderWidth: 1.5, borderDash: [6, 4],
+      borderColor: tDis.successBar, borderWidth: 1.5, borderDash: [6, 4],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     if (chart.thresholds.warningLine != null) extra.push({
       label: '–– Warning', data: Array(nLabels).fill(chart.thresholds.warningLine),
-      borderColor: 'rgba(245,158,11,0.50)', borderWidth: 1.5, borderDash: [4, 3],
+      borderColor: tDis.warningBar, borderWidth: 1.5, borderDash: [4, 3],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     if (chart.thresholds.criticalLine != null) extra.push({
       label: '–– Critical', data: Array(nLabels).fill(chart.thresholds.criticalLine),
-      borderColor: 'rgba(239,68,68,0.50)', borderWidth: 1.5, borderDash: [3, 3],
+      borderColor: tDis.dangerBar, borderWidth: 1.5, borderDash: [3, 3],
       pointRadius: 0, fill: false, tension: 0, order: 10,
     });
     return { ...chart.data, datasets: [...chart.data.datasets, ...extra] };
-  }, [chart]);
+  }, [chart, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const opts = useMemo(() => {
     if (!chart) return {};
+    const cd = makeChartDefaults();
+    const t  = getChartTokens();
     const legendCfg = chart.showLegend ? {
       display: true,
       position: chart.type === 'doughnut' ? 'right' : 'top',
-      labels: { color: '#64748b', font: { size: 9 }, boxWidth: 8, usePointStyle: true, padding: 6,
+      labels: { color: t.legendColor, font: { size: 9 }, boxWidth: 8, usePointStyle: true, padding: 6,
         filter: (item) => !item.text.startsWith('––') },
     } : { display: false };
     if (chart.type === 'doughnut') {
@@ -334,25 +336,25 @@ function GraphInfoPanel({ chart, onClose }) {
         plugins: { legend: legendCfg, tooltip: doughnutTooltip }, cutout: '65%' };
     }
     return {
-      ...chartDefaults,
-      plugins: { ...chartDefaults.plugins, legend: legendCfg },
+      ...cd,
+      plugins: { ...cd.plugins, legend: legendCfg },
       // Bar charts use fullWidthLinePlugin for threshold lines
       ...(chart.type === 'bar' && chart.thresholds ? {
         fullWidthLines: [
-          ...(chart.thresholds.normalLine  != null ? [{ value: chart.thresholds.normalLine,  color: 'rgba(16,185,129,0.60)', dash: [6, 4] }] : []),
-          ...(chart.thresholds.warningLine != null ? [{ value: chart.thresholds.warningLine, color: 'rgba(245,158,11,0.60)', dash: [4, 3] }] : []),
-          ...(chart.thresholds.criticalLine!= null ? [{ value: chart.thresholds.criticalLine,color: 'rgba(239,68,68,0.60)',  dash: [3, 3] }] : []),
+          ...(chart.thresholds.normalLine  != null ? [{ value: chart.thresholds.normalLine,  color: t.successBar, dash: [6, 4] }] : []),
+          ...(chart.thresholds.warningLine != null ? [{ value: chart.thresholds.warningLine, color: t.warningBar, dash: [4, 3] }] : []),
+          ...(chart.thresholds.criticalLine!= null ? [{ value: chart.thresholds.criticalLine,color: t.dangerBar,  dash: [3, 3] }] : []),
         ],
       } : {}),
       scales: {
-        x: { ...chartDefaults.scales.x },
-        y: { ...chartDefaults.scales.y,
+        x: { ...cd.scales.x },
+        y: { ...cd.scales.y,
           ...(chart.yMax ? { max: chart.yMax } : {}),
-          ...(chart.yLabel ? { title: { display: true, text: chart.yLabel, color: '#475569', font: { size: 9 } } } : {}),
+          ...(chart.yLabel ? { title: { display: true, text: chart.yLabel, color: t.tickColor, font: { size: 9 } } } : {}),
         },
       },
     };
-  }, [chart, doughnutTooltip]);
+  }, [chart, doughnutTooltip, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!chart) return null;
   const ChartComp = chart.type === 'doughnut' ? Doughnut : chart.type === 'bar' ? Bar : Line;
@@ -372,7 +374,7 @@ function GraphInfoPanel({ chart, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-stretch justify-end" onClick={onClose}>
-      <div className="relative bg-[#0d1117] border-l border-cwm-border w-full max-w-sm flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="relative border-l border-cwm-border w-full max-w-sm flex flex-col shadow-2xl" style={{ background: 'var(--cwm-bg)', boxShadow: '-4px 0 32px rgba(0,0,0,0.45)' }} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-cwm-border shrink-0">
           <div>
@@ -421,16 +423,16 @@ function GraphInfoPanel({ chart, onClose }) {
 }
 
 export default function Dashboard() {
-  const { kpis, alerts, binsSummary, weather } = useContext(DataContext);
+  const { kpis, alerts, binsSummary } = useContext(DataContext);
   const [timeRange] = useState('24h');
   const [selectedKPIDetail, setSelectedKPIDetail] = useState(null);
   const [selectedChartInfo, setSelectedChartInfo] = useState(null);
   const [zoneFilter, setZoneFilter] = useState('all');
+  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
 
   const k = useMemo(() => kpis || {}, [kpis]);
   // binsSummary and vehiclesSummary are now objects with computed stats
   const bins = binsSummary || {};
-  const w = weather || {};
 
   // filteredZones uses the static ZONE_DATA constant — no server-state dependency
   const filteredZones = useMemo(() => {
@@ -486,15 +488,15 @@ export default function Dashboard() {
       datasets: [{
         label: 'Collection Rate %',
         data: (k.historicalCollection || COLLECTION_PROFILE).map(v => Math.min(100, Math.round(v * scale))),
-        borderColor: '#06b6d4',
-        backgroundColor: 'rgba(6,182,212,0.1)',
+        borderColor: getCSSVar('--cwm-info'),
+        backgroundColor: getCSSVar('--cwm-accent-bg'),
         fill: true,
         tension: 0.4,
         pointRadius: 0,
         borderWidth: 1.5,
       }]
     };
-  }, [k.historicalCollection, k.collectionCoverage, zoneKPIs]);
+  }, [k.historicalCollection, k.collectionCoverage, zoneKPIs, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const wasteCompositionData = useMemo(() => ({
     labels: ['Organic', 'Plastic', 'Paper', 'Glass', 'Metal', 'Hazardous', 'Other'],
@@ -503,7 +505,7 @@ export default function Dashboard() {
       backgroundColor: CHART_PALETTES.categorical.slice(0, 7),
       borderWidth: 0,
     }]
-  }), [k.composition]);
+  }), [k.composition, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const zoneComparisonData = useMemo(() => {
     const zones = zoneFilter === 'all' ? ZONE_DATA : filteredZones;
@@ -512,11 +514,11 @@ export default function Dashboard() {
       datasets: [{
         label: 'Fill Level %',
         data: zones.map(z => z.avgFillLevel),
-        backgroundColor: zones.map(z => z.avgFillLevel > 75 ? 'rgba(239,68,68,0.5)' : z.avgFillLevel > 60 ? 'rgba(245,158,11,0.5)' : 'rgba(6,182,212,0.5)'),
+        backgroundColor: (() => { const t = getChartTokens(); return zones.map(z => z.avgFillLevel > 75 ? t.dangerBar : z.avgFillLevel > 60 ? t.warningBar : t.accentBg); })(),
         borderRadius: 4,
       }]
     };
-  }, [zoneFilter, filteredZones]);
+  }, [zoneFilter, filteredZones, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const vehicleActivityData = useMemo(() => ({
     labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2,'0')}:00`),
@@ -573,135 +575,120 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
 
         {/* 1. Collection Coverage */}
-        <KPICard icon="📡" label="Collection Coverage" value={`${(kz.collectionCoverage || 90.1).toFixed(1)}%`}
-          trend={kz.coverageTrend || -1.2} color={(kz.collectionCoverage || 90.1) >= 95 ? 'text-emerald-400' : (kz.collectionCoverage || 90.1) >= 85 ? 'text-amber-400' : 'text-red-400'}
+        {(() => { const col1 = (kz.collectionCoverage || 90.1) >= 95 ? 'text-emerald-400' : (kz.collectionCoverage || 90.1) >= 85 ? 'text-amber-400' : 'text-red-400'; return (
+        <KPICard icon={<IcoCoverage />} label="Collection Coverage" value={`${(kz.collectionCoverage || 90.1).toFixed(1)}%`}
+          trend={kz.coverageTrend || -1.2} color={col1}
           subValues={[{ label: 'Missed', value: `${(kz.missedCollections || 9.9).toFixed(1)}%` }, { label: zoneFilter === 'all' ? 'Zones' : 'Wards', value: zoneFilter === 'all' ? `${kz.zonesServed || 5}/5` : `${kz.wardCount || 3} wards` }]}
           onClick={() => showKPIDetail({
-            icon: '📡', label: 'Collection Coverage', value: (kz.collectionCoverage || 90.1).toFixed(1), unit: '%',
-            trend: kz.coverageTrend || -1.2, color: 'text-amber-400',
+            icon: <IcoCoverage />, label: 'Collection Coverage', value: (kz.collectionCoverage || 90.1).toFixed(1), unit: '%',
+            trend: kz.coverageTrend || -1.2, color: col1,
             thresholds: { green: 95, amber: 85 }, inverted: false,
             definition: 'Percentage of scheduled door-to-door collection points attended today. Measured via RFID scan logs and GPS route confirmation across all 15 wards in Colombo Municipal Council.',
             subValues: [{ label: 'Points Collected', value: kz.collectedPoints || '4,162' }, { label: 'Missed Points', value: kz.missedPoints || 457 }, { label: 'Critical Wards', value: kz.criticalWards || 3 }, { label: 'Target', value: '≥95% daily' }],
             analysis: 'Coverage is 4.9pts below the 95% SLA — 3 wards are in active breach: Grandpass (53.2%), Kirulapone (80.4%), Rajagiriya (82.5%)|V-006 breakdown at 08:15 is the root cause for Grandpass; driver absence for Kirulapone; route skipping for Rajagiriya — each requires a different response|Deploy standby vehicles to Grandpass Zone 2 immediately — 125 points are recoverable before shift end at 15:00',
             target: '95%+ daily door-to-door coverage'
-          })} />
+          })} />); })()}
 
         {/* 2. Missed Collections */}
-        <KPICard icon="⚠️" label="Missed Collections" value={`${(kz.missedCollections || 9.9).toFixed(1)}%`}
-          trend={-(kz.missedTrend || 0.4)} color={(kz.missedCollections || 9.9) <= 2 ? 'text-emerald-400' : (kz.missedCollections || 9.9) <= 5 ? 'text-amber-400' : 'text-red-400'}
+        {(() => { const col2 = (kz.missedCollections || 9.9) <= 2 ? 'text-emerald-400' : (kz.missedCollections || 9.9) <= 5 ? 'text-amber-400' : 'text-red-400'; return (
+        <KPICard icon={<IcoAlert />} label="Missed Collections" value={`${(kz.missedCollections || 9.9).toFixed(1)}%`}
+          trend={-(kz.missedTrend || 0.4)} color={col2}
           subValues={[{ label: 'Points', value: kz.missedPoints || 457 }, { label: 'Alerts', value: kz.overdueAlerts || 8 }]}
           onClick={() => showKPIDetail({
-            icon: '⚠️', label: 'Missed Collections', value: (kz.missedCollections || 9.9).toFixed(1), unit: '%',
-            trend: -(kz.missedTrend || 0.4), color: 'text-amber-400',
+            icon: <IcoAlert />, label: 'Missed Collections', value: (kz.missedCollections || 9.9).toFixed(1), unit: '%',
+            trend: -(kz.missedTrend || 0.4), color: col2,
             thresholds: { green: 2, amber: 5 }, inverted: true,
             definition: 'Percentage of scheduled collection points not attended within the planned time window. Tracked via RFID non-scan events and GPS geo-fence miss analysis per ward.',
             subValues: [{ label: 'Missed Points', value: kz.missedPoints || 457 }, { label: 'Overdue Alerts', value: kz.overdueAlerts || 8 }, { label: 'Avg Delay', value: '42 min' }, { label: 'Auto-Dispatched', value: '8 vehicles' }],
             analysis: 'Three separate failure modes are driving today’s misses: mechanical breakdown (V-006, 125 pts in Grandpass), driver absence (76 pts in Kirulapone), route skip (27 pts in Wellawatta) — each requires a different fix|8 overdue alerts are live across these wards; each escalates to a formal citizen complaint within 4 hours if unresolved|Assign standby vehicle to Grandpass, confirm roster cover for Kirulapone, and issue a supervisor accountability report for the Wellawatta route skip',
             target: '<2% per ward per day'
-          })} />
+          })} />); })()}
 
         {/* 3. Route Optimisation Savings */}
-        <KPICard icon="🛣️" label="Route Savings" value={`${(k.routeSavings || 18.4).toFixed(1)}%`}
-          trend={k.routeTrend || 2.3} color={(k.routeSavings || 18.4) >= 20 ? 'text-emerald-400' : 'text-amber-400'}
+        {(() => { const col3 = (k.routeSavings || 18.4) >= 20 ? 'text-emerald-400' : 'text-amber-400'; return (
+        <KPICard icon={<IcoRoute />} label="Route Savings" value={`${(k.routeSavings || 18.4).toFixed(1)}%`}
+          trend={k.routeTrend || 2.3} color={col3}
           subValues={[{ label: 'Fuel', value: `Rs.${(k.fuelSaved || 42).toFixed(0)}k` }, { label: 'km saved', value: k.kmSaved || 312 }]}
           onClick={() => showKPIDetail({
-            icon: '🛣️', label: 'Route Optimisation Savings', value: (k.routeSavings || 18.4).toFixed(1), unit: '%',
-            trend: k.routeTrend || 2.3, color: 'text-cyan-400',
+            icon: <IcoRoute />, label: 'Route Optimisation Savings', value: (k.routeSavings || 18.4).toFixed(1), unit: '%',
+            trend: k.routeTrend || 2.3, color: col3,
             thresholds: { green: 20, amber: 10 }, inverted: false,
             definition: 'Reduction in total route distance and fuel cost compared to unoptimised baseline routes. Calculated using GPS trip logs vs pre-defined optimal paths generated by the route planning algorithm.',
             subValues: [{ label: 'Fuel Saved', value: `Rs.${(k.fuelSaved || 42).toFixed(0)}k` }, { label: 'KM Reduced', value: `${k.kmSaved || 312} km` }, { label: 'Time Saved', value: '3.2 hrs' }, { label: 'CO₂ Avoided', value: '334 kg' }],
             analysis: 'Savings are 1.6pts short of the 20% target — the gap is recoverable this afternoon without additional vehicles|Zone 2 underperformed because breakdowns reduced load per trip, inflating cost-per-tonne; Zone 3’s 4-vehicle consolidation is the model to replicate|Apply optimised routing to V-010’s Zone 2 afternoon run — estimated +0.4% savings, enough to bring the daily total to target',
             target: '20% fuel/trip time reduction vs baseline'
-          })} />
+          })} />); })()}
 
         {/* 4. Total Waste Collected */}
-        <KPICard icon="🗑️" label="Daily Collection" value={(kz.dailyCollectionTons ?? 1247).toFixed(0)}
-          unit="t/day" trend={kz.collectionTrend || 3.2} color={(kz.collectionRate || 89.4) >= 95 ? 'text-emerald-400' : (kz.collectionRate || 89.4) >= 80 ? 'text-amber-400' : 'text-red-400'}
+        {(() => { const col4 = (kz.collectionRate || 89.4) >= 95 ? 'text-emerald-400' : (kz.collectionRate || 89.4) >= 80 ? 'text-amber-400' : 'text-red-400'; return (
+        <KPICard icon={<IcoTrash />} label="Daily Collection" value={(kz.dailyCollectionTons ?? 1247).toFixed(0)}
+          unit="t/day" trend={kz.collectionTrend || 3.2} color={col4}
           subValues={[{ label: 'Target', value: zoneFilter === 'all' ? '1,400t' : `${Math.round((kz.dailyCollectionTons || 249) / (k.dailyCollectionTons || 1247) * 1400)}t` }, { label: 'Rate', value: `${(kz.collectionRate || 72).toFixed(0)}%` }]}
           onClick={() => showKPIDetail({
-            icon: '🗑️', label: 'Total Waste Collected', value: (kz.dailyCollectionTons ?? 1247).toFixed(0), unit: 't/day',
-            trend: kz.collectionTrend || 3.2, color: 'text-cyan-400',
+            icon: <IcoTrash />, label: 'Total Waste Collected', value: (kz.dailyCollectionTons ?? 1247).toFixed(0), unit: 't/day',
+            trend: kz.collectionTrend || 3.2, color: col4,
             thresholds: { green: 1200, amber: 900 }, inverted: false,
             definition: 'Total tonnage of municipal solid waste collected daily across all wards, measured via weighbridge at transfer stations and WTE plant intake. Includes primary (door-to-door) and secondary (community bin) collection.',
             subValues: [{ label: 'Target', value: zoneFilter === 'all' ? '1,400 t/day' : `${Math.round((kz.dailyCollectionTons || 249) / (k.dailyCollectionTons || 1247) * 1400)} t/day` }, { label: 'Collection Rate', value: `${(kz.collectionRate || 72).toFixed(0)}%` }, { label: 'Weighbridge Reads', value: '138' }, { label: 'By Vehicle', value: '27.5t avg' }],
             analysis: '153t short of target — V-006 breakdown and V-014 idle removed ~8% of morning fleet capacity; this is recoverable, not a systemic shortfall|60–80t is reachable this afternoon by prioritising Grandpass and Pettah, both high-density wards with reserve vehicles available|Kerawalapitiya TS is logging 18-min processing delays — if afternoon inflow rises above 110t/h, a throughput backlog will form before 18:00',
             target: '1,400 tonnes/day total'
-          })} />
+          })} />); })()}
 
         {/* 5. Recycling/Reuse Rate */}
-        <KPICard icon="♻️" label="Recycling Rate" value={`${(k.recyclingRate || 23.0).toFixed(1)}%`}
-          trend={k.recyclingTrend || 1.8} color={(k.recyclingRate || 23.0) >= 30 ? 'text-emerald-400' : 'text-amber-400'}
+        {(() => { const col5 = (k.recyclingRate || 23.0) >= 30 ? 'text-emerald-400' : 'text-amber-400'; return (
+        <KPICard icon={<IcoRecycle />} label="Recycling Rate" value={`${(k.recyclingRate || 23.0).toFixed(1)}%`}
+          trend={k.recyclingTrend || 1.8} color={col5}
           subValues={[{ label: 'Material', value: '287t' }, { label: 'Revenue', value: 'Rs.2.1M' }]}
           onClick={() => showKPIDetail({
-            icon: '♻️', label: 'Recycling / Reuse Rate', value: (k.recyclingRate || 23.0).toFixed(1), unit: '%',
-            trend: k.recyclingTrend || 1.8, color: 'text-emerald-400',
+            icon: <IcoRecycle />, label: 'Recycling / Reuse Rate', value: (k.recyclingRate || 23.0).toFixed(1), unit: '%',
+            trend: k.recyclingTrend || 1.8, color: col5,
             thresholds: { green: 30, amber: 15 }, inverted: false,
             definition: 'Percentage of collected waste diverted from landfill through recycling, composting or reuse. Target of 30-50% supports SDG 12 (Responsible Consumption) and reduces landfill lifespan pressure.',
             subValues: [{ label: 'Recyclables', value: '287t' }, { label: 'Composted', value: '94t' }, { label: 'Revenue', value: 'Rs.2.1M' }, { label: 'Diverted from Landfill', value: '381t' }],
             analysis: 'Capacity to hit 30% already exists today — Muthurajawela Compost (91.2% recovery) has headroom and Kolonnawa MRF can absorb 30t/day more; the bottleneck is routing, not infrastructure|Kolonnawa MRF is rejecting 30.7t/day (21.7% of intake) due to contaminated mixed loads — a contamination audit would likely recover 6–8t/day from that rejection stream alone|Redirect 30t/day of source-separated organics from Kerawalapitiya TS to Muthurajawela; this single change lifts the recycling rate from 23.4% to approximately 26% with no capital expenditure',
             target: '30-50% diversion from landfill'
-          })} />
+          })} />); })()}
 
         {/* 6. Overflow Incidents */}
-        <KPICard icon="📊" label="Overflow Incidents" value={`${(bins.overflowPct || 1.8).toFixed(1)}%`}
-          trend={-(k.overflowTrend || 0.3)} color={(bins.overflowPct || 1.8) <= 2 ? 'text-emerald-400' : 'text-red-400'}
+        {(() => { const col6 = (bins.overflowPct || 1.8) <= 2 ? 'text-emerald-400' : 'text-red-400'; return (
+        <KPICard icon={<IcoBarChart />} label="Overflow Incidents" value={`${(bins.overflowPct || 1.8).toFixed(1)}%`}
+          trend={-(k.overflowTrend || 0.3)} color={col6}
           subValues={[{ label: 'Bins', value: `${bins.overflow || 8}/${bins.total || 445}` }, { label: 'Alerts', value: bins.alerts || 8 }]}
           onClick={() => showKPIDetail({
-            icon: '📊', label: 'Bin Overflow Incidents', value: (bins.overflowPct || 1.8).toFixed(1), unit: '%',
-            trend: -(k.overflowTrend || 0.3), color: 'text-emerald-400',
+            icon: <IcoBarChart />, label: 'Bin Overflow Incidents', value: (bins.overflowPct || 1.8).toFixed(1), unit: '%',
+            trend: -(k.overflowTrend || 0.3), color: col6,
             thresholds: { green: 2, amber: 5 }, inverted: true,
             definition: 'Percentage of smart bins reporting fill level above 85% (overflow threshold). Detected by ultrasonic sensors. Triggers automatic alert and priority dispatch. Target is <2% bins in overflow state at any time.',
             subValues: [{ label: 'Overflowing Bins', value: `${bins.overflow || 8} bins` }, { label: 'Total Monitored', value: bins.total || 445 }, { label: '75%+ Threshold', value: bins.needsCollection || 31 }, { label: 'Sensor Uptime', value: '99.1%' }],
             analysis: 'All 8 overflowing bins are in Pettah Zone 1 — Wednesday Manning Market traffic runs 22% above the weekly average, making this a predictable weekly pattern, not a reactive emergency|Sensors are at 99.1% uptime and auto-alerts fired within 3 minutes of each breach; the detection pipeline is working — the gap is pre-emption|Pre-scheduling a Wednesday afternoon Pettah pass (Rs.4,200) costs less than a single overflow complaint resolution (Rs.18,000 average); switch from reactive dispatch to proactive scheduling for this ward',
             target: '<2% bins in overflow at any time'
-          })} />
+          })} />); })()}
       </div>
 
-      {/* Weather + System Status Strip */}
-      <div className="flex items-center space-x-4 bg-cwm-panel border border-cwm-border rounded-lg px-4 py-2">
-        <div className="flex items-center space-x-2">
-          <span className="text-lg">{w.icon || '🌤️'}</span>
-          <span className="text-sm text-slate-300">{w.temperature?.toFixed(0) || 29}°C</span>
-          <span className="text-xs text-slate-500">{w.condition || 'Partly Cloudy'}</span>
-          <span className="text-xs text-slate-600">|</span>
-          <span className="text-xs text-slate-500">💧 {w.humidity?.toFixed(0) || 78}%</span>
-          <span className="text-xs text-slate-500">🌬️ {w.windSpeed?.toFixed(0) || 12} km/h</span>
+      {/* Digital Twin + 2 side charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-2.5">
+        <div className="lg:col-span-3">
+          <DigitalTwinPreview />
         </div>
-        <div className="flex-1" />
-        <div className="flex items-center space-x-4 text-[10px]">
-          <div className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-slate-400">Critical: {alerts?.filter(a => a.type === 'critical' && !a.acknowledged).length || 0}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-            <span className="text-slate-400">Warnings: {alerts?.filter(a => a.type === 'warning' && !a.acknowledged).length || 0}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-slate-400">Bins OK: {bins.ok || 0}/{bins.total || 0}</span>
-          </div>
+        <div className="lg:col-span-2 flex flex-col gap-2.5">
+          <MiniChart
+            title="Collection Trend"
+            subtitle="Hourly collection rate — % of scheduled stops completed per hour. Highlights shift gaps and peak demand windows."
+            type="line" data={collectionTrendData} height={155} yMax={100} yLabel="Collection %"
+            timeframes={TIMEFRAME_OPTIONS.intradayOps} defaultTimeframe="24H"
+            thresholds={{ normalLine: 80, warningLine: 60, normalDesc: '≥ 80% — on target', warningDesc: '60–80% — below target', criticalDesc: '< 60% — escalate now', unit: '%' }}
+            onInfo={setSelectedChartInfo} />
+          <MiniChart
+            title="Waste Composition"
+            subtitle="Material breakdown of today's collected waste by weight %. Guides MRF sorting priorities and recycling revenue targets."
+            type="doughnut" data={wasteCompositionData} height={155} showLegend
+            thresholds={{ normalDesc: 'Organics 55–65% → optimal compost yield', warningDesc: 'Plastics >15% → MRF contamination risk', criticalDesc: 'Hazardous >3% → compliance alert triggered', unit: '' }}
+            onInfo={setSelectedChartInfo} />
         </div>
       </div>
 
-      {/* Digital Twin Preview */}
-      <DigitalTwinPreview />
-
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
-        <MiniChart
-          title="Collection Trend"
-          subtitle="Hourly collection rate — % of scheduled stops completed per hour. Highlights shift gaps and peak demand windows."
-          type="line" data={collectionTrendData} height={140} yMax={100} yLabel="Collection %"
-          timeframes={TIMEFRAME_OPTIONS.intradayOps} defaultTimeframe="24H"
-          thresholds={{ normalLine: 80, warningLine: 60, normalDesc: '≥ 80% — on target', warningDesc: '60–80% — below target', criticalDesc: '< 60% — escalate now', unit: '%' }}
-          onInfo={setSelectedChartInfo} />
-        <MiniChart
-          title="Waste Composition"
-          subtitle="Material breakdown of today's collected waste by weight %. Guides MRF sorting priorities and recycling revenue targets."
-          type="doughnut" data={wasteCompositionData} height={140} showLegend
-          thresholds={{ normalDesc: 'Organics 55–65% → optimal compost yield', warningDesc: 'Plastics >15% → MRF contamination risk', criticalDesc: 'Hazardous >3% → compliance alert triggered', unit: '' }}
-          onInfo={setSelectedChartInfo} />
+      {/* Zone Fill + Vehicle Activity */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
         <MiniChart
           title="Zone Fill Levels"
           subtitle="Avg smart-bin fill level per zone. Red bars exceed 75% — those zones need priority dispatch to prevent overflow."

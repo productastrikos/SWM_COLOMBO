@@ -1,62 +1,161 @@
 import React from 'react';
 
-export const CHART_PALETTES = {
-  categorical: ['#06b6d4', '#8b5cf6', '#3b82f6', '#ec4899', '#64748b', '#14b8a6', '#6366f1', '#a855f7'],
-  area: {
-    cyan: { border: '#06b6d4', fill: 'rgba(6,182,212,0.10)' },
-    violet: { border: '#8b5cf6', fill: 'rgba(139,92,246,0.10)' },
-    blue: { border: '#3b82f6', fill: 'rgba(59,130,246,0.10)' },
-    pink: { border: '#ec4899', fill: 'rgba(236,72,153,0.10)' },
-    slate: { border: '#94a3b8', fill: 'rgba(148,163,184,0.10)' },
-  },
-};
+/* ─── CSS-variable reader ─────────────────────────────────── */
+export function getCSSVar(name) {
+  if (typeof document === 'undefined') return '';
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/* ─── Snapshot of all chart colour tokens for the current theme ─ */
+export function getChartTokens() {
+  return {
+    tooltipBg:     getCSSVar('--cwm-chart-tooltip-bg'),
+    tooltipBorder: getCSSVar('--cwm-chart-tooltip-border'),
+    tooltipTitle:  getCSSVar('--cwm-text'),
+    tooltipBody:   getCSSVar('--cwm-text-muted'),
+    gridColor:     getCSSVar('--cwm-chart-grid'),
+    tickColor:     getCSSVar('--cwm-text-faint'),
+    tickMuted:     getCSSVar('--cwm-text-muted'),
+    legendColor:   getCSSVar('--cwm-text-muted'),
+    success:       getCSSVar('--cwm-success'),
+    warning:       getCSSVar('--cwm-warning'),
+    danger:        getCSSVar('--cwm-danger'),
+    info:          getCSSVar('--cwm-info'),
+    accent:        getCSSVar('--cwm-accent'),
+    accentBg:      getCSSVar('--cwm-accent-bg'),
+    violet:        getCSSVar('--cwm-violet'),
+    violetBg:      getCSSVar('--cwm-violet-bg'),
+    successBar:    getCSSVar('--cwm-success-bar'),
+    warningBar:    getCSSVar('--cwm-warning-bar'),
+    dangerBar:     getCSSVar('--cwm-danger-bar'),
+  };
+}
+
+/* ─── Standard Chart.js tooltip config ───────────────────── */
+export function chartTooltip(extra = {}) {
+  const t = getChartTokens();
+  return {
+    backgroundColor: t.tooltipBg,
+    borderColor:     t.tooltipBorder,
+    borderWidth:     1,
+    titleColor:      t.tooltipTitle,
+    bodyColor:       t.tooltipBody,
+    padding:         8,
+    ...extra,
+  };
+}
+
+/* ─── Standard Chart.js scales config ────────────────────── */
+export function chartScales(overrides = {}) {
+  const t = getChartTokens();
+  return {
+    x: { grid: { color: t.gridColor }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.x || {}) },
+    y: { grid: { color: t.gridColor }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.y || {}) },
+  };
+}
+
+/* ─── Dynamic palette — reads CSS vars on every access ───── */
+function buildPalettes() {
+  const t = getChartTokens();
+  return {
+    categorical: [t.accent, t.violet, t.success, t.warning, t.danger, t.info, t.accent, t.violet],
+    area: {
+      cyan:   { border: t.accent,    fill: t.accentBg  },
+      violet: { border: t.violet,    fill: t.violetBg  },
+      blue:   { border: t.accent,    fill: t.accentBg  },
+      pink:   { border: t.danger,    fill: getCSSVar('--cwm-danger-bg')  },
+      slate:  { border: t.tickMuted, fill: getCSSVar('--cwm-surface-soft') },
+    },
+  };
+}
+
+/* CHART_PALETTES — Proxy so every property access reads current theme */
+export const CHART_PALETTES = new Proxy({}, {
+  get(_, key) { return buildPalettes()[key]; },
+});
 
 const LABEL_BUILDERS = {
-  '6H': (n) => Array.from({ length: n }, (_, i) => `${String(i * 15).padStart(2, '0')}m`),
-  '12H': (n) => Array.from({ length: n }, (_, i) => `${String(i).padStart(2, '0')}:00`),
-  '24H': (n) => Array.from({ length: n }, (_, i) => `${String(i).padStart(2, '0')}:00`),
-  '7D': (n) => Array.from({ length: n }, (_, i) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7]),
+  '12H': (n) => Array.from({ length: n }, (_, i) => `${String(Math.round((i / Math.max(n - 1, 1)) * 12)).padStart(2, '0')}:00`),
+  '24H': (n) => Array.from({ length: n }, (_, i) => `${String(Math.round((i / Math.max(n - 1, 1)) * 23)).padStart(2, '0')}:00`),
+  '7D':  (n) => Array.from({ length: n }, (_, i) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7]),
   '30D': (n) => Array.from({ length: n }, (_, i) => `D${i + 1}`),
-  '6M': (n) => ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].slice(-n),
-  '12M': (n) => Array.from({ length: n }, (_, i) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i % 12]),
 };
 
+/* ─── Standardised timeframe presets ──────────────────────────
+ * Only 12H / 24H / 7D / 30D are permitted across the application.
+ * Each preset is paired to the *kind* of metric whose health is
+ * actually affected on that horizon:
+ *   realtime → fast-moving operational telemetry (intra-day shifts)
+ *   ops      → daily operational KPIs (collection, fleet, intake)
+ *   trend    → medium-term performance & ESG trends
+ */
 export const TIMEFRAME_OPTIONS = {
+  // Realtime / intra-day operations (e.g. WTE power output, fleet activity)
+  realtime:    [
+    { value: '12H', label: '12H', points: 12, dataWindow: 12 },
+    { value: '24H', label: '24H', points: 24, dataWindow: null },
+  ],
+  // Daily operations rolling into the week (collection coverage, vehicle activity)
+  ops:         [
+    { value: '24H', label: '24H', points: 24, dataWindow: null },
+    { value: '7D',  label: '7D',  points: 7,  dataWindow: null },
+  ],
+  // Medium-term trends (citizen feedback, weekly intake, recycling rate)
+  trend:       [
+    { value: '7D',  label: '7D',  points: 7,  dataWindow: 7  },
+    { value: '30D', label: '30D', points: 30, dataWindow: null },
+  ],
+  // Strategic / ESG indicators (carbon, landfill capacity, sustainability)
+  strategic:   [
+    { value: '30D', label: '30D', points: 30, dataWindow: null },
+  ],
+  // Aliases — keep older imports working with sensible defaults
   intradayOps: [
-    { value: '6H', label: '6H', points: 12 },
-    { value: '12H', label: '12H', points: 12 },
-    { value: '24H', label: '24H', points: 24 },
+    { value: '12H', label: '12H', points: 12, dataWindow: 12 },
+    { value: '24H', label: '24H', points: 24, dataWindow: null },
   ],
   dailyOps: [
-    { value: '24H', label: '24H', points: 24 },
-    { value: '7D', label: '7D', points: 7 },
+    { value: '24H', label: '24H', points: 24, dataWindow: null },
+    { value: '7D',  label: '7D',  points: 7,  dataWindow: null },
   ],
   weekly: [
-    { value: '7D', label: '7D', points: 7 },
-    { value: '30D', label: '30D', points: 30 },
+    { value: '7D',  label: '7D',  points: 7,  dataWindow: 7  },
+    { value: '30D', label: '30D', points: 30, dataWindow: null },
   ],
   monthly: [
-    { value: '6M', label: '6M', points: 6 },
-    { value: '12M', label: '12M', points: 12 },
+    { value: '7D',  label: '7D',  points: 7,  dataWindow: 7  },
+    { value: '30D', label: '30D', points: 30, dataWindow: null },
   ],
 };
 
+/**
+ * Pill-style timeframe selector matching the dashboard card header style.
+ * Background, borders and text colours all derive from the active theme
+ * tokens so the control reads the same in light and dark mode.
+ */
 export function ChartTimeframeControl({ options, value, onChange }) {
   if (!options || options.length < 2) return null;
   return (
-    <div className="flex items-center bg-white/[0.04] rounded-lg p-0.5 border border-white/[0.06]">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
-            value === opt.value ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div
+      className="cwm-timeframe-control inline-flex items-center"
+      role="tablist"
+      aria-label="Time range"
+    >
+      {options.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(opt.value)}
+            className={`cwm-timeframe-btn ${active ? 'is-active' : ''}`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -75,9 +174,10 @@ export function resampleSeries(base, points) {
   if (points === 1) return [base[base.length - 1]];
   return Array.from({ length: points }, (_, i) => {
     const pos = (i / (points - 1)) * (base.length - 1);
-    const lo = Math.floor(pos);
-    const hi = Math.min(base.length - 1, Math.ceil(pos));
+    const lo  = Math.floor(pos);
+    const hi  = Math.min(base.length - 1, Math.ceil(pos));
     const mix = pos - lo;
     return parseFloat((base[lo] + (base[hi] - base[lo]) * mix).toFixed(2));
   });
 }
+

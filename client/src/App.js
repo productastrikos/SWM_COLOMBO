@@ -13,6 +13,7 @@ import Sustainability from './pages/Sustainability';
 import CitizenServices from './pages/CitizenServices';
 import DigitalTwin from './pages/DigitalTwin';
 import Layout from './components/Layout';
+import Profile from './pages/Profile';
 
 // Global Chart.js defaults — ensure tooltips appear on hover for all charts
 ChartJS.defaults.interaction.mode = 'index';
@@ -22,12 +23,30 @@ ChartJS.defaults.plugins.tooltip.enabled = true;
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('cwm_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+    localStorage.setItem('cwm_theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const token = localStorage.getItem('cwm_token');
     const userData = localStorage.getItem('cwm_user');
     if (token && userData) {
-      try { setUser(JSON.parse(userData)); } catch (e) { /* ignore */ }
+      try {
+        const parsed = JSON.parse(userData);
+        if (parsed.fullName === 'System Administrator') {
+          parsed.fullName = 'Nipun Bandara';
+          parsed.email = parsed.email === 'admin@cwm.lk' ? 'nipun@cwm.lk' : parsed.email;
+          localStorage.setItem('cwm_user', JSON.stringify(parsed));
+        }
+        setUser(parsed);
+      } catch (e) { /* ignore */ }
     }
     setLoading(false);
   }, []);
@@ -44,18 +63,25 @@ function App() {
     setUser(null);
   };
 
+  const handleThemeToggle = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   if (loading) return (
-    <div className="h-screen w-screen flex items-center justify-center bg-cwm-dark">
-      <div className="text-cyan-400 text-xl animate-pulse">Loading CWM Platform...</div>
+    <div className={`theme-${theme} h-screen w-screen flex items-center justify-center bg-cwm-dark`}>
+      <div className="app-loading">
+        <div className="app-loading-orbit" />
+        <div className="app-loading-text">Loading CWM Platform...</div>
+      </div>
     </div>
   );
 
-  if (!user) return <Login onLogin={handleLogin} />;
+  if (!user) return <Login onLogin={handleLogin} theme={theme} onThemeToggle={handleThemeToggle} />;
 
   return (
     <SocketProvider>
       <Router>
-        <Layout user={user} onLogout={handleLogout}>
+        <Layout user={user} onLogout={handleLogout} theme={theme} onThemeToggle={handleThemeToggle}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/collection" element={<WasteCollection />} />
@@ -66,6 +92,7 @@ function App() {
             <Route path="/sustainability" element={<Sustainability />} />
             <Route path="/citizen" element={<CitizenServices />} />
             <Route path="/digital-twin" element={<DigitalTwin />} />
+            <Route path="/profile" element={<Profile user={user} />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Layout>

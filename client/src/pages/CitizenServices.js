@@ -4,8 +4,8 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement,
   LineElement, ArcElement, Tooltip, Filler, Legend,
 } from 'chart.js';
-import KPICard from '../components/KPICard';
-import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES } from '../components/chartUtils';
+import KPICard, { IcoClipboard, IcoCheck, IcoClock, IcoSmile, IcoShield } from '../components/KPICard';
+import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Tooltip, Filler, Legend);
 
@@ -13,11 +13,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 
 // 431 total active complaints across all wards
 const COMPLAINT_TYPES = [
-  { type: 'Missed Collection', count: 187, pct: 43.4, avgResolutionH: 1.4,  color: '#ef4444', sla: 85 },
-  { type: 'Bin Overflow',      count: 98,  pct: 22.7, avgResolutionH: 1.75, color: '#f59e0b', sla: 91 },
-  { type: 'Illegal Dumping',   count: 67,  pct: 15.5, avgResolutionH: 9.2,  color: '#8b5cf6', sla: 62 },
-  { type: 'Odor / Hygiene',    count: 52,  pct: 12.1, avgResolutionH: 4.1,  color: '#06b6d4', sla: 78 },
-  { type: 'Property Damage',   count: 27,  pct: 6.3,  avgResolutionH: 18.05,color: '#64748b', sla: 44 },
+  { type: 'Missed Collection', count: 187, pct: 43.4, avgResolutionH: 1.4,  color: 'var(--cwm-danger)',     sla: 85 },
+  { type: 'Bin Overflow',      count: 98,  pct: 22.7, avgResolutionH: 1.75, color: 'var(--cwm-warning)',    sla: 91 },
+  { type: 'Illegal Dumping',   count: 67,  pct: 15.5, avgResolutionH: 9.2,  color: 'var(--cwm-violet)',     sla: 62 },
+  { type: 'Odor / Hygiene',    count: 52,  pct: 12.1, avgResolutionH: 4.1,  color: 'var(--cwm-info)',       sla: 78 },
+  { type: 'Property Damage',   count: 27,  pct: 6.3,  avgResolutionH: 18.05,color: 'var(--cwm-text-faint)', sla: 44 },
 ];
 
 // Ward-level complaints — zones aligned with Digital Twin (Zone 1–5)
@@ -35,15 +35,38 @@ const WARD_COMPLAINTS = [
   { ward: 'Fort',          zone: 'Zone 1', complaints: 15,  resolved: 11, pending: 4,  severity: 'normal',   topType: 'Property Damage'   },
 ];
 
-// 7-day service request trend
-const TREND_7D = [
-  { day: 'Tue 9 Apr',  newComplaints: 58, resolved: 71 },
-  { day: 'Wed 10 Apr', newComplaints: 62, resolved: 54 },
-  { day: 'Thu 11 Apr', newComplaints: 74, resolved: 68 },
-  { day: 'Fri 12 Apr', newComplaints: 81, resolved: 77 },
-  { day: 'Sat 13 Apr', newComplaints: 93, resolved: 85 },
-  { day: 'Sun 14 Apr', newComplaints: 88, resolved: 79 },
-  { day: 'Mon 15 Apr', newComplaints: 67, resolved: 72 },
+// 30-day service request trend (last entry = most recent day)
+const TREND_30D = [
+  { day: 'Mon 6 Apr',  newComplaints: 45, resolved: 41 },
+  { day: 'Tue 7 Apr',  newComplaints: 49, resolved: 46 },
+  { day: 'Wed 8 Apr',  newComplaints: 55, resolved: 52 },
+  { day: 'Thu 9 Apr',  newComplaints: 62, resolved: 58 },
+  { day: 'Fri 10 Apr', newComplaints: 71, resolved: 64 },
+  { day: 'Sat 11 Apr', newComplaints: 68, resolved: 61 },
+  { day: 'Sun 12 Apr', newComplaints: 52, resolved: 55 },
+  { day: 'Mon 13 Apr', newComplaints: 50, resolved: 46 },
+  { day: 'Tue 14 Apr', newComplaints: 53, resolved: 50 },
+  { day: 'Wed 15 Apr', newComplaints: 60, resolved: 57 },
+  { day: 'Thu 16 Apr', newComplaints: 68, resolved: 64 },
+  { day: 'Fri 17 Apr', newComplaints: 79, resolved: 73 },
+  { day: 'Sat 18 Apr', newComplaints: 74, resolved: 67 },
+  { day: 'Sun 19 Apr', newComplaints: 58, resolved: 60 },
+  { day: 'Mon 20 Apr', newComplaints: 52, resolved: 49 },
+  { day: 'Tue 21 Apr', newComplaints: 57, resolved: 53 },
+  { day: 'Wed 22 Apr', newComplaints: 65, resolved: 63 },
+  { day: 'Thu 23 Apr', newComplaints: 72, resolved: 68 },
+  { day: 'Fri 24 Apr', newComplaints: 84, resolved: 78 },
+  { day: 'Sat 25 Apr', newComplaints: 81, resolved: 73 },
+  { day: 'Sun 26 Apr', newComplaints: 62, resolved: 63 },
+  { day: 'Mon 27 Apr', newComplaints: 55, resolved: 52 },
+  { day: 'Tue 28 Apr', newComplaints: 58, resolved: 71 },
+  { day: 'Wed 29 Apr', newComplaints: 62, resolved: 54 },
+  { day: 'Thu 30 Apr', newComplaints: 74, resolved: 68 },
+  { day: 'Fri 1 May',  newComplaints: 81, resolved: 77 },
+  { day: 'Sat 2 May',  newComplaints: 93, resolved: 85 },
+  { day: 'Sun 3 May',  newComplaints: 88, resolved: 79 },
+  { day: 'Mon 4 May',  newComplaints: 67, resolved: 72 },
+  { day: 'Tue 5 May',  newComplaints: 63, resolved: 68 },
 ];
 
 // Missed collection reports — synced with WasteCollection.js MISSED_ALERTS
@@ -95,17 +118,13 @@ const PRIORITY_META = {
   low:      { label: 'LOW',      cls: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
 };
 
-const chartOpts = {
-  responsive: true, maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
-  },
-  scales: {
-    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-  },
-};
+function makeChartOpts() {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: chartTooltip() },
+    scales: chartScales(),
+  };
+}
 
 /* ── Complaint Heatmap Cell ──────────────────────────────────────── */
 function HeatCell({ ward, complaints, maxComplaints }) {
@@ -179,6 +198,7 @@ function ComplaintRow({ report }) {
 
 /* ════════════════════════════════════════════════════════════════════ */
 export default function CitizenServices() {
+  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
   const [activeSection, setActiveSection] = useState('overview');
   const [trendFrame, setTrendFrame] = useState('7D');
   const activeTrendFrame = getTimeframeOption(TIMEFRAME_OPTIONS.weekly, trendFrame);
@@ -250,70 +270,82 @@ export default function CitizenServices() {
   const satisfaction    = (SATISFACTION.reduce((s, c) => s + c.score, 0) / SATISFACTION.length).toFixed(1);
   const slaCompliance   = 78.4;
 
-  const complaintTypeData = useMemo(() => ({
-    labels: COMPLAINT_TYPES.map(t => t.type),
-    datasets: [{
-      data: COMPLAINT_TYPES.map(t => t.count),
-      backgroundColor: COMPLAINT_TYPES.map(t => t.color + 'cc'),
-      borderColor: COMPLAINT_TYPES.map(t => t.color),
-      borderWidth: 1.5,
-      borderRadius: 4,
-    }],
-  }), []);
+  const complaintTypeData = useMemo(() => {
+    const tok = getChartTokens();
+    const cols = [tok.danger, tok.warning, tok.violet, tok.info, tok.tickColor];
+    return {
+      labels: COMPLAINT_TYPES.map(ct => ct.type),
+      datasets: [{
+        data: COMPLAINT_TYPES.map(ct => ct.count),
+        backgroundColor: cols.map(c => c + 'cc'),
+        borderColor: cols,
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }],
+    };
+  }, [isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const trendData = useMemo(() => ({
-    labels: buildTimeframeLabels(activeTrendFrame.value, activeTrendFrame.points),
-    datasets: [
-      {
-        label: 'New Complaints',
-        data: resampleSeries(TREND_7D.map(d => d.newComplaints), activeTrendFrame.points),
-        borderColor: CHART_PALETTES.area.cyan.border,
-        backgroundColor: CHART_PALETTES.area.cyan.fill,
-        fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2,
-      },
-      {
-        label: 'Resolved',
-        data: resampleSeries(TREND_7D.map(d => d.resolved), activeTrendFrame.points),
-        borderColor: CHART_PALETTES.area.violet.border,
-        backgroundColor: CHART_PALETTES.area.violet.fill,
-        fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2,
-      },
-    ],
-  }), [activeTrendFrame]);
+  const trendData = useMemo(() => {
+    const base30New = TREND_30D.map(d => d.newComplaints);
+    const base30Res = TREND_30D.map(d => d.resolved);
+    const srcNew = activeTrendFrame.dataWindow ? base30New.slice(-activeTrendFrame.dataWindow) : base30New;
+    const srcRes = activeTrendFrame.dataWindow ? base30Res.slice(-activeTrendFrame.dataWindow) : base30Res;
+    return {
+      labels: buildTimeframeLabels(activeTrendFrame.value, activeTrendFrame.points),
+      datasets: [
+        {
+          label: 'New Complaints',
+          data: resampleSeries(srcNew, activeTrendFrame.points),
+          borderColor: CHART_PALETTES.area.cyan.border,
+          backgroundColor: CHART_PALETTES.area.cyan.fill,
+          fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2,
+        },
+        {
+          label: 'Resolved',
+          data: resampleSeries(srcRes, activeTrendFrame.points),
+          borderColor: CHART_PALETTES.area.violet.border,
+          backgroundColor: CHART_PALETTES.area.violet.fill,
+          fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2,
+        },
+      ],
+    };
+  }, [activeTrendFrame]);
 
-  const wardData = useMemo(() => ({
-    labels: filteredWardComplaints.map(w => w.ward),
-    datasets: [{
-      data: filteredWardComplaints.map(w => w.complaints),
-      backgroundColor: filteredWardComplaints.map(w =>
-        w.severity === 'critical' ? 'rgba(239,68,68,0.65)' :
-        w.severity === 'warning'  ? 'rgba(245,158,11,0.65)' :
-                                    'rgba(16,185,129,0.65)'),
-      borderColor: filteredWardComplaints.map(w =>
-        w.severity === 'critical' ? '#ef4444' :
-        w.severity === 'warning'  ? '#f59e0b' :
-                                    '#10b981'),
-      borderWidth: 1.5, borderRadius: 4,
-    }],
-  }), [filteredWardComplaints]);
+  const wardData = useMemo(() => {
+    const tok = getChartTokens();
+    return {
+      labels: filteredWardComplaints.map(w => w.ward),
+      datasets: [{
+        data: filteredWardComplaints.map(w => w.complaints),
+        backgroundColor: filteredWardComplaints.map(w =>
+          w.severity === 'critical' ? tok.dangerBar :
+          w.severity === 'warning'  ? tok.warningBar : tok.successBar),
+        borderColor: filteredWardComplaints.map(w =>
+          w.severity === 'critical' ? tok.danger :
+          w.severity === 'warning'  ? tok.warning : tok.success),
+        borderWidth: 1.5, borderRadius: 4,
+      }],
+    };
+  }, [filteredWardComplaints, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const maxComplaints = Math.max(...filteredWardComplaints.map(w => w.complaints), 1);
 
-  const satisfactionData = useMemo(() => ({
-    labels: SATISFACTION.map(s => s.category),
-    datasets: [{
-      data: SATISFACTION.map(s => s.score),
-      backgroundColor: SATISFACTION.map(s =>
-        s.score >= s.target ? 'rgba(16,185,129,0.65)' :
-        s.score >= s.target * 0.85 ? 'rgba(245,158,11,0.65)' :
-                                      'rgba(239,68,68,0.65)'),
-      borderColor: SATISFACTION.map(s =>
-        s.score >= s.target ? '#10b981' :
-        s.score >= s.target * 0.85 ? '#f59e0b' :
-                                      '#ef4444'),
-      borderWidth: 1.5, borderRadius: 4,
-    }],
-  }), []);
+  const satisfactionData = useMemo(() => {
+    const tok = getChartTokens();
+    return {
+      labels: SATISFACTION.map(s => s.category),
+      datasets: [{
+        data: SATISFACTION.map(s => s.score),
+        backgroundColor: SATISFACTION.map(s =>
+          s.score >= s.target ? tok.successBar :
+          s.score >= s.target * 0.85 ? tok.warningBar : tok.dangerBar),
+        borderColor: SATISFACTION.map(s =>
+          s.score >= s.target ? tok.success :
+          s.score >= s.target * 0.85 ? tok.warning : tok.danger),
+        borderWidth: 1.5, borderRadius: 4,
+      }],
+    };
+  }, [isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   const SECTIONS = [
@@ -344,11 +376,11 @@ export default function CitizenServices() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
-        <KPICard icon="📋" label="Active Complaints"    value={totalActive}          color="text-red-400"     rag="critical" />
-        <KPICard icon="✅" label="Resolved (7 days)"   value={totalResolved30}       color="text-emerald-400" rag="normal"   />
-        <KPICard icon="⏱️" label="Avg Resolution"      value={`${avgResolution}h`}   color={parseFloat(avgResolution) <= 4 ? 'text-emerald-400' : parseFloat(avgResolution) <= 10 ? 'text-amber-400' : 'text-red-400'} rag={parseFloat(avgResolution) <= 4 ? 'normal' : parseFloat(avgResolution) <= 10 ? 'warning' : 'critical'} />
-        <KPICard icon="😊" label="Satisfaction Score"   value={`${satisfaction}%`}    color={parseFloat(satisfaction) >= 80 ? 'text-emerald-400' : parseFloat(satisfaction) >= 65 ? 'text-amber-400' : 'text-red-400'} rag={parseFloat(satisfaction) >= 80 ? 'normal' : parseFloat(satisfaction) >= 65 ? 'warning' : 'critical'} />
-        <KPICard icon="📌" label="SLA Compliance (24h)" value={`${slaCompliance}%`}   color={slaCompliance >= 90 ? 'text-emerald-400' : slaCompliance >= 75 ? 'text-amber-400' : 'text-red-400'} rag={slaCompliance >= 90 ? 'normal' : slaCompliance >= 75 ? 'warning' : 'critical'} />
+        <KPICard icon={<IcoClipboard />} label="Active Complaints"    value={totalActive}          color="text-red-400"     rag="critical" />
+        <KPICard icon={<IcoCheck />} label="Resolved (7 days)"   value={totalResolved30}       color="text-emerald-400" rag="normal"   />
+        <KPICard icon={<IcoClock />} label="Avg Resolution"      value={`${avgResolution}h`}   color={parseFloat(avgResolution) <= 4 ? 'text-emerald-400' : parseFloat(avgResolution) <= 10 ? 'text-amber-400' : 'text-red-400'} rag={parseFloat(avgResolution) <= 4 ? 'normal' : parseFloat(avgResolution) <= 10 ? 'warning' : 'critical'} />
+        <KPICard icon={<IcoSmile />} label="Satisfaction Score"   value={`${satisfaction}%`}    color={parseFloat(satisfaction) >= 80 ? 'text-emerald-400' : parseFloat(satisfaction) >= 65 ? 'text-amber-400' : 'text-red-400'} rag={parseFloat(satisfaction) >= 80 ? 'normal' : parseFloat(satisfaction) >= 65 ? 'warning' : 'critical'} />
+        <KPICard icon={<IcoShield />} label="SLA Compliance (24h)" value={`${slaCompliance}%`}   color={slaCompliance >= 90 ? 'text-emerald-400' : slaCompliance >= 75 ? 'text-amber-400' : 'text-red-400'} rag={slaCompliance >= 90 ? 'normal' : slaCompliance >= 75 ? 'warning' : 'critical'} />
       </div>
 
       {/* Section nav */}
@@ -376,7 +408,7 @@ export default function CitizenServices() {
                 </div>
               </div>
               <div style={{ height: 160 }}>
-                <Line data={trendData} options={{ ...chartOpts, plugins: { ...chartOpts.plugins, legend: { display: false } } }} />
+                <Line data={trendData} options={makeChartOpts()} />
               </div>
               <p className="text-[10px] text-slate-500 mt-2">
                 Net new last 7 days: <span className="text-amber-400 font-bold">+17</span> complaints added to backlog
@@ -387,7 +419,7 @@ export default function CitizenServices() {
             <div className="bg-cwm-panel border border-cwm-border rounded-xl p-4">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Complaints by Type — Today</h3>
               <div style={{ height: 160 }}>
-                <Bar data={complaintTypeData} options={chartOpts} />
+                <Bar data={complaintTypeData} options={makeChartOpts()} />
               </div>
             </div>
           </div>
@@ -442,7 +474,7 @@ export default function CitizenServices() {
               <span className="text-[10px] text-slate-500">{filteredWardComplaints.length} wards</span>
             </div>
             <div style={{ height: 160 }} className="p-3">
-              <Bar data={wardData} options={chartOpts} />
+              <Bar data={wardData} options={makeChartOpts()} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
@@ -604,11 +636,8 @@ export default function CitizenServices() {
               <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Satisfaction Score by Category</h3>
               <div style={{ height: 200 }}>
                 <Bar data={satisfactionData} options={{
-                  ...chartOpts,
-                  scales: {
-                    x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 8 } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } }, min: 0, max: 100 },
-                  }
+                  ...makeChartOpts(),
+                  scales: chartScales({ x: { grid: { display: false } }, y: { min: 0, max: 100 } }),
                 }} />
               </div>
             </div>

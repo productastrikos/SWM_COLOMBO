@@ -16,7 +16,9 @@ module.exports = {
         'cwm-cyan': '#06b6d4',
       },
       fontFamily: {
-        'inter': ['Inter', 'sans-serif'],
+        'sans': ['Roboto'],
+        'mono': ['Roboto'],
+        'inter': ['Roboto'],
       }
     },
   },

@@ -2,54 +2,787 @@
 @tailwind components;
 @tailwind utilities;
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Design Tokens ───────────────────────────────────────── */
+:root,
+body[data-theme='dark'] {
+  /* ▼ MASTER PANEL COLOR — change only this value to retheme every card & panel */
+  --cwm-panel:         #1e2a3a;
+
+  /* Background layers */
+  --cwm-bg:            #141b24;
+  --cwm-bg-elevated:   var(--cwm-panel);
+  --cwm-surface:       var(--cwm-panel);
+  --cwm-surface-soft:  #182434;
+  --cwm-surface-raised: #2b3850;
+
+  /* Borders */
+  --cwm-border:        #2e3f56;
+  --cwm-border-soft:   #263548;
+
+  /* Typography */
+  --cwm-text:          #e8eef5;
+  --cwm-text-muted:    #afc3d8;
+  --cwm-text-faint:    #8ca0b6;
+
+  /* Brand */
+  --cwm-accent:        #5b8de0;
+  --cwm-accent-strong: #4a7ad4;
+  --cwm-accent-bg:     rgba(91, 141, 224, 0.11);
+  --cwm-accent-border: rgba(91, 141, 224, 0.26);
+  --cwm-glow:          rgba(91, 141, 224, 0.14);
+
+  /* ▼ ACTION BUTTON COLOR — change these two to retheme every filled button */
+  --cwm-btn:           #3b7de8;
+  --cwm-btn-hover:     #2d6ad4;
+  --cwm-btn-text:      #ffffff;
+
+  /* KPI card surface — borderless in dark mode for a flatter, modern look */
+  --cwm-kpi-bg:        var(--cwm-panel);
+  --cwm-kpi-border:    transparent;
+
+  /* General panel border — borderless in dark mode */
+  --cwm-panel-border:  transparent;
+
+  /* Logo image: invert the silver-on-white PNG so it's visible on the dark sidebar */
+  --cwm-logo-filter: invert(1) brightness(2);
+
+  /* Advisory accent (purple) */
+  --cwm-advisory:        #8b5cf6;
+  --cwm-advisory-strong: #7c3aed;
+  --cwm-advisory-bg:     rgba(139, 92, 246, 0.18);
+  --cwm-advisory-panel:  #2a1f4a;
+  --cwm-advisory-border: rgba(139, 92, 246, 0.45);
+
+  /* Status */
+  --cwm-success:       #16a34a;
+  --cwm-success-bg:    rgba(22, 163, 74, 0.14);
+  --cwm-success-border: rgba(22, 163, 74, 0.30);
+  --cwm-warning:       #d97706;
+  --cwm-warning-bg:    rgba(217, 119, 6, 0.14);
+  --cwm-warning-border: rgba(217, 119, 6, 0.30);
+  --cwm-danger:        #dc2626;
+  --cwm-danger-bg:     rgba(220, 38, 38, 0.14);
+  --cwm-danger-border: rgba(220, 38, 38, 0.30);
+  --cwm-info:          #0ea5e9;
+  --cwm-info-bg:       rgba(14, 165, 233, 0.14);
+  --cwm-info-border:   rgba(14, 165, 233, 0.30);
+
+  /* Accent-2: violet/indigo — secondary chart series & predict lines */
+  --cwm-violet:        #8b5cf6;
+  --cwm-violet-bg:     rgba(139, 92, 246, 0.10);
+
+  /* Chart infrastructure (tooltip, grid, axes) */
+  --cwm-chart-tooltip-bg:     var(--cwm-panel);
+  --cwm-chart-tooltip-border: #2e3f56;
+  --cwm-chart-grid:           rgba(255, 255, 255, 0.04);
+
+  /* Chart bar fills — RAG status, semi-opaque */
+  --cwm-success-bar:   rgba(22,  163,  74, 0.65);
+  --cwm-warning-bar:   rgba(217, 119,   6, 0.65);
+  --cwm-danger-bar:    rgba(220,  38,  38, 0.65);
+
+  /* Text on coloured/accent backgrounds (e.g. notification badge) */
+  --cwm-on-color:      #ffffff;
+
+  /* Shadows */
+  --cwm-shadow-xs: 0 1px 3px rgba(0,0,0,0.35);
+  --cwm-shadow-sm: 0 2px 8px rgba(0,0,0,0.28);
+  --cwm-shadow-md: 0 4px 16px rgba(0,0,0,0.26);
+  --cwm-shadow-lg: 0 8px 30px rgba(0,0,0,0.24);
+
+  /* Modal surface colours (coloured card backgrounds inside KPI modal) */
+  --cwm-modal-success-bg:      #0f2b1f;
+  --cwm-modal-success-border:  #1a4d33;
+  --cwm-modal-warning-bg:      #2b1f0a;
+  --cwm-modal-warning-border:  #4d3810;
+  --cwm-modal-danger-bg:       #2b0f0f;
+  --cwm-modal-danger-border:   #4d1a1a;
+  --cwm-modal-info-bg:         #0f1e2b;
+  --cwm-modal-info-border:     #1a3048;
+  --cwm-modal-advisory-bg:     #1a0f2b;
+  --cwm-modal-advisory-border: #341a4d;
+  --cwm-modal-teal-bg:         #0a1f22;
+  --cwm-modal-teal-border:     #134040;
+
+  /* Layout */
+  --cwm-sidebar-w: 244px;
+  --cwm-header-h:  62px;
+}
+
+body[data-theme='light'] {
+  /* ▼ MASTER PANEL COLOR — change only this value to retheme every card & panel */
+  --cwm-panel:         #ffffff;
+
+  --cwm-bg:            #f1f5fa;
+  --cwm-bg-elevated:   var(--cwm-panel);
+  --cwm-surface:       var(--cwm-panel);
+  --cwm-surface-soft:  #f7f9fc;
+  --cwm-surface-raised: #edf1f8;
+
+  --cwm-border:        #d3dce9;
+  --cwm-border-soft:   #dfe6f0;
+
+  --cwm-text:          #0a1628;
+  --cwm-text-muted:    #1a3150;
+  --cwm-text-faint:    #2c4a70;
+
+  --cwm-accent:        #3b6dbf;
+  --cwm-accent-strong: #2d5ca8;
+  --cwm-accent-bg:     rgba(59, 109, 191, 0.08);
+  --cwm-accent-border: rgba(59, 109, 191, 0.22);
+  --cwm-glow:          rgba(59, 109, 191, 0.10);
+
+  /* ▼ ACTION BUTTON COLOR — change these two to retheme every filled button */
+  --cwm-btn:           #3b7de8;
+  --cwm-btn-hover:     #2d6ad4;
+  --cwm-btn-text:      #ffffff;
+
+  /* KPI card surface — same as panel surface for visual unity */
+  --cwm-kpi-bg:        var(--cwm-panel);
+  --cwm-kpi-border:    var(--cwm-border);
+
+  /* General panel border — visible in light mode */
+  --cwm-panel-border:  var(--cwm-border);
+
+  /* Logo image: no filter needed, silver logo is visible on light sidebar */
+  --cwm-logo-filter: none;
+
+  /* Advisory accent (purple) */
+  --cwm-advisory:        #7c3aed;
+  --cwm-advisory-strong: #6d28d9;
+  --cwm-advisory-bg:     rgba(124, 58, 237, 0.10);
+  --cwm-advisory-panel:  #f5f0ff;
+  --cwm-advisory-border: rgba(124, 58, 237, 0.30);
+
+  --cwm-success:       #15803d;
+  --cwm-success-bg:    rgba(21, 128, 61, 0.11);
+  --cwm-success-border: rgba(21, 128, 61, 0.28);
+  --cwm-warning:       #c2410c;
+  --cwm-warning-bg:    rgba(194, 65, 12, 0.11);
+  --cwm-warning-border: rgba(194, 65, 12, 0.28);
+  --cwm-danger:        #b91c1c;
+  --cwm-danger-bg:     rgba(185, 28, 28, 0.11);
+  --cwm-danger-border: rgba(185, 28, 28, 0.28);
+  --cwm-info:          #0369a1;
+  --cwm-info-bg:       rgba(3, 105, 161, 0.11);
+  --cwm-info-border:   rgba(3, 105, 161, 0.28);
+
+  --cwm-violet:        #7c3aed;
+  --cwm-violet-bg:     rgba(124, 58, 237, 0.10);
+
+  --cwm-chart-tooltip-bg:     var(--cwm-panel);
+  --cwm-chart-tooltip-border: #c5d9f5;
+  --cwm-chart-grid:           rgba(15, 35, 75, 0.07);
+
+  --cwm-success-bar:   rgba(21,  128,  61, 0.50);
+  --cwm-warning-bar:   rgba(194,  65,  12, 0.50);
+  --cwm-danger-bar:    rgba(185,  28,  28, 0.50);
+
+  --cwm-on-color:      #ffffff;
+
+  --cwm-shadow-xs: 0 1px 3px rgba(0,0,0,0.06);
+  --cwm-shadow-sm: 0 2px 8px rgba(0,0,0,0.07);
+  --cwm-shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+  --cwm-shadow-lg: 0 8px 30px rgba(0,0,0,0.11);
+
+  /* Modal surface colours — light-mode counterparts */
+  --cwm-modal-success-bg:      rgba(22, 163, 74,  0.10);
+  --cwm-modal-success-border:  rgba(22, 163, 74,  0.40);
+  --cwm-modal-warning-bg:      rgba(217, 119, 6,  0.10);
+  --cwm-modal-warning-border:  rgba(217, 119, 6,  0.45);
+  --cwm-modal-danger-bg:       rgba(220, 38,  38, 0.10);
+  --cwm-modal-danger-border:   rgba(220, 38,  38, 0.40);
+  --cwm-modal-info-bg:         rgba(3,   105, 161, 0.09);
+  --cwm-modal-info-border:     rgba(3,   105, 161, 0.35);
+  --cwm-modal-advisory-bg:     rgba(124, 58,  237, 0.09);
+  --cwm-modal-advisory-border: rgba(124, 58,  237, 0.35);
+  --cwm-modal-teal-bg:         rgba(14,  116, 144, 0.09);
+  --cwm-modal-teal-border:     rgba(14,  116, 144, 0.35);
+
+  --cwm-sidebar-w: 244px;
+  --cwm-header-h:  62px;
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #0f172a;
-  color: #e2e8f0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--cwm-bg);
+  color: var(--cwm-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 #root { height: 100vh; width: 100vw; }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #1e293b; }
-::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #64748b; }
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cwm-border); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cwm-text-faint); }
 
-.leaflet-container { background: #0f172a !important; }
+/* ─── Leaflet ────────────────────────────────────────────── */
+.leaflet-container { background: var(--cwm-bg) !important; }
 
+/* ─── Legacy utility classes (keep existing JSX working) ─── */
+.bg-cwm-dark        { background-color: var(--cwm-bg) !important; }
+.bg-cwm-darker      { background-color: var(--cwm-panel) !important; }
+.bg-cwm-panel       { background: var(--cwm-panel) !important; box-shadow: var(--cwm-shadow-sm); }
+.bg-cwm-btn         { background-color: var(--cwm-btn) !important; }
+.border-cwm-border  { border-color: var(--cwm-border) !important; }
+.bg-cwm-accent      { background-color: var(--cwm-accent) !important; }
+.hover\:bg-cwm-accent\/30:hover { background-color: var(--cwm-accent-bg) !important; }
+
+/* ─── Theme text helpers ─────────────────────────────────── */
+.theme-dark,
+.theme-light { color: var(--cwm-text); }
+
+/* Dark mode (default): elevate dim Tailwind gray classes to CWM tokens */
+.text-slate-400                             { color: var(--cwm-text) !important; }
+.text-slate-500                             { color: var(--cwm-text-muted) !important; }
+.text-slate-600, .text-slate-700            { color: var(--cwm-text-muted) !important; }
+
+/* Light mode: fix hardcoded dark-mode Tailwind classes */
+body[data-theme='light'] .text-white                { color: var(--cwm-text) !important; }
+body[data-theme='light'] .text-slate-100,
+body[data-theme='light'] .text-slate-200,
+body[data-theme='light'] .text-slate-300            { color: var(--cwm-text-muted) !important; }
+body[data-theme='light'] .text-slate-400            { color: var(--cwm-text) !important; }
+body[data-theme='light'] .text-slate-500,
+body[data-theme='light'] .text-slate-600,
+body[data-theme='light'] .text-slate-700            { color: var(--cwm-text-muted) !important; }
+body[data-theme='light'] .bg-slate-900,
+body[data-theme='light'] .bg-slate-800,
+body[data-theme='light'] .bg-slate-800\/50,
+body[data-theme='light'] .bg-slate-700              { background-color: var(--cwm-surface-raised) !important; }
+body[data-theme='light'] .border-slate-800,
+body[data-theme='light'] .border-slate-700,
+body[data-theme='light'] .border-slate-600          { border-color: var(--cwm-border) !important; }
+body[data-theme='light'] .hover\:bg-slate-800:hover,
+body[data-theme='light'] .hover\:bg-slate-700:hover { background-color: var(--cwm-surface-raised) !important; }
+body[data-theme='light'] .bg-black\/60,
+body[data-theme='light'] .bg-black\/65,
+body[data-theme='light'] .bg-black\/75              { background-color: rgba(20, 35, 55, 0.50) !important; }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes spin           { to { transform: rotate(360deg); } }
+@keyframes slide-up       { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes fade-in        { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+  0%, 100% { box-shadow: 0 0 4px var(--cwm-accent-border); }
+  50%       { box-shadow: 0 0 14px var(--cwm-glow); }
 }
 
-@keyframes slide-up {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+.animate-slide-up        { animation: slide-up 0.25s ease-out; }
+.animate-slide-in-right  { animation: slide-in-right 0.28s cubic-bezier(0.22,1,0.36,1); }
+.animate-fade-in         { animation: fade-in 0.2s ease-out; }
+.animate-pulse-glow      { animation: pulse-glow 2s infinite; }
 
-.animate-slide-up { animation: slide-up 0.3s ease-out; }
-.animate-pulse-glow { animation: pulse-glow 2s infinite; }
-
+/* ─── KPI Card ───────────────────────────────────────────── */
 .kpi-card {
-  transition: all 0.2s ease;
-  cursor: pointer;
+  background: var(--cwm-kpi-bg);
+  border: 1px solid var(--cwm-kpi-border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--cwm-shadow-sm);
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.035) 0%, transparent 60%);
+  pointer-events: none;
 }
 .kpi-card:hover {
+  box-shadow: var(--cwm-shadow-md), 0 0 0 1.5px var(--cwm-accent-border);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  border-color: var(--cwm-accent-border);
+}
+
+/* Shared surface for KPI Detail Modal cards — same tokens as .kpi-card */
+.kpi-modal-card {
+  background: var(--cwm-panel);
+  border: 1px solid var(--cwm-panel-border);
+  border-radius: 16px;
+  padding: 18px;
 }
 
 .glass-panel {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(71, 85, 105, 0.3);
+  background: var(--cwm-surface);
+  border: 1px solid var(--cwm-panel-border);
+  box-shadow: var(--cwm-shadow-md);
 }
 
-/* Keep muted gray/slate copy readable across the dark UI. */
-[class*="text-slate-"],
-[class*="text-gray-"] {
-  color: #ffffff !important;
+/* Light-theme: darken the Tailwind 400-level colour classes used for KPI values */
+body[data-theme='light'] .kpi-card .text-amber-400   { color: #92400e !important; }
+body[data-theme='light'] .kpi-card .text-red-400     { color: #991b1b !important; }
+body[data-theme='light'] .kpi-card .text-emerald-400 { color: #14532d !important; }
+body[data-theme='light'] .kpi-card .text-cyan-400    { color: #0e7490 !important; }
+
+/* Scoped text-colour overrides inside the KPI modal (Tailwind 400 colours are too light on white) */
+body[data-theme='light'] .kpi-modal .text-emerald-400 { color: #15803d !important; }
+body[data-theme='light'] .kpi-modal .text-amber-400   { color: #b45309 !important; }
+body[data-theme='light'] .kpi-modal .text-red-400     { color: #dc2626 !important; }
+body[data-theme='light'] .kpi-modal .text-cyan-400    { color: #0e7490 !important; }
+body[data-theme='light'] .kpi-modal .text-violet-400  { color: #6d28d9 !important; }
+body[data-theme='light'] .kpi-modal .text-violet-500  { color: #6d28d9 !important; }
+body[data-theme='light'] .kpi-modal .text-blue-400    { color: #1d4ed8 !important; }
+
+/* ─── Dark-mode: kill ALL Tailwind border-cwm-border panel borders ─────── */
+/* border-cwm-border is a static Tailwind color (#334155); override globally */
+body[data-theme='dark'] .border-cwm-border {
+  border-color: transparent !important;
 }
+
+/* ─── Sidebar nav ────────────────────────────────────────── */
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cwm-text-faint);
+  padding: 14px 14px 4px;
+  user-select: none;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--cwm-text-muted);
+  cursor: pointer;
+  transition: all 0.14s ease;
+  line-height: 1.3;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+.nav-item:hover {
+  background: var(--cwm-accent-bg);
+  color: var(--cwm-text);
+}
+.nav-item.active {
+  background: var(--cwm-accent-bg);
+  color: var(--cwm-accent);
+  font-weight: 600;
+}
+
+/* ─── Header icon buttons ────────────────────────────────── */
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--cwm-border);
+  color: var(--cwm-text-muted);
+  cursor: pointer;
+  transition: all 0.14s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+.icon-btn:hover {
+  background: var(--cwm-surface-raised);
+  color: var(--cwm-text);
+  border-color: var(--cwm-accent-border);
+}
+.icon-btn.active {
+  background: var(--cwm-accent-bg);
+  color: var(--cwm-accent);
+  border-color: var(--cwm-accent-border);
+}
+
+/* ─── Control / Utility buttons ─────────────────────────── */
+.cwm-control-btn {
+  border: 1px solid var(--cwm-border);
+  background: var(--cwm-surface-soft);
+  color: var(--cwm-text-muted);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.cwm-control-btn:hover {
+  color: var(--cwm-text);
+  background: var(--cwm-surface-raised);
+  border-color: var(--cwm-accent-border);
+}
+
+/* ─── Primary button ─────────────────────────────────────── */
+.cwm-primary-btn,
+.cwm-btn {
+  background: var(--cwm-btn);
+  color: var(--cwm-btn-text);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 10px rgba(59, 125, 232, 0.25);
+}
+.cwm-primary-btn:hover,
+.cwm-btn:hover {
+  background: var(--cwm-btn-hover);
+  box-shadow: 0 4px 16px rgba(59, 125, 232, 0.35);
+}
+
+/* ─── Header search ──────────────────────────────────────── */
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cwm-bg);
+  border: 1px solid var(--cwm-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: all 0.15s ease;
+}
+.header-search:focus-within {
+  border-color: var(--cwm-accent-border);
+  background: var(--cwm-surface);
+}
+.header-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 12.5px;
+  color: var(--cwm-text);
+  font-family: inherit;
+  width: 100%;
+  min-width: 0;
+}
+.header-search input::placeholder { color: var(--cwm-text-faint); }
+
+/* ─── Search results dropdown ───────────────────────────── */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 360px;
+  z-index: 2000;
+  background: var(--cwm-surface);
+  border: 1px solid var(--cwm-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  overflow: hidden;
+  max-height: 440px;
+  overflow-y: auto;
+}
+body[data-theme='light'] .search-dropdown {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--cwm-border);
+}
+.search-dropdown-item:last-child { border-bottom: none; }
+.search-dropdown-item:hover,
+.search-dropdown-item:focus { background: var(--cwm-surface-soft); outline: none; }
+.search-dropdown-item .sdi-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--cwm-surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.search-dropdown-item .sdi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cwm-text);
+  line-height: 1.3;
+}
+.search-dropdown-item .sdi-desc {
+  font-size: 10px;
+  color: var(--cwm-text-faint);
+  margin-top: 1px;
+}
+.search-dropdown-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--cwm-text-faint);
+}
+
+/* ─── Status chips / badges ──────────────────────────────── */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.status-chip-success { background: var(--cwm-success-bg); color: var(--cwm-success); border-color: var(--cwm-success-border); }
+.status-chip-warning { background: var(--cwm-warning-bg); color: var(--cwm-warning); border-color: var(--cwm-warning-border); }
+.status-chip-danger  { background: var(--cwm-danger-bg);  color: var(--cwm-danger);  border-color: var(--cwm-danger-border); }
+.status-chip-info    { background: var(--cwm-info-bg);    color: var(--cwm-info);    border-color: var(--cwm-info-border); }
+.status-chip-accent  { background: var(--cwm-accent-bg);  color: var(--cwm-accent);  border-color: var(--cwm-accent-border); }
+
+/* ─── Progress bar ───────────────────────────────────────── */
+.progress-track {
+  height: 5px;
+  background: var(--cwm-border-soft);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Page header region ─────────────────────────────────── */
+.page-header-block {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--cwm-border);
+}
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cwm-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.page-subtitle {
+  font-size: 12px;
+  color: var(--cwm-text-muted);
+  margin-top: 3px;
+}
+
+/* ─── App loading ────────────────────────────────────────── */
+.app-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+.app-loading-orbit {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid var(--cwm-border);
+  border-top-color: var(--cwm-accent);
+  animation: spin 0.8s linear infinite;
+}
+.app-loading-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cwm-text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* ─── Gray text fix: dark mode readable ──────────────────── */
+[class*='text-gray-'] { color: var(--cwm-text-muted); }
+body[data-theme='light'] [class*='text-gray-'] { color: var(--cwm-text-muted); }
+
+/* ─── Timeframe selector (12H / 24H / 7D / 30D) ──────────── */
+.cwm-timeframe-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--cwm-surface-soft);
+  border: 1px solid var(--cwm-border);
+  box-shadow: var(--cwm-shadow-xs);
+}
+.cwm-timeframe-btn {
+  appearance: none;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cwm-text-faint);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  line-height: 1;
+}
+.cwm-timeframe-btn:hover {
+  color: var(--cwm-text);
+  background: var(--cwm-surface-raised);
+}
+.cwm-timeframe-btn.is-active {
+  color: var(--cwm-text);
+  background: var(--cwm-bg-elevated);
+  border-color: var(--cwm-accent-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.18), inset 0 0 0 1px var(--cwm-accent-border);
+}
+body[data-theme='light'] .cwm-timeframe-btn.is-active {
+  background: var(--cwm-panel);
+  color: var(--cwm-accent-strong);
+  box-shadow: 0 1px 2px rgba(15, 35, 75, 0.10);
+}
+
+/* ─── KPI card border tweaks ─────────────────────────────── */
+/* Borderless KPI cards in dark mode — token already removes border, but
+   protect against hover ring that re-introduces one. */
+body[data-theme='dark'] .kpi-card,
+.theme-dark .kpi-card { border: none; }
+body[data-theme='dark'] .kpi-card:hover,
+.theme-dark .kpi-card:hover {
+  border: none;
+  box-shadow: var(--cwm-shadow-md), 0 0 0 1.5px var(--cwm-accent-border);
+}
+
+/* Trend badges (KPICard) — borderless in both themes */
+.kpi-trend-badge {
+  border: 0 !important;
+  background: var(--cwm-surface-soft);
+}
+
+/* ─── Advisory (purple) UI ───────────────────────────────── */
+.cwm-advisory-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 8px;
+  background: var(--cwm-advisory);
+  color: #ffffff;
+  border: 1px solid var(--cwm-advisory-strong);
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.30);
+  flex-shrink: 0;
+}
+.cwm-advisory-btn:hover {
+  background: var(--cwm-advisory-strong);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.42);
+}
+.cwm-advisory-btn.active,
+.cwm-advisory-btn:active { transform: translateY(0.5px); }
+.cwm-advisory-btn.is-on {
+  background: var(--cwm-advisory-strong);
+  box-shadow: 0 0 0 2px var(--cwm-advisory), 0 4px 16px rgba(124, 58, 237, 0.42);
+}
+
+.cwm-advisory-panel {
+  background: var(--cwm-advisory-panel) !important;
+  border-left-color: var(--cwm-advisory-border) !important;
+}
+body[data-theme='light'] .cwm-advisory-panel { color: var(--cwm-text); }
+
+/* ─── Info / detail modal backdrops (transparent click-catcher) ─ */
+.cwm-modal-backdrop {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ─── Profile dropdown ───────────────────────────────────── */
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 230px;
+  background: var(--cwm-panel);
+  border: 1px solid var(--cwm-border);
+  border-radius: 12px;
+  box-shadow: var(--cwm-shadow-lg);
+  z-index: 1200;
+  overflow: hidden;
+  animation: slide-up 0.18s ease-out;
+}
+.profile-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cwm-border);
+}
+.profile-menu-header .avatar {
+  width: 36px; height: 36px; border-radius: 999px;
+  background: var(--cwm-accent);
+  color: #fff; font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.profile-menu-header .name { font-size: 12.5px; font-weight: 700; color: var(--cwm-text); line-height: 1.2; }
+.profile-menu-header .status {
+  font-size: 10px; color: var(--cwm-success);
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 2px;
+}
+.profile-menu-header .status::before {
+  content: ''; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--cwm-success);
+}
+.profile-menu-section { padding: 6px; }
+.profile-menu-section + .profile-menu-section { border-top: 1px solid var(--cwm-border); }
+.profile-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--cwm-text-muted);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.profile-menu-item:hover {
+  background: var(--cwm-accent-bg);
+  color: var(--cwm-text);
+}
+.profile-menu-item.danger { color: #ef4444; }
+.profile-menu-item.danger:hover { background: rgba(239, 68, 68, 0.10); color: #ef4444; }
+.profile-menu-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.85; }
+.profile-trigger {
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  background: var(--cwm-accent);
+  color: #fff; font-weight: 700; font-size: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--cwm-accent-border);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.05s ease;
+  flex-shrink: 0;
+}
+.profile-trigger:hover { box-shadow: 0 0 0 3px var(--cwm-accent-bg); }
+.profile-trigger:active { transform: scale(0.97); }

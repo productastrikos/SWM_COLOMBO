@@ -3,9 +3,9 @@ import { DataContext } from '../services/socket';
 import { getFacilities } from '../services/api';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler } from 'chart.js';
-import KPICard from '../components/KPICard';
+import KPICard, { IcoPin, IcoBarChart, IcoCalendar, IcoTruck } from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
-import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES } from '../components/chartUtils';
+import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler);
 
 /* ── Static baseline landfill data (shown when API returns no landfill records) ── */
@@ -186,7 +186,7 @@ export default function Landfills() {
   const { kpis } = useContext(DataContext);
   const [landfills, setLandfills] = useState(STATIC_LANDFILLS);
   const [selectedKPI, setSelectedKPI] = useState(null);
-  const [capacityFrame, setCapacityFrame] = useState('12M');
+  const [capacityFrame, setCapacityFrame] = useState('30D');
   const [intakeFrame, setIntakeFrame] = useState('7D');
   const activeCapacityFrame = getTimeframeOption(TIMEFRAME_OPTIONS.monthly, capacityFrame);
   const activeIntakeFrame = getTimeframeOption(TIMEFRAME_OPTIONS.weekly, intakeFrame);
@@ -205,33 +205,53 @@ export default function Landfills() {
     return () => clearInterval(interval);
   }, []);
 
+  const ARUWAKKALU_12M  = [25.2,26.4,27.8,28.6,29.4,30.2,31.0,31.9,32.7,33.4,34.0,34.2];
+  const KARADIYANA_12M  = [93.1,94.2,95.0,95.8,96.4,96.9,97.2,97.6,97.9,98.1,98.3,98.5];
+
   const capacityTrendData = {
     labels: buildTimeframeLabels(activeCapacityFrame.value, activeCapacityFrame.points),
     datasets: [
       {
         label: 'Aruwakkalu',
-        data: resampleSeries([25.2,26.4,27.8,28.6,29.4,30.2,31.0,31.9,32.7,33.4,34.0,34.2], activeCapacityFrame.points),
+        data: resampleSeries(
+          activeCapacityFrame.dataWindow ? ARUWAKKALU_12M.slice(-activeCapacityFrame.dataWindow) : ARUWAKKALU_12M,
+          activeCapacityFrame.points
+        ),
         borderColor: CHART_PALETTES.area.cyan.border, backgroundColor: CHART_PALETTES.area.cyan.fill,
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
       },
       {
         label: 'Karadiyana',
-        data: resampleSeries([93.1,94.2,95.0,95.8,96.4,96.9,97.2,97.6,97.9,98.1,98.3,98.5], activeCapacityFrame.points),
+        data: resampleSeries(
+          activeCapacityFrame.dataWindow ? KARADIYANA_12M.slice(-activeCapacityFrame.dataWindow) : KARADIYANA_12M,
+          activeCapacityFrame.points
+        ),
         borderColor: CHART_PALETTES.area.violet.border, backgroundColor: CHART_PALETTES.area.violet.fill,
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
       }
     ]
   };
 
-  const intakeVals = [780, 820, 810, 850, 790, 400, 350];
-  const displayedIntakeVals = resampleSeries(intakeVals, activeIntakeFrame.points);
+  // 30-day daily intake (tons) — Mon–Sun repeating; weekends drop ~50%
+  const intakeVals = [
+    790,810,820,840,780,405,355,
+    800,825,815,855,795,410,355,
+    780,820,810,850,790,400,350,
+    805,830,820,845,800,415,360,
+    795,815,
+  ];
+  const displayedIntakeVals = resampleSeries(
+    activeIntakeFrame.dataWindow ? intakeVals.slice(-activeIntakeFrame.dataWindow) : intakeVals,
+    activeIntakeFrame.points
+  );
+  const tLand = getChartTokens();
   const intakeData = {
     labels: buildTimeframeLabels(activeIntakeFrame.value, activeIntakeFrame.points),
     datasets: [{
       label: 'Daily Intake (tons)',
       data: displayedIntakeVals,
-      backgroundColor: displayedIntakeVals.map(v => v > 750 ? 'rgba(239,68,68,0.65)' : v > 600 ? 'rgba(245,158,11,0.65)' : 'rgba(16,185,129,0.65)'),
-      borderColor: displayedIntakeVals.map(v => v > 750 ? '#ef4444' : v > 600 ? '#f59e0b' : '#10b981'),
+      backgroundColor: displayedIntakeVals.map(v => v > 750 ? tLand.dangerBar : v > 600 ? tLand.warningBar : tLand.successBar),
+      borderColor: displayedIntakeVals.map(v => v > 750 ? tLand.danger : v > 600 ? tLand.warning : tLand.success),
       borderWidth: 1.5, borderRadius: 4,
     }]
   };
@@ -252,15 +272,15 @@ export default function Landfills() {
       </div>
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <KPICard icon="🏔️" label="Active Sites" value={landfills.filter(l => l.status === 'active' || l.status === 'operational').length}
+        <KPICard icon={<IcoPin />} label="Active Sites" value={landfills.filter(l => l.status === 'active' || l.status === 'operational').length}
           desc="Landfills currently accepting Colombo Municipal waste"
           color="text-emerald-400" rag="normal" />
-        <KPICard icon="📊" label="Avg Capacity Used"
+        <KPICard icon={<IcoBarChart />} label="Avg Capacity Used"
           value={`${(kpis?.landfillCapacity || (landfills.reduce((a, l) => a + (l.capacityUsed || 0), 0) / (landfills.length || 1))).toFixed(1)}%`}
           desc="Weighted average fill level across all registered landfill cells"
           color="text-amber-400" rag="warning" trend={0.8}
           onClick={() => setSelectedKPI({
-            icon: '📊', label: 'Avg Capacity Used',
+            icon: <IcoBarChart />, label: 'Avg Capacity Used',
             value: (kpis?.landfillCapacity || (landfills.reduce((a, l) => a + (l.capacityUsed || 0), 0) / (landfills.length || 1))).toFixed(1),
             unit: '%',
             trend: 0.8, color: 'text-amber-400',
@@ -275,16 +295,16 @@ export default function Landfills() {
             analysis: 'The average is skewed by Karadiyana\'s 98.5% fill — the operational Aruwakkalu site is at a manageable 34.2% and growing ~0.4% per month at current intake|If WTE diversion increases by 200 t/day, Aruwakkalu fill rate drops by 0.2% per month, extending life by approximately 1.5 additional years|Karadiyana cell integrity is degraded; leachate treatment must continue at 215 t/day to prevent groundwater contamination',
             target: '<60% avg fill level; Aruwakkalu <80%',
           })} />
-        <KPICard icon="⏱️" label="Est. Life Remaining"
+        <KPICard icon={<IcoCalendar />} label="Est. Life Remaining"
           value={`${(kpis?.landfillYears || 4.8).toFixed(1)} yrs`}
           desc="Projected years until Aruwakkalu primary landfill reaches capacity"
           color="text-amber-400" rag="warning" />
-        <KPICard icon="🗑️" label="Daily Intake"
+        <KPICard icon={<IcoTruck />} label="Daily Intake"
           value={`${landfills.filter(l => l.status === 'active' || l.status === 'operational').reduce((a, l) => a + (l.dailyIntake || 0), 0).toFixed(0)} t`}
           desc="Total waste received at active landfill sites today"
           color="text-white" rag="normal" trend={-3.2}
           onClick={() => setSelectedKPI({
-            icon: '🗑️', label: 'Daily Intake',
+            icon: <IcoTruck />, label: 'Daily Intake',
             value: landfills.filter(l => l.status === 'active' || l.status === 'operational').reduce((a, l) => a + (l.dailyIntake || 0), 0).toFixed(0),
             unit: 't/day',
             trend: -3.2, color: 'text-slate-300',
@@ -312,13 +332,10 @@ export default function Landfills() {
             <Line data={capacityTrendData} options={{
               responsive: true, maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top', labels: { color: '#94a3b8', font: { size: 9 } } },
-                tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
+                legend: { position: 'top', labels: { color: getChartTokens().legendColor, font: { size: 9 } } },
+                tooltip: chartTooltip(),
               },
-              scales: {
-                x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } }, max: 100, title: { display: true, text: '% Used', color: '#64748b', font: { size: 9 } } }
-              }
+              scales: chartScales({ x: { grid: { display: false } }, y: { max: 100, title: { display: true, text: '% Used', color: getChartTokens().tickColor, font: { size: 9 } } } })
             }} />
           </div>
         </div>
@@ -332,12 +349,9 @@ export default function Landfills() {
               responsive: true, maintainAspectRatio: false,
               plugins: {
                 legend: { display: false },
-                tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8 },
+                tooltip: chartTooltip(),
               },
-              scales: {
-                x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } }
-              }
+              scales: chartScales({ x: { grid: { display: false } } })
             }} />
           </div>
         </div>

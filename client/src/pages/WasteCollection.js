@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
-import KPICard from '../components/KPICard';
+import KPICard, { IcoCoverage, IcoCheck, IcoAlert, IcoCalendar } from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+import { getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 
 function EscalationModal({ ward, onClose }) {
   const [target, setTarget]     = useState('Zone Supervisor');
@@ -121,15 +121,16 @@ export default function WasteCollection() {
   const overallCoverage = totalScheduled > 0 ? ((totalCollected / totalScheduled) * 100).toFixed(1) : '0.0';
   const criticalWards   = filteredWardCoverage.filter(w => w.coverage < 85).length;
 
+  const t = getChartTokens();
   const wardChartData = {
     labels: filteredWardCoverage.map(w => w.ward.split('/')[0].trim().split(' ').slice(0, 2).join(' ')),
     datasets: [{
       data: filteredWardCoverage.map(w => w.coverage),
       backgroundColor: filteredWardCoverage.map(w =>
-        w.coverage >= 95 ? 'rgba(16,185,129,0.65)' :
-        w.coverage >= 85 ? 'rgba(245,158,11,0.65)' : 'rgba(239,68,68,0.65)'),
+        w.coverage >= 95 ? t.successBar :
+        w.coverage >= 85 ? t.warningBar : t.dangerBar),
       borderColor: filteredWardCoverage.map(w =>
-        w.coverage >= 95 ? '#10b981' : w.coverage >= 85 ? '#f59e0b' : '#ef4444'),
+        w.coverage >= 95 ? t.success : w.coverage >= 85 ? t.warning : t.danger),
       borderWidth: 1.5, borderRadius: 4,
     }],
   };
@@ -159,13 +160,13 @@ export default function WasteCollection() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
-        <KPICard icon="🗺️" label="Overall Coverage" value={`${overallCoverage}%`}
+        <KPICard icon={<IcoCoverage />} label="Overall Coverage" value={`${overallCoverage}%`}
           desc="Collection points visited vs scheduled across all 15 wards"
           color={parseFloat(overallCoverage) >= 95 ? 'text-emerald-400' : parseFloat(overallCoverage) >= 85 ? 'text-amber-400' : 'text-red-400'}
           rag={parseFloat(overallCoverage) >= 95 ? 'normal' : parseFloat(overallCoverage) >= 85 ? 'warning' : 'critical'}
           trend={0.8}
           onClick={() => setSelectedKPI({
-            icon: '🗺️', label: 'Overall Coverage', value: overallCoverage, unit: '%',
+            icon: <IcoCoverage />, label: 'Overall Coverage', value: overallCoverage, unit: '%',
             trend: 0.8, color: parseFloat(overallCoverage) >= 95 ? 'text-emerald-400' : 'text-amber-400',
             thresholds: { green: 95, amber: 85 }, inverted: false,
             definition: 'Percentage of scheduled door-to-door collection points attended today. Measured via RFID scan logs and GPS route confirmation across all 15 wards in Colombo Municipal Council.',
@@ -178,11 +179,11 @@ export default function WasteCollection() {
             analysis: `Coverage is at ${overallCoverage}% — on the 95% SLA target. Three wards are in amber recovery: Grandpass (88.4%, V-006 standby deployed), Kirulapone (91.7%, driver returned to duty), Rajagiriya (93.5%, afternoon sweep dispatched)|V-009 standby has recovered 82% of the original Grandpass misses — 31 points remain for the afternoon window|Zones 1, 3, and 4 are all at or above 95.8%; Kollupitiya (97.8%), Fort (97.5%), and Dematagoda (97.2%) are leading the network`,
             target: '95%+ daily door-to-door coverage',
           })} />
-        <KPICard icon="✅" label="Points Collected" value={totalCollected.toLocaleString()}
+        <KPICard icon={<IcoCheck />} label="Points Collected" value={totalCollected.toLocaleString()}
           desc="RFID-confirmed household and commercial pickups today"
           color="text-emerald-400" rag="normal" trend={2.3}
           onClick={() => setSelectedKPI({
-            icon: '✅', label: 'Points Collected', value: totalCollected, unit: 'pts',
+            icon: <IcoCheck />, label: 'Points Collected', value: totalCollected, unit: 'pts',
             trend: 2.3, color: 'text-emerald-400',
             thresholds: { green: 4200, amber: 3500 }, inverted: false,
             definition: 'Total RFID-confirmed collection stops completed today across all 15 wards. Each scan represents a verified household or commercial pickup logged by on-board scanner.',
@@ -195,12 +196,12 @@ export default function WasteCollection() {
             analysis: `Collections are tracking +2.3% vs yesterday — Zone 1 and Zone 3 are leading performance while Zone 2 (Grandpass) drags the overall total|${totalMissed.toLocaleString()} missed points represent an ${((totalMissed / totalScheduled) * 100).toFixed(0)}% gap that is fully recoverable this afternoon if standby vehicles are deployed now|Zones 3, 4, and 5 are all above 90% — the systemic issue is confined to three wards in Zone 2 and Zone 5`,
             target: `${totalScheduled.toLocaleString()} confirmed pickups per day`,
           })} />
-        <KPICard icon="⚠️" label="Missed Points" value={totalMissed.toLocaleString()}
+        <KPICard icon={<IcoAlert />} label="Missed Points" value={totalMissed.toLocaleString()}
           desc="Scheduled stops not serviced — pending follow-up dispatch"
           color={totalMissed <= 150 ? 'text-emerald-400' : totalMissed <= 350 ? 'text-amber-400' : 'text-red-400'}
           rag={totalMissed <= 150 ? 'normal' : totalMissed <= 350 ? 'warning' : 'critical'} trend={-3.2}
           onClick={() => setSelectedKPI({
-            icon: '⚠️', label: 'Missed Points', value: totalMissed, unit: 'pts',
+            icon: <IcoAlert />, label: 'Missed Points', value: totalMissed, unit: 'pts',
             trend: -3.2, color: totalMissed <= 150 ? 'text-emerald-400' : totalMissed <= 350 ? 'text-amber-400' : 'text-red-400',
             thresholds: { green: 150, amber: 350 }, inverted: true,
             definition: 'Scheduled collection stops not attended within the planned time window. Detected via RFID non-scan events and GPS geo-fence miss analysis. Each unresolved miss escalates to a citizen complaint within 4 hours.',
@@ -213,12 +214,12 @@ export default function WasteCollection() {
             analysis: `Missed points are at ${totalMissed} across 15 wards — within the amber operating range. Three wards account for 41% of all misses: Grandpass (31 pts, V-006 in maintenance), Kirulapone (32 pts, driver absence recovery), Rajagiriya (29 pts, afternoon sweep assigned)|Remaining ${totalMissed - 92} missed points are distributed across 12 wards with low individual counts — standard RFID scan delays and minor route congestion, all auto-dispatched for same-day closure|System is tracking to close the majority of missed points before 15:00 shift end`,
             target: '<150 missed points per day (<3.2% of schedule)',
           })} />
-        <KPICard icon="🚨" label="Critical Wards" value={criticalWards}
+        <KPICard icon={<IcoAlert />} label="Critical Wards" value={criticalWards}
           desc="Wards with <85% coverage requiring urgent intervention"
           color={criticalWards === 0 ? 'text-emerald-400' : criticalWards <= 2 ? 'text-amber-400' : 'text-red-400'}
           rag={criticalWards === 0 ? 'normal' : criticalWards <= 2 ? 'warning' : 'critical'}
           onClick={() => setSelectedKPI({
-            icon: '🚨', label: 'Critical Wards', value: criticalWards, unit: 'wards',
+            icon: <IcoAlert />, label: 'Critical Wards', value: criticalWards, unit: 'wards',
             trend: -3, color: criticalWards === 0 ? 'text-emerald-400' : criticalWards <= 2 ? 'text-amber-400' : 'text-red-400',
             thresholds: { green: 0, amber: 2 }, inverted: true,
             definition: 'Wards where collection coverage has fallen below the 85% SLA threshold. Each critical ward triggers a formal escalation and mandatory supervisor response within 2 hours.',
@@ -231,11 +232,11 @@ export default function WasteCollection() {
             analysis: 'No wards are below the 85% SLA threshold — all 15 wards are in amber or green status. The three wards in recovery (Grandpass, Kirulapone, Rajagiriya) are trending toward daily target by 15:00|V-009 standby deployment to Grandpass has been the key recovery lever — without it, Zone 2 would have remained below 85% coverage|Maintaining 0 critical wards requires active standby deployment; the current 1-vehicle-per-zone contingency rule is working',
             target: '0 wards below 85% coverage SLA',
           })} />
-        <KPICard icon="📅" label="Scheduled Points" value={totalScheduled.toLocaleString()}
+        <KPICard icon={<IcoCalendar />} label="Scheduled Points" value={totalScheduled.toLocaleString()}
           desc="Total collection stops planned across all active routes today"
           color="text-white" rag="normal"
           onClick={() => setSelectedKPI({
-            icon: '📅', label: 'Scheduled Points', value: totalScheduled, unit: 'pts',
+            icon: <IcoCalendar />, label: 'Scheduled Points', value: totalScheduled, unit: 'pts',
             trend: 0, color: 'text-slate-300',
             thresholds: { green: 4000, amber: 3500 }, inverted: false,
             definition: 'Total planned collection stops across all 15 wards today, derived from route plans assigned to active vehicles. Each stop corresponds to a registered RFID tag at a household or commercial premises.',
@@ -267,11 +268,8 @@ export default function WasteCollection() {
             <div style={{ height: 150 }}>
               <Bar data={wardChartData} options={{
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8' } },
-                scales: {
-                  x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 8 } } },
-                  y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } }, min: 0, max: 100 },
-                },
+                plugins: { legend: { display: false }, tooltip: chartTooltip() },
+                scales: chartScales({ x: { grid: { display: false } }, y: { min: 0, max: 100 } }),
               }} />
             </div>
           </div>

@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 
 const users = [
-  { id: '1', username: 'admin', email: 'admin@cwm.lk', password: bcrypt.hashSync('admin123', 10), role: 'admin', fullName: 'System Administrator', department: 'IT & Operations' },
+  { id: '1', username: 'admin', email: 'nipun@cwm.lk', password: bcrypt.hashSync('admin123', 10), role: 'admin', fullName: 'Nipun Bandara', department: 'IT & Operations' },
   { id: '2', username: 'operator', email: 'operator@cwm.lk', password: bcrypt.hashSync('operator123', 10), role: 'operator', fullName: 'Chaminda Bandara', department: 'Collection Operations' },
   { id: '3', username: 'analyst', email: 'analyst@cwm.lk', password: bcrypt.hashSync('analyst123', 10), role: 'analyst', fullName: 'Nethmi Perera', department: 'Data Analytics' },
   { id: '4', username: 'fieldworker', email: 'field@cwm.lk', password: bcrypt.hashSync('field123', 10), role: 'field_worker', fullName: 'Tharaka Silva', department: 'Field Operations' }

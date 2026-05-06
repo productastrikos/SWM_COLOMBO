@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getHRData, getFinanceData, getProcurementData, getITSecurityData, getLegalData, getESGData, getCitizenData } from '../services/api';
-import KPICard from '../components/KPICard';
+import KPICard, {
+  IcoPeople, IcoWrench, IcoCheck, IcoClipboard, IcoDollar, IcoBarChart, IcoBolt,
+  IcoTrendUp, IcoBox, IcoHourglass, IcoRecycle, IcoLock, IcoScale, IcoLeaf,
+  IcoPhone, IcoClock, IcoSmile, IcoShield, IcoAlert, IcoPin
+} from '../components/KPICard';
+
+const ICON_MAP = {
+  '👥': <IcoPeople />, '🛠️': <IcoWrench />, '✅': <IcoCheck />, '📋': <IcoClipboard />,
+  '💰': <IcoDollar />, '📊': <IcoBarChart />, '⚡': <IcoBolt />, '📈': <IcoTrendUp />,
+  '📦': <IcoBox />, '⏳': <IcoHourglass />, '💹': <IcoTrendUp />, '🤝': <IcoPeople />,
+  '🔒': <IcoLock />, '⚖️': <IcoScale />, '🌿': <IcoLeaf />, '📱': <IcoPhone />,
+  '⏱️': <IcoClock />, '😊': <IcoSmile />, '📌': <IcoPin />, '♻️': <IcoRecycle />,
+  '💻': <IcoShield />, '🎫': <IcoClipboard />, '🔄': <IcoRecycle />, '📄': <IcoClipboard />,
+  '❌': <IcoAlert />,
+};
+const EI = (key) => ICON_MAP[key] || key;
 
 const enterpriseApis = {
   hr: getHRData, finance: getFinanceData, procurement: getProcurementData,
@@ -78,7 +93,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Attendance Rate', value: `${(data.attendanceRate || data.trainingCompliance || 94.2).toFixed(1)}%`, color: 'text-white', icon: '✅' },
                 { label: 'Open Positions',  value: data.openPositions || 23,                        color: 'text-amber-400',   icon: '📋' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentHires || [
@@ -98,7 +113,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Revenue (WTE)', value: 'Rs. 680M', color: 'text-cyan-400',    icon: '⚡'       },
                 { label: 'Budget Util.', value: '73.8%',    color: 'text-amber-400',    icon: '📈' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentTransactions || [
@@ -118,7 +133,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'YTD Savings',      value: 'Rs. 45M',                                       color: 'text-emerald-400', icon: '💹' },
                 { label: 'Active Vendors',   value: data.topVendors?.length || data.vendors || 4,    color: 'text-white',       icon: '🤝' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentOrders || [
@@ -138,7 +153,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Avg Resolution',    value: `${(data.avgResolutionTime || data.avgResolution || 4.2).toFixed(1)}h`,                        color: 'text-cyan-400',    icon: '⏱️' },
                 { label: 'Satisfaction',      value: `${(data.satisfactionRate || data.satisfaction || 73).toFixed(0)}%`,                           color: 'text-amber-400',   icon: '😊' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentComplaints || [
@@ -158,7 +173,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Security Alerts',  value: data.securityAlerts || data.alerts || 3,                     color: 'text-red-400',     icon: '🔒' },
                 { label: 'Data Sync Rate',   value: `${(data.syncRate || data.dataSync || 98.4).toFixed(1)}%`,   color: 'text-cyan-400',    icon: '🔄' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentIncidents || data.incidents_list || [
@@ -178,7 +193,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Pending Reviews', value: data.pendingReviews || 7,  color: 'text-amber-400',   icon: '📋' },
                 { label: 'Contracts Due',   value: data.contractsDue   || 3,  color: 'text-cyan-400',    icon: '📄' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.recentCases || data.cases || [
@@ -198,7 +213,7 @@ function ModuleView({ moduleId, data }) {
                 { label: 'Energy from WTE',  value: `${(data.wteEnergy       || data.energyMWh || 2.4).toFixed(1)} MWh`,  color: 'text-amber-400',   icon: '⚡' },
                 { label: 'ESG Score',        value: `${(data.esgScore        || 72).toFixed(0)}/100`,                      color: 'text-white',       icon: '📊' },
               ].map((s, i) => (
-                <KPICard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} />
+                <KPICard key={i} icon={EI(s.icon)} label={s.label} value={s.value} color={s.color} />
               ))}
             </div>
             <DataTable data={data.esgMetrics || data.metrics || [
@@ -268,7 +283,7 @@ export default function Enterprise() {
               activeModule === mod.id ? 'ring-1 ring-white/20 scale-[1.02]' : 'opacity-60 hover:opacity-80'
             }`}
           >
-            <div className="text-xl mb-1">{mod.icon}</div>
+            <div className="text-xl mb-1">{EI(mod.icon)}</div>
             <p className="text-[10px] font-semibold text-white">{mod.name}</p>
           </button>
         ))}
@@ -277,7 +292,7 @@ export default function Enterprise() {
       {/* Active Module Content */}
       <div className="bg-cwm-panel border border-cwm-border rounded-lg p-4">
         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-cwm-border">
-          <span className="text-lg">{modules.find(m => m.id === activeModule)?.icon}</span>
+          <span className="text-lg">{EI(modules.find(m => m.id === activeModule)?.icon)}</span>
           <h2 className="text-sm font-bold text-white">{modules.find(m => m.id === activeModule)?.name}</h2>
         </div>
         <ModuleView moduleId={activeModule} data={moduleData[activeModule] || {}} />

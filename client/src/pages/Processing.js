@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getFacilities } from '../services/api';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
-import KPICard from '../components/KPICard';
+import KPICard, { IcoRecycle, IcoBox, IcoRoute } from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
-import { CHART_PALETTES } from '../components/chartUtils';
+import { CHART_PALETTES, chartTooltip } from '../components/chartUtils';
 ChartJS.register(ArcElement, Tooltip);
 
 function FacilityCard({ facility }) {
@@ -149,14 +149,14 @@ export default function Processing() {
       </div>
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <KPICard icon="🔄" label="Transfer Stations" value="3 Active"
+        <KPICard icon={<IcoRecycle />} label="Transfer Stations" value="3 Active"
           desc="Kerawalapitiya, Moratuwa & Nugegoda — all operational today"
           color="text-emerald-400" rag="normal" trend={0} />
-        <KPICard icon="📦" label="TS Throughput" value="627 t/day"
+        <KPICard icon={<IcoBox />} label="TS Throughput" value="627 t/day"
           desc="Total waste tonnage received across 3 transfer stations"
           color="text-white" rag="normal" trend={1.8}
           onClick={() => setSelectedKPI({
-            icon: '📦', label: 'TS Throughput', value: '627', unit: 't/day',
+            icon: <IcoBox />, label: 'TS Throughput', value: '627', unit: 't/day',
             trend: 1.8, color: 'text-cyan-400',
             thresholds: { green: 700, amber: 500 }, inverted: false,
             definition: 'Total daily waste tonnage processed across all three transfer stations. Measured via weighbridge at intake. Throughput excludes WTE plant direct intake of ~620t/day.',
@@ -169,14 +169,14 @@ export default function Processing() {
             analysis: 'Throughput is 73 t/day below capacity — the gap is partly driven by morning collection delays rippling downstream; afternoon volumes typically add 15–20% more inflow|Moratuwa\'s 25-min delay is the key bottleneck; a queuing issue at the compactor bay is suspected — a 30-min maintenance window this afternoon could recover throughput|If afternoon inflow from Zone 2 and Zone 4 increases as expected, Kerawalapitiya may approach 90% utilization; pre-position a diversion route to Nugegoda now',
             target: '700 t/day combined throughput at all 3 stations',
           })} />
-        <KPICard icon="♻️" label="Recycling Plants" value="3 Active"
+        <KPICard icon={<IcoRecycle />} label="Recycling Plants" value="3 Active"
           desc="Kolonnawa MRF, Muthurajawela Compost & Modara Plastic Recovery"
           color="text-emerald-400" rag="normal" trend={0} />
-        <KPICard icon="🔃" label="Diversion Rate" value="23.0%"
+        <KPICard icon={<IcoRoute />} label="Diversion Rate" value="23.0%"
           desc="Share of total collected waste diverted from landfill via recycling"
           color="text-amber-400" rag="warning" trend={1.1}
           onClick={() => setSelectedKPI({
-            icon: '🔃', label: 'Diversion Rate', value: '23.0', unit: '%',
+            icon: <IcoRoute />, label: 'Diversion Rate', value: '23.0', unit: '%',
             trend: 1.1, color: 'text-amber-400',
             thresholds: { green: 30, amber: 15 }, inverted: false,
             definition: 'Percentage of total collected waste (1,247 t/day) diverted from landfill through recycling or composting. Excludes WTE energy recovery. Target of 30% supports SDG 12 and extends Aruwakkalu landfill lifespan.',
@@ -201,8 +201,7 @@ export default function Processing() {
               plugins: {
                 legend: { display: false },
                 tooltip: {
-                  backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1,
-                  titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 8,
+                  ...chartTooltip(),
                   callbacks: {
                     label: (ctx) => {
                       const total = ctx.dataset.data.reduce((a, b) => a + b, 0);

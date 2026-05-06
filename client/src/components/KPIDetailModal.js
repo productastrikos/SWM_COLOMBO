@@ -1,38 +1,44 @@
 import React, { useState, useMemo } from 'react';
+import { deriveRag } from './KPICard';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Tooltip, Filler, Legend,
 } from 'chart.js';
-import { CHART_PALETTES } from './chartUtils';
+import { CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from './chartUtils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler, Legend);
 
 /* ─── RAG Helper ──────────────────────────────────────────── */
-function getRag(value, thresholds, inverted) {
+function getRag(value, thresholds, inverted, forceLevel) {
   const num = parseFloat(value) || 0;
-  let level = 'normal';
-  if (thresholds) {
-    const { green, amber } = thresholds;
-    if (!inverted) level = num >= green ? 'normal' : num >= amber ? 'warning' : 'critical';
-    else           level = num <= green ? 'normal' : num <= amber ? 'warning' : 'critical';
-  } else {
-    level = num >= 80 ? 'normal' : num >= 50 ? 'warning' : 'critical';
+  let level = forceLevel || 'normal';
+  if (!forceLevel) {
+    if (thresholds) {
+      const { green, amber } = thresholds;
+      if (!inverted) level = num >= green ? 'normal' : num >= amber ? 'warning' : 'critical';
+      else           level = num <= green ? 'normal' : num <= amber ? 'warning' : 'critical';
+    } else {
+      level = num >= 80 ? 'normal' : num >= 50 ? 'warning' : 'critical';
+    }
   }
   return {
     normal: {
-      color: '#10b981', text: 'text-emerald-400', bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/30', dot: 'bg-emerald-400', label: 'NORMAL',
-      badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+      color: getCSSVar('--cwm-success'), text: 'text-emerald-400',
+      dot: 'bg-emerald-400', label: 'NORMAL',
+      solidBg: 'var(--cwm-modal-success-bg)', solidBorder: 'var(--cwm-modal-success-border)',
+      badgeSolidBg: 'var(--cwm-modal-success-bg)', badgeSolidBorder: 'var(--cwm-modal-success-border)',
     },
     warning: {
-      color: '#f59e0b', text: 'text-amber-400', bg: 'bg-amber-500/10',
-      border: 'border-amber-500/30', dot: 'bg-amber-400', label: 'WARNING',
-      badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      color: getCSSVar('--cwm-warning'), text: 'text-amber-400',
+      dot: 'bg-amber-400', label: 'WARNING',
+      solidBg: 'var(--cwm-modal-warning-bg)', solidBorder: 'var(--cwm-modal-warning-border)',
+      badgeSolidBg: 'var(--cwm-modal-warning-bg)', badgeSolidBorder: 'var(--cwm-modal-warning-border)',
     },
     critical: {
-      color: '#ef4444', text: 'text-red-400', bg: 'bg-red-500/10',
-      border: 'border-red-500/30', dot: 'bg-red-400', label: 'CRITICAL',
-      badge: 'bg-red-500/10 text-red-400 border-red-500/30',
+      color: getCSSVar('--cwm-danger'), text: 'text-red-400',
+      dot: 'bg-red-400', label: 'CRITICAL',
+      solidBg: 'var(--cwm-modal-danger-bg)', solidBorder: 'var(--cwm-modal-danger-border)',
+      badgeSolidBg: 'var(--cwm-modal-danger-bg)', badgeSolidBorder: 'var(--cwm-modal-danger-border)',
     },
   }[level];
 }
@@ -59,22 +65,42 @@ function buildPred(hist, trendPct, n = 8) {
   });
 }
 
-/* ─── Time-range config ───────────────────────────────────── */
+/* ─── Time-range config — only 12H / 24H / 7D / 30D allowed ── */
 const TIME_CFG = {
-  '1H':  { n: 12, lbl: (i) => `${i * 5}m`,                       title: '1-Hour (5-Min Intervals)'    },
-  '6H':  { n: 24, lbl: (i) => `${i * 15}m`,                      title: '6-Hour (15-Min Intervals)'   },
-  '24H': { n: 24, lbl: (i) => `${String(i).padStart(2,'0')}:00`, title: '24-Hour (1-Hr Intervals)'   },
-  '7D':  { n: 28, lbl: (i) => `D${i + 1}`,                       title: '7-Day (6-Hr Intervals)'      },
-  '30D': { n: 30, lbl: (i) => `${i + 1}`,                        title: '30-Day (Daily Intervals)'     },
+  '12H': { n: 12, lbl: (i) => `${String(i).padStart(2,'0')}:00`, title: '12-Hour (1-Hr Intervals)' },
+  '24H': { n: 24, lbl: (i) => `${String(i).padStart(2,'0')}:00`, title: '24-Hour (1-Hr Intervals)' },
+  '7D':  { n: 7,  lbl: (i) => ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i % 7], title: '7-Day (Daily Intervals)' },
+  '30D': { n: 30, lbl: (i) => `D${i + 1}`,                       title: '30-Day (Daily Intervals)' },
 };
 
+/**
+ * Decide which timeframes a KPI can meaningfully be viewed at.
+ * The rule: only offer a horizon if a change inside that horizon can
+ * realistically affect the health of the underlying system.
+ */
 function getKpiTimeRanges(kpi) {
   const label = (kpi?.label || '').toLowerCase();
-  const unit = (kpi?.unit || '').toLowerCase();
-  if (label.includes('carbon') || label.includes('co2') || label.includes('co₂') || label.includes('circular') || label.includes('landfill') || unit.includes('/100')) return ['7D', '30D'];
-  if (label.includes('daily') || label.includes('ton') || label.includes('throughput') || label.includes('intake') || label.includes('scheduled') || label.includes('collected')) return ['24H', '7D', '30D'];
-  if (label.includes('coverage') || label.includes('missed') || label.includes('overflow') || label.includes('route') || label.includes('vehicle')) return ['1H', '6H', '24H', '7D'];
-  return ['6H', '24H', '7D', '30D'];
+  const unit  = (kpi?.unit  || '').toLowerCase();
+  // Strategic / sustainability KPIs — only multi-day signal is meaningful
+  if (label.includes('carbon') || label.includes('co2') || label.includes('co₂') ||
+      label.includes('circular') || label.includes('landfill capacity') ||
+      label.includes('esg') || unit.includes('/100')) {
+    return ['7D', '30D'];
+  }
+  // Daily ops with a weekly rollup
+  if (label.includes('daily') || label.includes('ton') || label.includes('throughput') ||
+      label.includes('intake') || label.includes('scheduled') || label.includes('collected') ||
+      label.includes('recycling') || label.includes('citizen')) {
+    return ['24H', '7D', '30D'];
+  }
+  // Realtime operational KPIs — same-day changes affect health
+  if (label.includes('coverage') || label.includes('missed') || label.includes('overflow') ||
+      label.includes('route') || label.includes('vehicle') || label.includes('idle') ||
+      label.includes('fuel') || label.includes('power') || label.includes('temperature') ||
+      label.includes('emission')) {
+    return ['12H', '24H', '7D'];
+  }
+  return ['24H', '7D', '30D'];
 }
 
 /* ─── Threshold side-label plugin (per-instance) ─────────── */
@@ -94,8 +120,8 @@ function makePlugin(target, warn) {
         ctx.fillStyle = color;
         ctx.fillText(text, right + 4, y.getPixelForValue(val) + 3);
       };
-      draw(target, '#64748b', 'Target');
-      draw(warn,   '#a78bfa', 'Warn');
+      draw(target, getCSSVar('--cwm-text-faint'), 'Target');
+      draw(warn,   getCSSVar('--cwm-violet'),     'Warn');
       ctx.restore();
     },
   };
@@ -127,9 +153,17 @@ function toCode(label) {
 export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
   const [timeRange, setTimeRange]           = useState('24H');
   const [showPrediction, setShowPrediction] = useState(false);
+  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
 
   const numValue    = useMemo(() => parseFloat(kpi?.value) || 0, [kpi]);
-  const rag         = useMemo(() => getRag(numValue, kpi?.thresholds, kpi?.inverted), [numValue, kpi]);
+  const rag         = useMemo(() => {
+    // Prefer color-derived RAG so modal matches what the KPICard displays
+    if (kpi?.color) {
+      const key = deriveRag(kpi.color);
+      return getRag(numValue, null, false, key);
+    }
+    return getRag(numValue, kpi?.thresholds, kpi?.inverted);
+  }, [numValue, kpi]);
   const ytdAvg       = useMemo(() => numValue > 0 ? parseFloat((numValue * 0.977).toFixed(1)) : 0, [numValue]);
   const thirtyDayAvg = useMemo(() => numValue > 0 ? parseFloat((numValue * 0.964).toFixed(1)) : 0, [numValue]);
 
@@ -191,9 +225,9 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
   }, [kpi]);
 
   const bandStyle = {
-    emerald: { box: 'bg-emerald-500/[0.07] border-emerald-500/30', title: 'text-emerald-400' },
-    amber:   { box: 'bg-amber-500/[0.07]   border-amber-500/30',   title: 'text-amber-400'   },
-    red:     { box: 'bg-red-500/[0.07]     border-red-500/30',     title: 'text-red-400'     },
+    emerald: { title: 'text-emerald-400', solidBg: 'var(--cwm-modal-success-bg)', solidBorder: 'var(--cwm-modal-success-border)' },
+    amber:   { title: 'text-amber-400',   solidBg: 'var(--cwm-modal-warning-bg)', solidBorder: 'var(--cwm-modal-warning-border)' },
+    red:     { title: 'text-red-400',     solidBg: 'var(--cwm-modal-danger-bg)',  solidBorder: 'var(--cwm-modal-danger-border)' },
   };
 
   /* Chart datasets */
@@ -210,22 +244,22 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
       ...(kpi?.thresholds ? [{
         label: 'Target',
         data: Array(allLabels.length).fill(targetNum),
-        borderColor: '#94a3b8', borderWidth: 1.5, borderDash: [6, 4],
+        borderColor: getChartTokens().tickMuted, borderWidth: 1.5, borderDash: [6, 4],
         pointRadius: 0, fill: false, tension: 0,
       }] : []),
       ...(warnVal != null ? [{
         label: 'Warn',
         data: Array(allLabels.length).fill(warnVal),
-        borderColor: '#a78bfa99', borderWidth: 1.5, borderDash: [3, 3],
+        borderColor: getChartTokens().violet, borderWidth: 1.5, borderDash: [3, 3],
         pointRadius: 0, fill: false, tension: 0,
       }] : []),
       ...(showPrediction ? [{
         label: 'Predicted',
         data: [...Array(hist.length).fill(null), ...pred],
-        borderColor: '#818cf8',
-        backgroundColor: 'rgba(129,140,248,0.06)',
+        borderColor: getChartTokens().violet,
+        backgroundColor: getChartTokens().violetBg,
         fill: true, tension: 0.4, pointRadius: 2.5,
-        pointBackgroundColor: '#818cf8', pointBorderColor: '#312e81',
+        pointBackgroundColor: getChartTokens().violet, pointBorderColor: getCSSVar('--cwm-bg'),
         borderWidth: 2, borderDash: [6, 4],
       }] : []),
     ];
@@ -239,28 +273,20 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#0f172a', borderColor: '#1e293b', borderWidth: 1,
-        titleColor: '#e2e8f0', bodyColor: '#94a3b8', padding: 10,
+        ...chartTooltip(),
         callbacks: {
           label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) : '—'} ${kpi?.unit || ''}`,
         },
       },
     },
-    scales: {
-      x: {
-        grid: { color: 'rgba(255,255,255,0.03)' },
-        ticks: { color: '#94a3b8', font: { size: 8 }, maxTicksLimit: 12 },
-      },
-      y: {
-        grid: { color: 'rgba(255,255,255,0.04)' },
-        ticks: { color: '#94a3b8', font: { size: 8 } },
-      },
-    },
-  }), [kpi]);
+    scales: chartScales({ x: { ticks: { maxTicksLimit: 12 } } }),
+  }), [kpi, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const events   = useMemo(() => genEvents(kpi?.label, rag.label, kpi?.inverted), [kpi?.label, rag.label, kpi?.inverted]);
   const analyses = useMemo(() => (kpi?.analysis || '').split('|').map(s => s.trim()).filter(s => s.length > 3), [kpi?.analysis]);
-  const subs     = kpi?.subValues || [];
+  const subs       = kpi?.subValues || [];
+  const mainSubs   = subs.filter(m => !/target/i.test(m.label));
+  const targetSubs = subs.filter(m => /target/i.test(m.label));
 
   if (!kpi) return null;
 
@@ -268,15 +294,15 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
   const category = kpi.category || 'SWM DASHBOARD';
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3">
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[1100] flex justify-end">
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} onClick={onClose} />
 
-      <div className="relative w-full max-w-4xl bg-[#0c1520] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
+      <div className="relative h-full kpi-modal kpi-modal-card flex flex-col shadow-2xl animate-slide-in-right" style={{ width: 680, borderLeft: '1px solid var(--cwm-border)', borderRadius: 0 }}>
 
         {/* ── HEADER ─────────────────────────────────────────── */}
-        <div className="px-6 py-4 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.02]">
+        <div className="px-6 py-4 border-b border-cwm-border flex items-center justify-between kpi-modal-card" style={{ borderRadius: 0 }}>
           <div className="flex items-center space-x-4">
-            <div className={`w-12 h-12 rounded-xl ${rag.bg} border ${rag.border} flex items-center justify-center text-2xl flex-shrink-0`}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: rag.solidBg, border: `1px solid ${rag.solidBorder}` }}>
               {kpi.icon}
             </div>
             <div>
@@ -287,13 +313,13 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
             </div>
           </div>
           <div className="flex items-center space-x-3 flex-shrink-0">
-            <span className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold ${rag.badge}`}>
+            <span className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold ${rag.text}`} style={{ background: rag.badgeSolidBg, borderColor: rag.badgeSolidBorder }}>
               <span className={`w-1.5 h-1.5 rounded-full ${rag.dot} animate-pulse`} />
               <span>{rag.label}</span>
             </span>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -303,174 +329,197 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
         </div>
 
         {/* ── BODY ───────────────────────────────────────────── */}
-        <div className="p-5 space-y-4 max-h-[78vh] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin' }}>
 
-          {/* 4-card metric row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className={`${rag.bg} border ${rag.border} rounded-xl p-4`}>
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2">Current Value</p>
-              <p className={`text-3xl font-bold leading-none ${rag.text}`}>
+          {/* Compact 4-card metric strip */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1">Current Value</p>
+              <p className="text-2xl font-bold leading-none text-white">
                 {kpi.value}
-                {kpi.unit && <span className="text-sm font-normal ml-1 text-slate-400">{kpi.unit}</span>}
+                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
               </p>
-              <p className={`text-[10px] mt-2.5 font-medium ${(kpi.trend || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <p className={`text-[9px] mt-1.5 font-medium ${(kpi.trend || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {(kpi.trend || 0) >= 0 ? '▲' : '▼'} {Math.abs(kpi.trend || 0).toFixed(1)}% vs yesterday
               </p>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center space-x-1">
+            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
                 <span>⊙</span><span>Target</span>
               </p>
-              <p className="text-3xl font-bold leading-none text-white">
+              <p className="text-2xl font-bold leading-none text-white">
                 {targetNum}
-                {kpi.unit && <span className="text-sm font-normal ml-1 text-slate-400">{kpi.unit}</span>}
+                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
               </p>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center space-x-1">
+            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
                 <span>📅</span><span>YTD Avg</span>
               </p>
-              <p className="text-3xl font-bold leading-none text-white">
+              <p className="text-2xl font-bold leading-none text-white">
                 {ytdAvg}
-                {kpi.unit && <span className="text-sm font-normal ml-1 text-slate-400">{kpi.unit}</span>}
+                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
               </p>
-              <p className="text-[10px] mt-2.5 text-slate-400">Year-to-date average</p>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center space-x-1">
+            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
                 <span>◈</span><span>30-Day Avg</span>
               </p>
-              <p className="text-3xl font-bold leading-none text-white">
+              <p className="text-2xl font-bold leading-none text-white">
                 {thirtyDayAvg}
-                {kpi.unit && <span className="text-sm font-normal ml-1 text-slate-400">{kpi.unit}</span>}
+                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
               </p>
-              <p className="text-[10px] mt-2.5 text-slate-400">Rolling month average</p>
             </div>
           </div>
 
-          {/* Definition & Methodology */}
-          {kpi.definition && (
-            <div className="bg-cyan-500/[0.04] border border-cyan-500/20 rounded-xl p-4">
-              <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2 flex items-center space-x-2">
-                <span>ℹ</span><span>Definition &amp; Methodology</span>
-              </p>
-              <p className="text-xs text-slate-400 leading-relaxed">{kpi.definition}</p>
-            </div>
-          )}
+          {/* Main bento: chart (2 cols) + thresholds/definition (1 col) */}
+          <div className="grid grid-cols-3 gap-3 mb-3">
 
-          {/* Threshold Bands */}
-          <div>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Threshold Bands</p>
-            <div className="grid grid-cols-3 gap-2">
-              {bands.map((b, i) => {
-                const s = bandStyle[b.color];
-                return (
-                  <div key={i} className={`${s.box} border rounded-xl p-4 text-center`}>
-                    <p className={`text-[10px] font-bold ${s.title} uppercase tracking-wider mb-1`}>{b.label}</p>
-                    <p className={`text-lg font-bold ${s.title}`}>{b.desc}</p>
+            {/* Chart – spans 2 columns */}
+            <div className="col-span-2 kpi-modal-card rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <p className="text-[10px] font-bold text-white uppercase tracking-wider">{cfg.title}</p>
+                <div className="flex items-center space-x-2">
+                  <div className="cwm-timeframe-control">
+                    {availableRanges.map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => { setTimeRange(r); setShowPrediction(false); }}
+                        className={`cwm-timeframe-btn ${activeTimeRange === r ? 'is-active' : ''}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Chart section */}
-          <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <p className="text-[10px] font-bold text-white uppercase tracking-wider">{cfg.title}</p>
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center bg-white/[0.04] rounded-lg p-0.5 border border-white/[0.06]">
-                  {availableRanges.map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => { setTimeRange(r); setShowPrediction(false); }}
-                      className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
-                        activeTimeRange === r ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
+                  <button
+                    onClick={() => setShowPrediction((p) => !p)}
+                    className={`cwm-advisory-btn${showPrediction ? ' is-on' : ''}`}
+                    style={{ height: 26, padding: '0 10px', fontSize: 10, borderRadius: 6, boxShadow: showPrediction ? undefined : 'none' }}
+                  >
+                    <span>✦</span><span>Predict Trend</span>
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowPrediction((p) => !p)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold border transition-all ${
-                    showPrediction
-                      ? 'bg-violet-500/20 border-violet-500/40 text-violet-300'
-                      : 'bg-white/[0.04] border-white/[0.07] text-slate-400 hover:text-violet-300 hover:border-violet-500/30'
-                  }`}
-                >
-                  <span>✦</span><span>Predict Trend</span>
-                </button>
               </div>
+
+              <div style={{ height: 210 }}>
+                <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
+              </div>
+
+              {showPrediction && (
+                <div className="mt-2 pt-2 border-t border-cwm-border flex items-center justify-between text-[10px]">
+                  <span className="text-slate-400">◄ {activeTimeRange} historical (3 parts)</span>
+                  <span className="text-violet-400">8h predicted trend (1 part) ►</span>
+                </div>
+              )}
             </div>
 
-            <div style={{ height: 210 }}>
-              <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
-            </div>
+            {/* Right column: threshold bands + definition */}
+            <div className="col-span-1 flex flex-col gap-2">
 
-            {showPrediction && (
-              <div className="mt-2 pt-2 border-t border-white/[0.05] flex items-center justify-between text-[10px]">
-                <span className="text-slate-400">◄ {activeTimeRange} historical (3 parts)</span>
-                <span className="text-violet-400">8h predicted trend (1 part) ►</span>
+              {/* Compact threshold bands */}
+              <div className="rounded-xl p-3" style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)' }}>
+                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Threshold Bands</p>
+                <div className="flex flex-col gap-1.5">
+                  {bands.map((b, i) => {
+                    const s = bandStyle[b.color];
+                    return (
+                      <div key={i} className="flex items-center justify-between rounded-lg px-2.5 py-2"
+                        style={{ background: s.solidBg, border: `1px solid ${s.solidBorder}` }}>
+                        <p className={`text-[9px] font-bold ${s.title} uppercase tracking-wider`}>{b.label}</p>
+                        <p className={`text-xs font-bold ${s.title}`}>{b.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+
+              {/* Definition & Methodology */}
+              {kpi.definition && (
+                <div className="rounded-xl p-3 flex-1" style={{ background: 'var(--cwm-modal-teal-bg)', border: '1px solid var(--cwm-modal-teal-border)' }}>
+                  <p className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center space-x-1">
+                    <span>ℹ</span><span>Definition</span>
+                  </p>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">{kpi.definition}</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Detected Anomalies & Events */}
-          <div>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">
-              Detected Anomalies &amp; Events
-            </p>
-            <div className="space-y-2">
-              {events.map((e, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start space-x-3 rounded-xl px-4 py-3 border ${
-                    e.sev === 'critical' ? 'bg-red-500/[0.07] border-red-500/25' :
-                    e.sev === 'warning'  ? 'bg-amber-500/[0.07] border-amber-500/25' :
-                                          'bg-blue-500/[0.05] border-blue-500/20'
-                  }`}
-                >
-                  <span className={`text-sm mt-0.5 ${
-                    e.sev === 'critical' ? 'text-red-400' :
-                    e.sev === 'warning'  ? 'text-amber-400' : 'text-blue-400'
-                  }`}>
-                    {e.sev === 'critical' ? '⊘' : e.sev === 'warning' ? '⚠' : 'ℹ'}
-                  </span>
-                  <div>
-                    <span className={`text-xs font-bold ${
+          {/* Bottom row: anomalies + related metrics */}
+          <div className={`grid gap-3 mb-3 ${subs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+
+            {/* Detected Anomalies & Events */}
+            <div>
+              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2">
+                Detected Anomalies &amp; Events
+              </p>
+              <div className="space-y-1.5">
+                {events.map((e, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start space-x-3 rounded-xl px-3 py-2.5"
+                    style={{
+                    background: e.sev === 'critical' ? 'var(--cwm-modal-danger-bg)' : e.sev === 'warning' ? 'var(--cwm-modal-warning-bg)' : 'var(--cwm-modal-info-bg)',
+                    border: `1px solid ${e.sev === 'critical' ? 'var(--cwm-modal-danger-border)' : e.sev === 'warning' ? 'var(--cwm-modal-warning-border)' : 'var(--cwm-modal-info-border)'}`
+                    }}
+                  >
+                    <span className={`text-sm mt-0.5 ${
                       e.sev === 'critical' ? 'text-red-400' :
                       e.sev === 'warning'  ? 'text-amber-400' : 'text-blue-400'
-                    }`}>{e.time}</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">{e.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Related Metrics (subValues) */}
-          {subs.length > 0 && (
-            <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-3">Related Metrics</p>
-              <div className="grid grid-cols-3 gap-3">
-                {subs.map((m, i) => (
-                  <div key={i} className="bg-white/[0.03] border border-white/[0.05] rounded-lg p-3">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{m.label}</p>
-                    <p className="text-sm font-bold text-slate-200">{m.value}</p>
+                    }`}>
+                      {e.sev === 'critical' ? '⊘' : e.sev === 'warning' ? '⚠' : 'ℹ'}
+                    </span>
+                    <div>
+                      <span className={`text-[10px] font-bold ${
+                        e.sev === 'critical' ? 'text-red-400' :
+                        e.sev === 'warning'  ? 'text-amber-400' : 'text-blue-400'
+                      }`}>{e.time}</span>
+                      <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">{e.text}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
+
+            {/* Related Metrics */}
+            {subs.length > 0 && (
+              <div>
+                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2 flex items-center gap-1.5">
+                  <span style={{ color: 'var(--cwm-accent)' }}>◈</span> Related Metrics
+                </p>
+                {mainSubs.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {mainSubs.map((m, i) => {
+                      const isCrit = /critical|danger|error|failed/i.test(m.label);
+                      const isWarn = /miss|overdue|lost|excess|pending/i.test(m.label);
+                      const bg = isCrit ? 'var(--cwm-modal-danger-bg)' : isWarn ? 'var(--cwm-modal-warning-bg)' : 'var(--cwm-surface-soft)';
+                      const borderClr = isCrit ? 'var(--cwm-modal-danger-border)' : isWarn ? 'var(--cwm-modal-warning-border)' : 'var(--cwm-border)';
+                      const valClr = isCrit ? 'var(--cwm-danger)' : isWarn ? 'var(--cwm-warning)' : 'var(--cwm-text)';
+                      return (
+                        <div key={i} className="rounded-xl px-3 py-2.5" style={{ background: bg, border: `1px solid ${borderClr}` }}>
+                          <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--cwm-text-faint)' }}>{m.label}</p>
+                          <p className="text-xl font-bold leading-none" style={{ color: valClr }}>{m.value}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {targetSubs.map((m, i) => (
+                  <div key={i} className="flex items-center gap-4 rounded-xl px-3 py-2.5 mt-2" style={{ background: 'var(--cwm-modal-info-bg)', border: '1px solid var(--cwm-modal-info-border)' }}>
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--cwm-accent)' }}>Target</span>
+                    <span className="text-sm font-bold" style={{ color: 'var(--cwm-text)' }}>{m.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* AI Advisory */}
           {showAnalysis && analyses.length > 0 && (
-            <div className="bg-violet-500/[0.06] border border-violet-500/20 rounded-xl p-4">
+            <div className="rounded-xl p-4" style={{ background: 'var(--cwm-modal-advisory-bg)', border: '1px solid var(--cwm-modal-advisory-border)' }}>
               <p className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-3 flex items-center space-x-2">
                 <span>ⓘ</span><span>AI Advisory</span>
               </p>
@@ -487,13 +536,13 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
         </div>
 
         {/* ── FOOTER ─────────────────────────────────────────── */}
-        <div className="px-6 py-3 border-t border-white/[0.07] bg-white/[0.01] flex items-center justify-between">
+        <div className="px-6 py-3 border-t border-cwm-border kpi-modal-card flex items-center justify-between" style={{ borderRadius: 0 }}>
           <p className="text-[10px] text-slate-400">
             Last updated: {new Date().toLocaleTimeString()} · Smart SWM Platform · Colombo
           </p>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs text-slate-300 hover:bg-white/10 transition-colors"
+            className="px-4 py-1.5 cwm-control-btn text-xs"
           >
             Close
           </button>

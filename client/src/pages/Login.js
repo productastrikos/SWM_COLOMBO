@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { login } from '../services/api';
 
 const demoUsers = {
-  admin: { password: 'admin123', role: 'admin', fullName: 'System Administrator', department: 'IT & Operations' },
-  operator: { password: 'operator123', role: 'operator', fullName: 'Chaminda Bandara', department: 'Collection Operations' },
-  analyst: { password: 'analyst123', role: 'analyst', fullName: 'Nethmi Perera', department: 'Data Analytics' },
-  fieldworker: { password: 'field123', role: 'field_worker', fullName: 'Tharaka Silva', department: 'Field Operations' },
+  admin:       { password: 'admin123',    role: 'admin',       fullName: 'Nipun Bandara',         department: 'IT & Operations' },
+  operator:    { password: 'operator123', role: 'operator',    fullName: 'Chaminda Bandara',       department: 'Collection Operations' },
+  analyst:     { password: 'analyst123',  role: 'analyst',     fullName: 'Nethmi Perera',          department: 'Data Analytics' },
+  fieldworker: { password: 'field123',    role: 'field_worker',fullName: 'Tharaka Silva',          department: 'Field Operations' },
 };
 
 function getDemoLogin(username, password) {
@@ -25,11 +25,11 @@ function getDemoLogin(username, password) {
   };
 }
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +43,7 @@ export default function Login({ onLogin }) {
       if (demoLogin) {
         onLogin(demoLogin.user, demoLogin.token);
       } else {
-        setError(err.response?.data?.error || 'Login failed');
+        setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -51,86 +51,262 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-cwm-darker via-cwm-dark to-slate-900">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative glass-panel rounded-2xl p-8 w-full max-w-md mx-4">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    <div
+      className={`theme-${theme} h-screen w-screen flex`}
+      style={{ background: 'var(--cwm-bg)', fontFamily: "'Plus Jakarta Sans','Inter',sans-serif" }}
+    >
+      {/* ── LEFT BRANDING PANEL ────────────────────────────── */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
+        style={{ background: 'var(--cwm-bg-elevated)', borderRight: '1px solid var(--cwm-border)' }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'var(--cwm-accent)' }}
+          >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white">CWM Command Center</h1>
-          <p className="text-slate-400 mt-1 text-sm">Colombo Smart Waste Management Platform</p>
+          <div>
+            <div className="text-sm font-bold" style={{ color: 'var(--cwm-text)' }}>CWM Platform</div>
+            <div className="text-xs" style={{ color: 'var(--cwm-text-faint)' }}>Colombo Smart Waste</div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              placeholder="Enter username"
-              required
-              autoComplete="username"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              placeholder="Enter password"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-2.5 rounded-lg font-medium hover:from-cyan-400 hover:to-blue-500 transition-all disabled:opacity-50"
+        {/* Hero text */}
+        <div>
+          <h2
+            className="text-3xl font-bold mb-4 leading-tight"
+            style={{ color: 'var(--cwm-text)', letterSpacing: '-0.02em' }}
           >
-            {loading ? 'Authenticating...' : 'Sign In'}
-          </button>
-        </form>
+            Colombo Waste Management<br />
+            <span style={{ color: 'var(--cwm-accent)' }}>Command Center</span>
+          </h2>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--cwm-text-muted)' }}>
+            Real-time operations monitoring, fleet dispatch, sustainability tracking and AI-powered advisory for Colombo Municipal Council's smart waste ecosystem.
+          </p>
 
-        <div className="mt-6 border-t border-slate-700 pt-4">
-          <p className="text-xs text-slate-500 text-center mb-3">Demo Credentials</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          {/* Feature list */}
+          <ul className="mt-6 space-y-3">
             {[
-              { user: 'admin', pass: 'admin123', role: 'Admin' },
-              { user: 'operator', pass: 'operator123', role: 'Operator' },
-              { user: 'analyst', pass: 'analyst123', role: 'Analyst' },
-              { user: 'fieldworker', pass: 'field123', role: 'Field' },
-            ].map((cred) => (
-              <button
-                key={cred.user}
-                type="button"
-                onClick={() => { setUsername(cred.user); setPassword(cred.pass); }}
-                className="bg-slate-800/50 border border-slate-700 rounded px-2 py-1.5 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all text-center"
-              >
-                {cred.role}
-              </button>
+              { icon: '🗺️', text: 'Digital twin with live vehicle tracking' },
+              { icon: '♻️', text: 'Circular economy & ESG dashboard' },
+              { icon: '🤖', text: 'AI advisory and anomaly detection' },
+              { icon: '📊', text: 'Real-time KPIs and operations analytics' },
+            ].map((f) => (
+              <li key={f.text} className="flex items-center gap-3">
+                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+                  style={{ background: 'var(--cwm-surface-raised)' }}>
+                  {f.icon}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--cwm-text-muted)' }}>{f.text}</span>
+              </li>
             ))}
+          </ul>
+        </div>
+
+        {/* Footer */}
+        <div className="text-xs" style={{ color: 'var(--cwm-text-faint)' }}>
+          © 2025 Colombo Municipal Council · Powered by Astrikos
+        </div>
+      </div>
+
+      {/* ── RIGHT FORM PANEL ───────────────────────────────── */}
+      <div className="flex-1 flex flex-col">
+        {/* Theme toggle row */}
+        <div className="flex items-center justify-end p-5">
+          <button
+            onClick={onThemeToggle}
+            className="icon-btn"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 1012 21a8.962 8.962 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Centered form */}
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="w-full max-w-[380px]">
+
+            {/* Mobile logo (hidden on lg) */}
+            <div className="flex items-center gap-3 mb-8 lg:hidden">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--cwm-accent)' }}
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-bold" style={{ color: 'var(--cwm-text)' }}>CWM Command Center</div>
+                <div className="text-xs" style={{ color: 'var(--cwm-text-faint)' }}>Colombo Smart Waste Management</div>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--cwm-text)', letterSpacing: '-0.02em' }}>
+                Sign in
+              </h1>
+              <p className="text-sm" style={{ color: 'var(--cwm-text-muted)' }}>
+                Enter your credentials to access the platform
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div
+                  className="px-4 py-3 rounded-lg text-sm"
+                  style={{
+                    background: 'var(--cwm-danger-bg)',
+                    border: '1px solid var(--cwm-danger-border)',
+                    color: 'var(--cwm-danger)',
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label
+                  htmlFor="cwm-username"
+                  className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                  style={{ color: 'var(--cwm-text-muted)' }}
+                >
+                  Username
+                </label>
+                <input
+                  id="cwm-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="app-input"
+                  placeholder="Enter username"
+                  required
+                  autoComplete="username"
+                  autoFocus
+                  style={{
+                    background: 'var(--cwm-surface-soft)',
+                    border: '1px solid var(--cwm-border)',
+                    color: 'var(--cwm-text)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 13,
+                    width: '100%',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'var(--cwm-accent)'}
+                  onBlur={e  => e.target.style.borderColor = 'var(--cwm-border)'}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="cwm-password"
+                  className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                  style={{ color: 'var(--cwm-text-muted)' }}
+                >
+                  Password
+                </label>
+                <input
+                  id="cwm-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="app-input"
+                  placeholder="Enter password"
+                  required
+                  autoComplete="current-password"
+                  style={{
+                    background: 'var(--cwm-surface-soft)',
+                    border: '1px solid var(--cwm-border)',
+                    color: 'var(--cwm-text)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 13,
+                    width: '100%',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'var(--cwm-accent)'}
+                  onBlur={e  => e.target.style.borderColor = 'var(--cwm-border)'}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="cwm-primary-btn w-full"
+                style={{ padding: '11px 0', fontSize: 14, borderRadius: 8, opacity: loading ? 0.6 : 1 }}
+              >
+                {loading ? 'Authenticating…' : 'Sign In'}
+              </button>
+            </form>
+
+            {/* Demo credentials */}
+            <div className="mt-6">
+              <div
+                className="flex items-center gap-3 mb-3"
+                style={{ color: 'var(--cwm-text-faint)' }}
+              >
+                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--cwm-border)' }} />
+                <span className="text-xs whitespace-nowrap">Demo accounts</span>
+                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--cwm-border)' }} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { user: 'admin',       pass: 'admin123',    role: 'Admin' },
+                  { user: 'operator',    pass: 'operator123', role: 'Operator' },
+                  { user: 'analyst',     pass: 'analyst123',  role: 'Analyst' },
+                  { user: 'fieldworker', pass: 'field123',    role: 'Field Worker' },
+                ].map((cred) => (
+                  <button
+                    key={cred.user}
+                    type="button"
+                    onClick={() => { setUsername(cred.user); setPassword(cred.pass); }}
+                    className="px-3 py-2 rounded-lg text-xs font-medium text-center transition-all"
+                    style={{
+                      background: 'var(--cwm-surface-soft)',
+                      border: '1px solid var(--cwm-border)',
+                      color: 'var(--cwm-text-muted)',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'var(--cwm-surface-raised)';
+                      e.currentTarget.style.color = 'var(--cwm-text)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'var(--cwm-surface-soft)';
+                      e.currentTarget.style.color = 'var(--cwm-text-muted)';
+                    }}
+                  >
+                    {cred.role}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

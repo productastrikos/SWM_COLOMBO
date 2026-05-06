@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getVehicles, dispatchVehicle } from '../services/api';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
-import KPICard from '../components/KPICard';
-import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries } from '../components/chartUtils';
+import KPICard, { IcoTruck, IcoCheck, IcoRoute, IcoTrash, IcoHourglass, IcoWrench } from '../components/KPICard';
+import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 // Maps server simulation zone IDs (Z01–Z15) to the 5 Digital-Twin zone labels
@@ -303,16 +303,20 @@ export default function FleetManagement() {
   // Active = en route + collecting so the three cards always add up correctly
   const kActive      = kEnRoute + kCollecting;
 
-  // Activity chart values — RAG coloured per bar
-  const actVals = [22, 25, 28, 30, 32, 35, 38, 37, 34, 31, 28, 24];
-  const displayedActVals = resampleSeries(actVals, activeActivityFrame.points);
+  // Activity chart values — 24 hourly values (midnight→23:00): overnight low, morning ramp, afternoon peak
+  const actVals = [8, 7, 6, 5, 6, 11, 22, 31, 34, 35, 34, 32, 30, 31, 34, 37, 36, 33, 26, 20, 16, 14, 12, 9];
+  const displayedActVals = resampleSeries(
+    activeActivityFrame.dataWindow ? actVals.slice(-activeActivityFrame.dataWindow) : actVals,
+    activeActivityFrame.points
+  );
+  const tFleet = getChartTokens();
   const fleetActivityData = {
     labels: buildTimeframeLabels(activeActivityFrame.value, activeActivityFrame.points),
     datasets: [{
       label: 'Active Units',
       data: displayedActVals,
-      backgroundColor: displayedActVals.map(v => v >= 30 ? 'rgba(16,185,129,0.65)' : v >= 22 ? 'rgba(245,158,11,0.65)' : 'rgba(239,68,68,0.65)'),
-      borderColor: displayedActVals.map(v => v >= 30 ? '#10b981' : v >= 22 ? '#f59e0b' : '#ef4444'),
+      backgroundColor: displayedActVals.map(v => v >= 30 ? tFleet.successBar : v >= 22 ? tFleet.warningBar : tFleet.dangerBar),
+      borderColor: displayedActVals.map(v => v >= 30 ? tFleet.success : v >= 22 ? tFleet.warning : tFleet.danger),
       borderWidth: 1.5, borderRadius: 4,
     }],
   };
@@ -341,22 +345,22 @@ export default function FleetManagement() {
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5">
-        <KPICard icon="🚛" label="Total Fleet" value={kTotal}
+        <KPICard icon={<IcoTruck />} label="Total Fleet" value={kTotal}
           desc="All registered CMC waste collection vehicles (compactors, tippers & special)"
           color="text-white" rag="normal" />
-        <KPICard icon="✅" label="Active" value={kActive}
+        <KPICard icon={<IcoCheck />} label="Active" value={kActive}
           desc="Vehicles currently on route, collecting, or returning to depot"
           color="text-emerald-400" rag="normal" trend={6.7} />
-        <KPICard icon="🗺️" label="En Route" value={kEnRoute}
+        <KPICard icon={<IcoRoute />} label="En Route" value={kEnRoute}
           desc="Vehicles traveling to assigned collection zones or transfer stations"
           color="text-emerald-400" rag="normal" />
-        <KPICard icon="🗑️" label="Collecting" value={kCollecting}
+        <KPICard icon={<IcoTrash />} label="Collecting" value={kCollecting}
           desc="Actively servicing bin collection stops along their route"
           color="text-emerald-400" rag="normal" />
-        <KPICard icon="⏸️" label="Idle" value={kIdle}
+        <KPICard icon={<IcoHourglass />} label="Idle" value={kIdle}
           desc="Vehicles at depot awaiting dispatch or assignment"
           color="text-amber-400" rag="warning" />
-        <KPICard icon="🔧" label="Maintenance" value={kMaintenance}
+        <KPICard icon={<IcoWrench />} label="Maintenance" value={kMaintenance}
           desc="Off-road for scheduled servicing, breakdown repair or inspection"
           color="text-amber-400" rag="warning" />
       </div>
@@ -418,11 +422,8 @@ export default function FleetManagement() {
             <div style={{ height: 140 }}>
               <Bar data={fleetActivityData} options={{
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8' } },
-                scales: {
-                  x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
-                  y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } }, min: 0, max: 45 }
-                }
+                plugins: { legend: { display: false }, tooltip: chartTooltip() },
+                scales: chartScales({ x: { grid: { display: false } }, y: { min: 0, max: 45 } }),
               }} />
             </div>
           </div>
