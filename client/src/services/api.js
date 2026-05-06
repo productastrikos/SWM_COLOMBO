@@ -27,7 +27,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('cwm_token');
       localStorage.removeItem('cwm_user');
-      window.location.href = '/login';
+      window.dispatchEvent(new CustomEvent('cwm:unauthorized'));
     }
     return Promise.reject(error);
   }

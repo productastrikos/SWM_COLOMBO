@@ -39,13 +39,7 @@ function App() {
     const userData = localStorage.getItem('cwm_user');
     if (token && userData) {
       try {
-        const parsed = JSON.parse(userData);
-        if (parsed.fullName === 'System Administrator') {
-          parsed.fullName = 'Nipun Bandara';
-          parsed.email = parsed.email === 'admin@cwm.lk' ? 'nipun@cwm.lk' : parsed.email;
-          localStorage.setItem('cwm_user', JSON.stringify(parsed));
-        }
-        setUser(parsed);
+        setUser(JSON.parse(userData));
       } catch (e) { /* ignore */ }
     }
     setLoading(false);
@@ -62,6 +56,12 @@ function App() {
     localStorage.removeItem('cwm_user');
     setUser(null);
   };
+
+  useEffect(() => {
+    const onUnauthorized = () => setUser(null);
+    window.addEventListener('cwm:unauthorized', onUnauthorized);
+    return () => window.removeEventListener('cwm:unauthorized', onUnauthorized);
+  }, []);
 
   const handleThemeToggle = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));

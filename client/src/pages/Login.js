@@ -1,27 +1,6 @@
 import React, { useState } from 'react';
 import { login } from '../services/api';
 
-const demoUsers = {
-  admin: { password: 'Astrikos2026', role: 'admin', fullName: 'Admin', department: 'IT & Operations' },
-};
-
-function getDemoLogin(username, password) {
-  const normalized = username.trim().toLowerCase();
-  const demo = demoUsers[normalized];
-  if (!demo || demo.password !== password) return null;
-  return {
-    token: `static-demo-token-${normalized}`,
-    user: {
-      id: normalized,
-      username: normalized,
-      email: `${normalized}@cwm.lk`,
-      role: demo.role,
-      fullName: demo.fullName,
-      department: demo.department,
-    },
-  };
-}
-
 export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -36,12 +15,7 @@ export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
       const res = await login(username, password);
       onLogin(res.data.user, res.data.token);
     } catch (err) {
-      const demoLogin = getDemoLogin(username, password);
-      if (demoLogin) {
-        onLogin(demoLogin.user, demoLogin.token);
-      } else {
-        setError('Invalid credentials. Use username: admin / password: Astrikos2026');
-      }
+      setError('Invalid username or password.');
     } finally {
       setLoading(false);
     }
