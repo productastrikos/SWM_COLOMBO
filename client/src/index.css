@@ -669,7 +669,7 @@ body[data-theme='dark'] .kpi-card:hover,
 /* Trend badges (KPICard) — borderless in both themes */
 .kpi-trend-badge {
   border: 0 !important;
-  background: var(--cwm-surface-soft);
+  background: transparent;
 }
 
 /* ─── Advisory (purple) UI ───────────────────────────────── */

@@ -105,7 +105,7 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
       <div className="flex items-start justify-between mb-4">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center text-base leading-none flex-shrink-0"
-          style={{ background: r.iconBg, color: r.iconClr }}
+          style={{ color: r.iconClr }}
         >
           {icon || '▣'}
         </div>
@@ -113,7 +113,6 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
           <span
             className="kpi-trend-badge text-[10px] font-semibold px-2 py-1.5 rounded-lg flex flex-col items-center leading-tight"
             style={{
-              background: r.badge.bg,
               color: r.badge.color,
               minWidth: '2.8rem',
               textAlign: 'center',
