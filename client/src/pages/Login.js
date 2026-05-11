@@ -28,68 +28,51 @@ export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
     >
       {/* ── LEFT BRANDING PANEL ────────────────────────────── */}
       <div
-        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
-        style={{ background: 'var(--cwm-bg-elevated)', borderRight: '1px solid var(--cwm-border)' }}
+        className="hidden lg:flex flex-col justify-between w-[340px] shrink-0 p-10 relative overflow-hidden"
+        style={{
+          background: 'var(--cwm-bg-elevated)',
+          borderRight: '1px solid var(--cwm-border)',
+        }}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'var(--cwm-accent)' }}
-          >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-between h-full">
+
+          {/* Spacer to push content below top */}
+          <div />
+
+          {/* Hero text — vertically centred, slightly below middle */}
+          <div className="flex flex-col items-center text-center" style={{ marginTop: '8%' }}>
+            {/* Council emblem */}
+            <img src="/swmlogo.png" alt="Municipal Council of Colombo" className="w-36 h-36 object-contain opacity-95 mb-6" />
+            <h2
+              className="text-3xl font-bold mb-4 leading-tight"
+              style={{ color: 'var(--cwm-text)', letterSpacing: '-0.02em' }}
+            >
+              Colombo Waste Management<br />
+              <span style={{ color: 'var(--cwm-accent)' }}>Command Center</span>
+            </h2>
           </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: 'var(--cwm-text)' }}>CWM Platform</div>
-            <div className="text-xs" style={{ color: 'var(--cwm-text-faint)' }}>Colombo Smart Waste</div>
+
+          {/* Footer */}
+          <div className="text-xs text-center" style={{ color: 'var(--cwm-text-faint)' }}>
+            © 2025 Colombo Municipal Council · Powered by Astrikos
           </div>
-        </div>
 
-        {/* Hero text */}
-        <div>
-          <h2
-            className="text-3xl font-bold mb-4 leading-tight"
-            style={{ color: 'var(--cwm-text)', letterSpacing: '-0.02em' }}
-          >
-            Colombo Waste Management<br />
-            <span style={{ color: 'var(--cwm-accent)' }}>Command Center</span>
-          </h2>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--cwm-text-muted)' }}>
-            Real-time operations monitoring, fleet dispatch, sustainability tracking and AI-powered advisory for Colombo Municipal Council's smart waste ecosystem.
-          </p>
-
-          {/* Feature list */}
-          <ul className="mt-6 space-y-3">
-            {[
-              { icon: '🗺️', text: 'Digital twin with live vehicle tracking' },
-              { icon: '♻️', text: 'Circular economy & ESG dashboard' },
-              { icon: '🤖', text: 'AI advisory and anomaly detection' },
-              { icon: '📊', text: 'Real-time KPIs and operations analytics' },
-            ].map((f) => (
-              <li key={f.text} className="flex items-center gap-3">
-                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
-                  style={{ background: 'var(--cwm-surface-raised)' }}>
-                  {f.icon}
-                </span>
-                <span className="text-xs" style={{ color: 'var(--cwm-text-muted)' }}>{f.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Footer */}
-        <div className="text-xs" style={{ color: 'var(--cwm-text-faint)' }}>
-          © 2025 Colombo Municipal Council · Powered by Astrikos
         </div>
       </div>
 
       {/* ── RIGHT FORM PANEL ───────────────────────────────── */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative overflow-hidden"
+        style={{
+          backgroundImage: 'url(/download.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0" style={{ background: 'rgba(5, 18, 20, 0.82)' }} />
         {/* Theme toggle row */}
-        <div className="flex items-center justify-end p-5">
+        <div className="relative z-10 flex items-center justify-end p-5">
           <button
             onClick={onThemeToggle}
             className="icon-btn"
@@ -111,7 +94,7 @@ export default function Login({ onLogin, theme = 'dark', onThemeToggle }) {
         </div>
 
         {/* Centered form */}
-        <div className="flex-1 flex items-center justify-center px-6">
+        <div className="relative z-10 flex-1 flex items-center justify-center px-6">
           <div className="w-full max-w-[380px]">
 
             {/* Mobile logo (hidden on lg) */}
