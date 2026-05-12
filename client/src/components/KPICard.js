@@ -60,61 +60,54 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
   const hasTrend = trend !== null && trend !== undefined;
   const isPos    = (trend || 0) >= 0;
 
-  // ── Position constants — adjust these to move each element ──────────────
-  const POS_ICON        = { top: '22px',  left: '14px' };
-  const POS_LABEL       = { top: '30px',  left: '0',    right: '0' };      // centered via textAlign
-  const POS_DIVIDER     = { top: '58px',  left: '14px', right: '14px' };
-  const POS_VALUE       = { top: '80px',  left: '0' ,   right: '0', justifyContent: 'center' }; // horizontal centering via flexbox
-  const POS_TREND_BADGE = { top: '128px',  right: '72px' , justifyContent: 'center'};
-  const POS_VS_LABEL    = { top: '130px',  right: '4px' };
-  const POS_INFO_BTN    = { top: '12px',  right: '12px' };
-  // ────────────────────────────────────────────────────────────────────────
-
   return (
     <div
       className="kpi-card"
-      style={{ cursor: 'default', aspectRatio: '5 / 3', position: 'relative' }}
+      style={{
+        cursor: 'default',
+        aspectRatio: '5 / 3',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '10px 12px 8px',
+        overflow: 'hidden',
+      }}
     >
-      {/* ── Info button ─────────────────────────────────────────────────── */}
-      {onClick && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
-          aria-label={`Details for ${label}`}
-          className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center text-[9px] transition-colors"
-          style={{ position: 'absolute', ...POS_INFO_BTN }}
-          title={`Details for ${label}`}
+      {/* ── Top row: icon + label + info button ─────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <div
+          className="rounded-xl flex items-center justify-center text-xl leading-none cwm-kpi-icon"
+          style={{ width: '28px', height: '28px', flexShrink: 0 }}
         >
-          ℹ
-        </button>
-      )}
-
-      {/* ── Icon ────────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-xl flex items-center justify-center text-2xl leading-none cwm-kpi-icon"
-        style={{ position: 'absolute', width: '36px', height: '36px', ...POS_ICON }}
-      >
-        {icon || '▣'}
+          {icon || '▣'}
+        </div>
+        <p
+          className="text-[12px] font-semibold leading-snug flex-1"
+          style={{ color: 'var(--cwm-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
+          {label}
+        </p>
+        {onClick && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
+            aria-label={`Details for ${label}`}
+            className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center text-[9px] transition-colors"
+            style={{ flexShrink: 0 }}
+            title={`Details for ${label}`}
+          >
+            ℹ
+          </button>
+        )}
       </div>
 
-      {/* ── Label ───────────────────────────────────────────────────────── */}
-      <p
-        className="text-[15px] font-semibold leading-snug pointer-events-none"
-        style={{ position: 'absolute', textAlign: 'center', ...POS_LABEL, color: 'var(--cwm-text)' }}
-      >
-        {label}
-      </p>
-
       {/* ── Divider ─────────────────────────────────────────────────────── */}
-      <div
-        style={{ position: 'absolute', height: '1px', background: 'var(--cwm-border)', ...POS_DIVIDER }}
-      />
+      <div style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
 
-      {/* ── Value ───────────────────────────────────────────────────────── */}
-      <div style={{ position: 'absolute', ...POS_VALUE, display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+      {/* ── Value — fills remaining height, centred ─────────────────────── */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: 0 }}>
         <span
-          className="text-[2.2rem] font-normal leading-none tracking-tight"
-          style={{ color: 'var(--cwm-text)' }}
+          className="font-normal leading-none tracking-tight"
+          style={{ color: 'var(--cwm-text)', fontSize: 'clamp(1.2rem, 2.2rem, 2.2rem)' }}
         >
           {value}
         </span>
@@ -123,28 +116,21 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
         )}
       </div>
 
-      {/* ── Trend badge ─────────────────────────────────────────────────── */}
+      {/* ── Trend row ───────────────────────────────────────────────────── */}
       {hasTrend && (
-        <span
-          className="kpi-trend-badge text-[10px] font-semibold px-2 py-1 rounded-md flex items-center leading-tight gap-0.5"
-          style={{
-            position: 'absolute', ...POS_TREND_BADGE,
-            color:      isPos ? '#16a34a' : '#dc2626',
-            background: isPos ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)',
-          }}
-        >
-          <span>{isPos ? '+' : '-'}</span>
-          <span>{Math.abs(trend).toFixed(1)}%</span>
-        </span>
-      )}
-
-      {/* ── "vs yesterday" label ────────────────────────────────────────── */}
-      {hasTrend && (
-        <span
-          style={{ position: 'absolute', ...POS_VS_LABEL, fontSize: '11px', color: 'var(--cwm-text-muted)' }}
-        >
-          vs yesterday
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexShrink: 0, marginTop: '4px' }}>
+          <span
+            className="kpi-trend-badge text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center leading-tight gap-0.5"
+            style={{
+              color:      isPos ? '#16a34a' : '#dc2626',
+              background: isPos ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)',
+            }}
+          >
+            <span>{isPos ? '+' : '-'}</span>
+            <span>{Math.abs(trend).toFixed(1)}%</span>
+          </span>
+          <span style={{ fontSize: '9px', color: 'var(--cwm-text-muted)' }}>vs yesterday</span>
+        </div>
       )}
     </div>
   );
