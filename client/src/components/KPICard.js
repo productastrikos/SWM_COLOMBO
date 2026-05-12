@@ -101,7 +101,7 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
       </div>
 
       {/* ── Divider ─────────────────────────────────────────────────────── */}
-      <div style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
+      <div className="kpi-card-divider" style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
 
       {/* ── Value — fills remaining height, centred ─────────────────────── */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: 0 }}>
