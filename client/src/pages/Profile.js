@@ -58,7 +58,6 @@ export default function Profile({ user }) {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const initials = user?.fullName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
   const role = (user?.role || 'operator').replace(/_/g, ' ');
   const joinDate = 'January 2024';
 

@@ -158,7 +158,7 @@ const PAGE_TITLES = {
 export default function Layout({ children, user, onLogout, theme = 'dark', onThemeToggle }) {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { connected, alerts, advisories } = useData();
+  const { alerts, advisories } = useData();
   const [showAlerts,   setShowAlerts]   = useState(false);
   const [showAdvisory, setShowAdvisory] = useState(false);
   const [showProfile,  setShowProfile]  = useState(false);
@@ -434,7 +434,7 @@ export default function Layout({ children, user, onLogout, theme = 'dark', onThe
                   d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
               </svg>
             ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="-1 -1 26 26">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 1012 21a8.962 8.962 0 008.354-5.646z" />
               </svg>
@@ -525,27 +525,29 @@ export default function Layout({ children, user, onLogout, theme = 'dark', onThe
           </div>
         </header>
 
-        {/* ── CONTENT + PANELS ──────────────────────────────────── */}
-        <div className="flex-1 flex overflow-hidden">
-          <main className={`flex-1 ${location.pathname === '/digital-twin' ? 'overflow-hidden' : 'overflow-auto p-4'}`}>
+        {/* ── CONTENT ──────────────────────────────────────────── */}
+        <div className="flex-1 overflow-hidden">
+          <main className={`h-full ${location.pathname === '/digital-twin' ? 'overflow-hidden' : 'overflow-auto p-4'}`}>
             {children}
           </main>
-
-          {/* Alert panel */}
-          {showAlerts && (
-            <div className="w-80 shrink-0 overflow-hidden animate-slide-up border-l border-cwm-border bg-cwm-darker">
-              <AlertPanel alerts={alerts} onClose={() => setShowAlerts(false)} />
-            </div>
-          )}
-
-          {/* AI Advisory panel */}
-          {showAdvisory && (
-            <div className="cwm-advisory-panel w-96 shrink-0 overflow-hidden animate-slide-up border-l border-cwm-border">
-              <AdvisoryPanel advisories={advisories} onClose={() => setShowAdvisory(false)} />
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Alert panel — rendered outside flex flow, true fixed overlay */}
+      {showAlerts && (
+        <div className="w-80 overflow-hidden animate-slide-up border-l border-cwm-border bg-cwm-darker"
+          style={{ position: 'fixed', top: 'var(--cwm-header-h, 62px)', right: 0, bottom: 0, zIndex: 200 }}>
+          <AlertPanel alerts={alerts} onClose={() => setShowAlerts(false)} />
+        </div>
+      )}
+
+      {/* AI Advisory panel — rendered outside flex flow, true fixed overlay */}
+      {showAdvisory && (
+        <div className="cwm-advisory-panel w-96 overflow-hidden animate-slide-up border-l border-cwm-border"
+          style={{ position: 'fixed', top: 'var(--cwm-header-h, 62px)', right: 0, bottom: 0, zIndex: 200 }}>
+          <AdvisoryPanel advisories={advisories} onClose={() => setShowAdvisory(false)} />
+        </div>
+      )}
     </div>
   );
 }

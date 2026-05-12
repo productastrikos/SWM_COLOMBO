@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
 import KPICard, { IcoCoverage, IcoCheck, IcoAlert, IcoCalendar } from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
 import { getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';

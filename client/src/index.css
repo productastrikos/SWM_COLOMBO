@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,8 +20,8 @@ body[data-theme='dark'] {
   --cwm-surface-raised: #2a2a2a;
 
   /* Borders */
-  --cwm-border:        rgba(255, 255, 255, 0.05);
-  --cwm-border-soft:   rgba(255, 255, 255, 0.03);
+  --cwm-border:        transparent;
+  --cwm-border-soft:   transparent;
 
   /* Typography */
   --cwm-text:          #e8eef5;
@@ -40,10 +40,6 @@ body[data-theme='dark'] {
   --cwm-btn-hover:     #505050;
   --cwm-btn-text:      #ffffff;
 
-  /* KPI card surface — lifted above panel background for contrast */
-  --cwm-kpi-bg:        #202020;
-  --cwm-kpi-border:    #333333;
-
   /* General panel border — visible in dark mode */
   --cwm-panel-border:  transparent;
 
@@ -53,8 +49,7 @@ body[data-theme='dark'] {
   /* Advisory accent (purple) */
   --cwm-advisory:        #8b5cf6;
   --cwm-advisory-strong: #7c3aed;
-  --cwm-advisory-bg:     rgba(139, 92, 246, 0.18);
-  --cwm-advisory-panel:  #2a1f4a;
+  --cwm-advisory-panel:  rgba(59, 31, 140, 0.90);
   --cwm-advisory-border: rgba(139, 92, 246, 0.45);
 
   /* Status */
@@ -124,8 +119,8 @@ body[data-theme='light'] {
   --cwm-surface-soft:  #f7f9fc;
   --cwm-surface-raised: #edf1f8;
 
-  --cwm-border:        rgba(0, 0, 0, 0.07);
-  --cwm-border-soft:   rgba(0, 0, 0, 0.04);
+  --cwm-border:        rgba(0, 0, 0, 0.12);
+  --cwm-border-soft:   rgba(0, 0, 0, 0.07);
 
   --cwm-text:          #0a1628;
   --cwm-text-muted:    #1a3150;
@@ -142,12 +137,8 @@ body[data-theme='light'] {
   --cwm-btn-hover:     #2d6ad4;
   --cwm-btn-text:      #ffffff;
 
-  /* KPI card surface — same as panel surface for visual unity */
-  --cwm-kpi-bg:        var(--cwm-panel);
-  --cwm-kpi-border:    var(--cwm-border);
-
   /* General panel border — visible in light mode */
-  --cwm-panel-border:  transparent;
+  --cwm-panel-border:  rgba(0, 0, 0, 0.10);
 
   /* Logo image: no filter needed, silver logo is visible on light sidebar */
   --cwm-logo-filter: none;
@@ -155,9 +146,8 @@ body[data-theme='light'] {
   /* Advisory accent (purple) */
   --cwm-advisory:        #7c3aed;
   --cwm-advisory-strong: #6d28d9;
-  --cwm-advisory-bg:     rgba(124, 58, 237, 0.10);
-  --cwm-advisory-panel:  #f5f0ff;
-  --cwm-advisory-border: rgba(124, 58, 237, 0.30);
+  --cwm-advisory-panel:  rgba(74, 34, 168, 0.90);
+  --cwm-advisory-border: rgba(124, 58, 237, 0.80);
 
   --cwm-success:       #15803d;
   --cwm-success-bg:    rgba(21, 128, 61, 0.11);
@@ -211,7 +201,7 @@ body[data-theme='light'] {
 
 /* ─── Base ───────────────────────────────────────────────── */
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   line-height: 1.5;
   background: var(--cwm-bg);
@@ -296,7 +286,7 @@ body[data-theme='light'] .bg-black\/75              { background-color: rgba(20,
   background: var(--cwm-surface);
   border: none;
   border-radius: 16px;
-  padding: 20px;
+  padding: 17px 14px;
   box-shadow: none;
   transition: transform 0.2s ease;
   position: relative;
@@ -320,6 +310,16 @@ body[data-theme='light'] .bg-black\/75              { background-color: rgba(20,
   background: var(--cwm-surface);
   border: 1px solid var(--cwm-panel-border);
   box-shadow: none;
+}
+
+/* Light-theme: add subtle border to KPI cards */
+body[data-theme='light'] .kpi-card {
+  border: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+/* Dark-theme: make the name-label divider visible */
+body[data-theme='dark'] .kpi-card-divider {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Light-theme: darken the Tailwind 400-level colour classes used for KPI values */
@@ -346,21 +346,21 @@ body[data-theme='dark'] .recharts-line .recharts-line-curve { stroke: #5b8de0; }
 
 /* ─── Sidebar nav ────────────────────────────────────────── */
 .nav-section-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--cwm-text-faint);
-  padding: 14px 14px 4px;
+  padding: 18px 14px 6px;
   user-select: none;
 }
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
+  gap: 12px;
+  padding: 10px 14px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--cwm-text-muted);
   cursor: pointer;
@@ -660,11 +660,10 @@ body[data-theme='light'] .cwm-kpi-icon { color: #3b7de8 !important; }
 /* Trend badges (KPICard) — borderless in both themes */
 .kpi-trend-badge {
   border: 0 !important;
-  background: transparent;
   border-radius: 6px;
 }
-body[data-theme='light'] .kpi-trend-badge {
-  filter: saturate(1.4) brightness(0.75);
+.kpi-info-btn:hover {
+  opacity: 1 !important;
 }
 
 /* ─── Advisory (purple) UI ───────────────────────────────── */
@@ -700,8 +699,14 @@ body[data-theme='light'] .kpi-trend-badge {
 .cwm-advisory-panel {
   background: var(--cwm-advisory-panel) !important;
   border-left-color: var(--cwm-advisory-border) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #ffffff;
 }
-body[data-theme='light'] .cwm-advisory-panel { color: var(--cwm-text); }
+/* Both themes use a dark purple bg — force all text to white */
+.cwm-advisory-panel * { color: rgba(255,255,255,0.90) !important; }
+body[data-theme='light'] .cwm-advisory-panel *,
+body[data-theme='light'] .cwm-advisory-panel .text-white { color: rgba(255,255,255,0.90) !important; }
 
 /* ─── Info / detail modal backdrops (transparent click-catcher) ─ */
 .cwm-modal-backdrop {

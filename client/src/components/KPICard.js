@@ -3,7 +3,7 @@ import React from 'react';
 /* ─── SVG Icon library (line-art, 24×24 viewBox) ──────── */
 const Ico = ({ children }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}
-    strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+    strokeLinecap="round" strokeLinejoin="round" className="w-[28px] h-[24px]">
     {children}
   </svg>
 );
@@ -36,34 +36,6 @@ export const IcoThermometer= () => <Ico><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v
 export const IcoWind       = () => <Ico><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></Ico>;
 export const IcoTrendDown  = () => <Ico><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></Ico>;
 
-/* ─── RAG colour maps (CSS-variable aware) ─────────────── */
-const RAG = {
-  normal: {
-    iconBg:   'var(--cwm-success-bg)',
-    iconClr:  'var(--cwm-success)',
-    dot:      'var(--cwm-success)',
-    badge:    { bg: 'var(--cwm-success-bg)', color: 'var(--cwm-success)', border: 'var(--cwm-success-border)' },
-    label:    'NORMAL',
-    accent:   'var(--cwm-success)',
-  },
-  warning: {
-    iconBg:   'var(--cwm-warning-bg)',
-    iconClr:  'var(--cwm-warning)',
-    dot:      'var(--cwm-warning)',
-    badge:    { bg: 'var(--cwm-warning-bg)', color: 'var(--cwm-warning)', border: 'var(--cwm-warning-border)' },
-    label:    'WARNING',
-    accent:   'var(--cwm-warning)',
-  },
-  critical: {
-    iconBg:   'var(--cwm-danger-bg)',
-    iconClr:  'var(--cwm-danger)',
-    dot:      'var(--cwm-danger)',
-    badge:    { bg: 'var(--cwm-danger-bg)', color: 'var(--cwm-danger)', border: 'var(--cwm-danger-border)' },
-    label:    'CRITICAL',
-    accent:   'var(--cwm-danger)',
-  },
-};
-
 export function deriveRag(color) {
   if (!color) return 'normal';
   if (color.includes('red'))                                                        return 'critical';
@@ -85,67 +57,93 @@ export function deriveRag(color) {
  *   onClick — makes card clickable
  */
 export default function KPICard({ label, value, unit, icon, color, rag: ragProp, trend, onClick }) {
-  const ragKey = ragProp || deriveRag(color);
-  const r      = RAG[ragKey] || RAG.normal;
   const hasTrend = trend !== null && trend !== undefined;
   const isPos    = (trend || 0) >= 0;
 
-  /* Value always uses the CSS-var accent so it matches the badge colour */
+  // ── Position constants — adjust these to move each element ──────────────
+  const POS_ICON        = { top: '22px',  left: '14px' };
+  const POS_LABEL       = { top: '30px',  left: '0',    right: '0' };      // centered via textAlign
+  const POS_DIVIDER     = { top: '58px',  left: '14px', right: '14px' };
+  const POS_VALUE       = { top: '80px',  left: '0' ,   right: '0', justifyContent: 'center' }; // horizontal centering via flexbox
+  const POS_TREND_BADGE = { top: '128px',  right: '72px' , justifyContent: 'center'};
+  const POS_VS_LABEL    = { top: '130px',  right: '4px' };
+  const POS_INFO_BTN    = { top: '12px',  right: '12px' };
+  // ────────────────────────────────────────────────────────────────────────
 
   return (
     <div
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
       className="kpi-card"
-      style={{ cursor: onClick ? 'pointer' : 'default', aspectRatio: '1 / 1' }}
+      style={{ cursor: 'default', aspectRatio: '5 / 3', position: 'relative' }}
     >
-      {/* Icon + Label — top row */}
-      <div className="flex items-center gap-2.5">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl leading-none flex-shrink-0 cwm-kpi-icon"
-          style={{  }}
+      {/* ── Info button ─────────────────────────────────────────────────── */}
+      {onClick && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
+          aria-label={`Details for ${label}`}
+          className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center text-[9px] transition-colors"
+          style={{ position: 'absolute', ...POS_INFO_BTN }}
+          title={`Details for ${label}`}
         >
-          {icon || '▣'}
-        </div>
-        <p className="text-[18px] font-semibold leading-snug" style={{ color: 'var(--cwm-text)' }}>
-          {label}
-        </p>
+          ℹ
+        </button>
+      )}
+
+      {/* ── Icon ────────────────────────────────────────────────────────── */}
+      <div
+        className="rounded-xl flex items-center justify-center text-2xl leading-none cwm-kpi-icon"
+        style={{ position: 'absolute', width: '36px', height: '36px', ...POS_ICON }}
+      >
+        {icon || '▣'}
       </div>
 
-      {/* Divider */}
-      <div style={{ height: '1px', background: 'var(--cwm-border)', margin: '10px 0 0' }} />
+      {/* ── Label ───────────────────────────────────────────────────────── */}
+      <p
+        className="text-[15px] font-semibold leading-snug pointer-events-none"
+        style={{ position: 'absolute', textAlign: 'center', ...POS_LABEL, color: 'var(--cwm-text)' }}
+      >
+        {label}
+      </p>
 
-      {/* Value — centred in remaining space */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="leading-none">
-          <span
-            className="text-[2.6rem] font-bold leading-none tracking-tight"
-            style={{ color: 'var(--cwm-text)' }}
-          >
-            {value}
-          </span>
-          {unit && (
-            <span className="text-sm font-medium ml-1" style={{ color: 'var(--cwm-text-faint)' }}>{unit}</span>
-          )}
-        </div>
+      {/* ── Divider ─────────────────────────────────────────────────────── */}
+      <div
+        style={{ position: 'absolute', height: '1px', background: 'var(--cwm-border)', ...POS_DIVIDER }}
+      />
+
+      {/* ── Value ───────────────────────────────────────────────────────── */}
+      <div style={{ position: 'absolute', ...POS_VALUE, display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+        <span
+          className="text-[2.2rem] font-normal leading-none tracking-tight"
+          style={{ color: 'var(--cwm-text)' }}
+        >
+          {value}
+        </span>
+        {unit && (
+          <span className="text-sm font-medium" style={{ color: 'var(--cwm-text-faint)' }}>{unit}</span>
+        )}
       </div>
 
-      {/* Trend badge — bottom right */}
+      {/* ── Trend badge ─────────────────────────────────────────────────── */}
       {hasTrend && (
         <span
-          className="kpi-trend-badge text-[12px] font-semibold px-2.5 py-1.5 rounded-lg flex items-center leading-tight gap-0.5"
+          className="kpi-trend-badge text-[10px] font-semibold px-2 py-1 rounded-md flex items-center leading-tight gap-0.5"
           style={{
-            color: r.badge.color,
-            background: r.badge.bg,
-            position: 'absolute',
-            bottom: '12px',
-            right: '12px',
+            position: 'absolute', ...POS_TREND_BADGE,
+            color:      isPos ? '#16a34a' : '#dc2626',
+            background: isPos ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)',
           }}
         >
           <span>{isPos ? '+' : '-'}</span>
           <span>{Math.abs(trend).toFixed(1)}%</span>
+        </span>
+      )}
+
+      {/* ── "vs yesterday" label ────────────────────────────────────────── */}
+      {hasTrend && (
+        <span
+          style={{ position: 'absolute', ...POS_VS_LABEL, fontSize: '11px', color: 'var(--cwm-text-muted)' }}
+        >
+          vs yesterday
         </span>
       )}
     </div>

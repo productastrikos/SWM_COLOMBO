@@ -787,7 +787,7 @@ function CCTVVideo({ src, cameraId, camStatus }) {
         </div>
       )}
       {/* HUD overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{ fontFamily: 'Roboto', fontSize: 9 }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ fontFamily: 'Figtree', fontSize: 9 }}>
         {/* top-left: camera ID + time */}
         <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
           <span style={{ color: isOffline ? '#ef4444' : '#00c850', textShadow: '0 0 4px #000' }}>{cameraId}</span>
@@ -2596,7 +2596,7 @@ export default function DigitalTwin({ isPreview = false }) {
                   pathOptions={{ color: wClr, fillColor: wClr, fillOpacity: selectedRef?.type === 'ward' && selectedRef.id === w.id ? 0.22 : 0.10, weight: selectedRef?.type === 'ward' && selectedRef.id === w.id ? 3 : 1.5, opacity: selectedRef?.type === 'ward' && selectedRef.id === w.id ? 0.95 : 0.75 }}
                   eventHandlers={{ click: () => selectWard(w.id, { focus: false }) }} />
                 <Marker position={[w.cLat, w.cLng]} icon={L.divIcon({
-                  html: '<div style="background:' + wClr + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '38' : '22') + ';border:' + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '1.5px solid #ffffff' : '1px solid ' + wClr + '66') + ';border-radius:4px;padding:2px 5px;color:' + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '#ffffff' : wClr) + ';font-size:8px;font-weight:700;font-family:Roboto;white-space:nowrap;pointer-events:none;">' + w.name + '</div>',
+                  html: '<div style="background:' + wClr + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '38' : '22') + ';border:' + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '1.5px solid #ffffff' : '1px solid ' + wClr + '66') + ';border-radius:4px;padding:2px 5px;color:' + (selectedRef?.type === 'ward' && selectedRef.id === w.id ? '#ffffff' : wClr) + ';font-size:8px;font-weight:700;font-family:Figtree;white-space:nowrap;pointer-events:none;">' + w.name + '</div>',
                   className: '', iconSize: null, iconAnchor: [0, 0],
                 })} eventHandlers={{ click: () => selectWard(w.id, { focus: false }) }} />
               </React.Fragment>
@@ -2617,7 +2617,7 @@ export default function DigitalTwin({ isPreview = false }) {
                     pathOptions={{ color: zClr, fillColor: zClr, fillOpacity: isSelected ? 0.12 : 0.05, weight: isSelected ? 2.5 : 1, dashArray: isSelected ? undefined : '5 4', opacity: isSelected ? 1 : 0.6 }}
                     eventHandlers={{ click: () => selectZone(z.id) }} />
                   <Marker position={[cLat, cLng]} icon={L.divIcon({
-                    html: '<div style="background:' + zClr + (isSelected ? '30' : '18') + ';border:' + (isSelected ? '1.5px solid ' + zClr : '1px solid ' + zClr + '55') + ';border-radius:4px;padding:2px 6px;color:' + zClr + ';font-size:8px;font-weight:700;font-family:Roboto;white-space:nowrap;cursor:pointer;">' + z.name + (isSelected ? '' : ' ▲') + '</div>',
+                    html: '<div style="background:' + zClr + (isSelected ? '30' : '18') + ';border:' + (isSelected ? '1.5px solid ' + zClr : '1px solid ' + zClr + '55') + ';border-radius:4px;padding:2px 6px;color:' + zClr + ';font-size:8px;font-weight:700;font-family:Figtree;white-space:nowrap;cursor:pointer;">' + z.name + (isSelected ? '' : ' ▲') + '</div>',
                     className: '', iconSize: null, iconAnchor: [0, 0],
                   })} eventHandlers={{ click: () => selectZone(z.id) }} />
                 </React.Fragment>
@@ -2646,7 +2646,7 @@ export default function DigitalTwin({ isPreview = false }) {
             {layers.bins && bins.filter(b => !selectedZoneId || b.zone === selectedZoneId).map(b => (
               <Marker key={b.id} position={[b.lat, b.lng]} icon={mkBinIcon(b, selectedRef?.id === b.id)}
                 eventHandlers={{ click: () => selectRef('bin', b.id) }}>
-                <Popup className="dt-popup"><div style={{fontFamily:'Roboto',fontSize:11}}><b>{b.id}</b> · {b.fill.toFixed(0)}% filled<br />{b.ward} · {b.zone} · <b style={{color:BIN_TYPE_STROKE[b.type]}}>{b.type}</b> · {b.cap}L</div></Popup>
+                <Popup className="dt-popup"><div style={{fontFamily:'Figtree',fontSize:11}}><b>{b.id}</b> · {b.fill.toFixed(0)}% filled<br />{b.ward} · {b.zone} · <b style={{color:BIN_TYPE_STROKE[b.type]}}>{b.type}</b> · {b.cap}L</div></Popup>
               </Marker>
             ))}
 
@@ -2654,7 +2654,7 @@ export default function DigitalTwin({ isPreview = false }) {
             {layers.weighbridges && weighbridges.filter(bridge => !selectedZoneId || inZoneByLat(bridge.lat, selectedZoneId)).map(bridge => (
               <Marker key={bridge.id} position={[bridge.lat, bridge.lng]} icon={mkWeighIcon(bridge, selectedRef?.id === bridge.id)}
                 eventHandlers={{ click: () => selectRef('weighbridge', bridge.id) }}>
-                <Popup className="dt-popup"><div style={{fontFamily:'Roboto',fontSize:11}}><b>{bridge.name}</b><br />{bridge.status.toUpperCase()} · queue {bridge.queue}<br />Last {bridge.lastVehicle} · {bridge.lastWeight} t</div></Popup>
+                <Popup className="dt-popup"><div style={{fontFamily:'Figtree',fontSize:11}}><b>{bridge.name}</b><br />{bridge.status.toUpperCase()} · queue {bridge.queue}<br />Last {bridge.lastVehicle} · {bridge.lastWeight} t</div></Popup>
               </Marker>
             ))}
 
@@ -2693,7 +2693,7 @@ export default function DigitalTwin({ isPreview = false }) {
                     pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.22, weight: 2, opacity: 0.9 }} />
                   {/* Label badge at alert */}
                   <Marker position={[ri.alertLat, ri.alertLng]} icon={L.divIcon({
-                    html: '<div style="background:#ef444415;border:1px solid #ef444455;border-radius:6px;padding:2px 7px;color:#ef4444;font-size:8px;font-weight:700;font-family:Roboto;white-space:nowrap;pointer-events:none;">' + v.id + ' → ' + ri.alertId + ' (' + (ri.phase === 'heading' ? 'En Route' : 'Arrived') + ')</div>',
+                    html: '<div style="background:#ef444415;border:1px solid #ef444455;border-radius:6px;padding:2px 7px;color:#ef4444;font-size:8px;font-weight:700;font-family:Figtree;white-space:nowrap;pointer-events:none;">' + v.id + ' → ' + ri.alertId + ' (' + (ri.phase === 'heading' ? 'En Route' : 'Arrived') + ')</div>',
                     className: '', iconSize: [0, 0], iconAnchor: [-2, 32],
                   })} />
                 </React.Fragment>
@@ -2716,7 +2716,7 @@ export default function DigitalTwin({ isPreview = false }) {
               return (
                 <Marker key={v.id} position={pos} icon={mkVehIcon(v, selectedRef?.id === v.id)}
                   eventHandlers={{ click: () => selectRef('vehicle', v.id) }}>
-                  <Popup className="dt-popup"><div style={{fontFamily:'Roboto',fontSize:11}}><b>{v.id}</b> · {v.type}<br />{typeof v.driver === 'object' ? v.driver?.name : v.driver} · {v.status.replace(/_/g,' ')}</div></Popup>
+                  <Popup className="dt-popup"><div style={{fontFamily:'Figtree',fontSize:11}}><b>{v.id}</b> · {v.type}<br />{typeof v.driver === 'object' ? v.driver?.name : v.driver} · {v.status.replace(/_/g,' ')}</div></Popup>
                 </Marker>
               );
             })}
@@ -2725,7 +2725,7 @@ export default function DigitalTwin({ isPreview = false }) {
             {layers.staff && staff.filter(s => !selectedZoneId || s.zone === selectedZoneId).map(s => (
               <Marker key={s.id} position={[s.lat, s.lng]} icon={mkStfIcon(s)}
                 eventHandlers={{ click: () => selectRef('staff', s.id) }}>
-                <Popup className="dt-popup"><div style={{fontFamily:'Roboto',fontSize:11}}><b>{s.name}</b><br />{s.type} · {s.zone}</div></Popup>
+                <Popup className="dt-popup"><div style={{fontFamily:'Figtree',fontSize:11}}><b>{s.name}</b><br />{s.type} · {s.zone}</div></Popup>
               </Marker>
             ))}
 
@@ -2733,7 +2733,7 @@ export default function DigitalTwin({ isPreview = false }) {
             {layers.complaints && complaints.filter(c => c.status !== 'resolved' && (!selectedZoneId || WARD_ZONE_MAP[c.wardId] === selectedZoneId)).map(c => (
               <Marker key={c.id} position={[c.lat, c.lng]} icon={mkCmpIcon(c)}
                 eventHandlers={{ click: () => selectRef('complaint', c.id) }}>
-                <Popup className="dt-popup"><div style={{fontFamily:'Roboto',fontSize:11}}><b>{c.id}</b><br />{c.type.replace(/_/g,' ')} · {c.priority}</div></Popup>
+                <Popup className="dt-popup"><div style={{fontFamily:'Figtree',fontSize:11}}><b>{c.id}</b><br />{c.type.replace(/_/g,' ')} · {c.priority}</div></Popup>
               </Marker>
             ))}
 
@@ -2752,7 +2752,7 @@ export default function DigitalTwin({ isPreview = false }) {
                   dblclick: (e) => { L.DomEvent.stopPropagation(e); if (f.type === 'wte') { setWteData(f); setWteOpen(true); } },
                 }}>
                 <Popup className="dt-popup">
-                  <div style={{fontFamily:'Roboto',fontSize:11}}>
+                  <div style={{fontFamily:'Figtree',fontSize:11}}>
                     <b>{f.name}</b><br />{f.type} · {f.capPct}% capacity
                     {f.type === 'wte' && <><br /><span style={{color:'#f59e0b',fontStyle:'italic'}}>Double-click → 3D Sub-Twin</span></>}
                   </div>
@@ -2776,7 +2776,7 @@ export default function DigitalTwin({ isPreview = false }) {
               <Marker key={c.id} position={[c.lat, c.lng]} icon={mkCamIcon(c)}
                 eventHandlers={{ click: () => selectRef('camera', c.id) }}>
                 <Popup className="dt-popup">
-                  <div style={{fontFamily:'Roboto',fontSize:11}}>
+                  <div style={{fontFamily:'Figtree',fontSize:11}}>
                     <b>{c.name}</b><br />
                     <span style={{color: c.status==='alert'?'#ef4444':c.status==='offline'?'#6b7280':'#10b981'}}>{c.status.toUpperCase()}</span>
                     {' · '}{c.detect}

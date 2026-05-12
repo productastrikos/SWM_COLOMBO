@@ -49,8 +49,8 @@ export function chartTooltip(extra = {}) {
 export function chartScales(overrides = {}) {
   const t = getChartTokens();
   return {
-    x: { grid: { color: t.gridColor }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.x || {}) },
-    y: { grid: { color: t.gridColor }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.y || {}) },
+    x: { grid: { display: false }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.x || {}) },
+    y: { grid: { display: false }, ticks: { color: t.tickColor, font: { size: 9 } }, ...(overrides.y || {}) },
   };
 }
 
@@ -58,13 +58,13 @@ export function chartScales(overrides = {}) {
 function buildPalettes() {
   const t = getChartTokens();
   return {
-    categorical: [t.accent, t.violet, t.success, t.warning, t.danger, t.info, t.accent, t.violet],
+    categorical: [t.accent, t.violet, t.info, '#14b8a6', '#e879f9', '#ec4899', '#6366f1', '#a78bfa'],
     area: {
-      cyan:   { border: '#3b7de8',                  fill: 'rgba(59, 125, 232, 0.15)' },
-      blue:   { border: '#3b7de8',                  fill: 'rgba(59, 125, 232, 0.15)' },
-      violet: { border: 'rgba(255, 255, 255, 0.85)', fill: 'rgba(255, 255, 255, 0.06)' },
-      pink:   { border: t.danger,                    fill: getCSSVar('--cwm-danger-bg')  },
-      slate:  { border: t.tickMuted,                 fill: getCSSVar('--cwm-surface-soft') },
+      cyan:   { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
+      blue:   { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
+      violet: { border: '#8b5cf6',  fill: 'rgba(139, 92, 246, 0.12)' },
+      pink:   { border: '#ec4899',  fill: 'rgba(236, 72, 153, 0.10)' },
+      slate:  { border: t.tickMuted, fill: getCSSVar('--cwm-surface-soft') },
     },
   };
 }

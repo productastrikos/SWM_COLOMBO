@@ -214,7 +214,7 @@ function DigitalTwinPreview() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden flex flex-col" style={{ height: 400 }}>
+    <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden flex flex-col" style={{ height: 460 }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-cwm-border shrink-0">
         <div className="flex items-center space-x-3">
@@ -477,8 +477,8 @@ export default function Dashboard() {
       datasets: [{
         label: 'Collection Rate %',
         data: (k.historicalCollection || COLLECTION_PROFILE).map(v => Math.min(100, Math.round(v * scale))),
-        borderColor: getCSSVar('--cwm-info'),
-        backgroundColor: getCSSVar('--cwm-accent-bg'),
+        borderColor: CHART_PALETTES.area.blue.border,
+        backgroundColor: CHART_PALETTES.area.blue.fill,
         fill: true,
         tension: 0.4,
         pointRadius: 0,
@@ -491,7 +491,7 @@ export default function Dashboard() {
     labels: ['Organic', 'Plastic', 'Paper', 'Glass', 'Metal', 'Hazardous', 'Other'],
     datasets: [{
       data: k.composition || [62, 12, 9, 6, 3, 2, 6],
-      backgroundColor: CHART_PALETTES.categorical.slice(0, 7),
+      backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#06b6d4', '#e879f9', '#6366f1', '#a78bfa'],
       borderWidth: 0,
     }]
   }), [k.composition, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -503,7 +503,7 @@ export default function Dashboard() {
       datasets: [{
         label: 'Fill Level %',
         data: zones.map(z => z.avgFillLevel),
-        backgroundColor: (() => { const t = getChartTokens(); return zones.map(z => z.avgFillLevel > 75 ? t.dangerBar : z.avgFillLevel > 60 ? t.warningBar : t.accentBg); })(),
+        backgroundColor: (() => { const t = getChartTokens(); return zones.map(z => z.avgFillLevel > 75 ? t.dangerBar : z.avgFillLevel > 60 ? t.warningBar : t.successBar); })(),
         borderRadius: 4,
       }]
     };

@@ -339,8 +339,8 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
                 {kpi.value}
                 {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
               </p>
-              <p className={`text-[9px] mt-1.5 font-medium ${(kpi.trend || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {(kpi.trend || 0) >= 0 ? '▲' : '▼'} {Math.abs(kpi.trend || 0).toFixed(1)}% vs yesterday
+              <p className={`text-[9px] mt-1.5 font-medium ${ (kpi.trend || 0) >= 0 ? 'text-green-600' : 'text-red-600' }`}>
+                {(kpi.trend || 0) >= 0 ? '+' : '-'}{Math.abs(kpi.trend || 0).toFixed(1)}% vs yesterday
               </p>
             </div>
 

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { executeAdvisoryAction } from '../services/api';
 
 const PRIORITY_META = {
-  critical:    { border:'border-red-500/40',      bg:'bg-red-500/5',      badge:'bg-red-500/18 text-red-400',         dot:'bg-red-500',      label:'CRITICAL',    icon:'🔴' },
-  high:        { border:'border-orange-500/40',  bg:'bg-orange-500/5',   badge:'bg-orange-500/18 text-orange-400',   dot:'bg-orange-500',   label:'HIGH',        icon:'🟠' },
-  medium:      { border:'border-yellow-500/35',  bg:'bg-yellow-500/5',   badge:'bg-yellow-500/18 text-yellow-400',   dot:'bg-yellow-500',   label:'MEDIUM',      icon:'🟡' },
-  info:        { border:'border-blue-500/30',    bg:'bg-blue-500/4',     badge:'bg-blue-500/15 text-blue-400',       dot:'bg-blue-400',     label:'INFO',        icon:'🔵' },
-  low:         { border:'border-blue-500/30',    bg:'bg-blue-500/4',     badge:'bg-blue-500/15 text-blue-400',       dot:'bg-blue-400',     label:'LOW',         icon:'🔵' },
-  predictive:  { border:'border-purple-500/50',  bg:'bg-purple-500/6',   badge:'bg-purple-500/20 text-purple-300',   dot:'bg-purple-400',   label:'PREDICTIVE',  icon:'🔮' },
+  critical:    { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'CRITICAL' },
+  high:        { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'HIGH' },
+  medium:      { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'MEDIUM' },
+  info:        { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'INFO' },
+  low:         { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'LOW' },
+  predictive:  { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'PREDICTIVE' },
 };
 
 // Safely render an evidence item — never shows raw JSON
@@ -283,10 +283,10 @@ const ACTION_FORMS = {
 };
 
 const COLOR_MAP = {
-  cyan:   { ring:'focus:ring-cyan-500/50',    btn:'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25'       },
-  emerald:{ ring:'focus:ring-emerald-500/50', btn:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25' },
-  amber:  { ring:'focus:ring-amber-500/50',   btn:'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25'   },
-  purple: { ring:'focus:ring-purple-500/50',  btn:'bg-purple-500/15 border-purple-500/30 text-purple-400 hover:bg-purple-500/25' },
+  cyan:   { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
+  emerald:{ ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
+  amber:  { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
+  purple: { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
 };
 
 export default function AdvisoryPanel({ advisories = [], onClose }) {
@@ -340,10 +340,8 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
       {/* HEADER */}
       <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between shrink-0">
         <div>
-          <h3 className="text-sm font-semibold text-purple-300 flex items-center space-x-2">
-            <span>🧠</span><span>AI Advisories</span>
-          </h3>
-          <p className="text-[10px] text-slate-400">{merged.length} active recommendations</p>
+          <h3 className="text-base font-semibold text-white">AI Advisories</h3>
+          <p className="text-xs text-white/60">{merged.length} active recommendations</p>
         </div>
         <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,10 +432,8 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                 {/* Top row: index badge + priority dot + advisory ID + chevron */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-[8px] font-black text-slate-400 bg-white/5 rounded px-1.5 py-0.5 tabular-nums">#{String(idx+1).padStart(2,'0')}</span>
-                    <span className={'w-1.5 h-1.5 rounded-full shrink-0 ' + pm.dot} />
-                    <span className={'text-[8px] font-bold rounded px-1.5 py-0.5 ' + pm.badge}>{pm.icon} {pm.label}</span>
-                    <span className="text-[8px] text-slate-400">{titleCase(advisory.template)}</span>
+                    <span className={'text-[10px] ' + pm.badge}>{pm.label}</span>
+                    <span className="text-[10px] text-slate-400">{titleCase(advisory.template)}</span>
                   </div>
                   <svg className={'w-3.5 h-3.5 text-slate-400 transition-transform group-hover:text-slate-200 ' + (isExpanded ? 'rotate-180' : '')}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,26 +442,9 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                 </div>
 
                 {/* Advisory title */}
-                <p className="text-[11px] font-semibold text-white leading-snug pr-1">{advisory.title}</p>
+                <p className="text-[13px] font-semibold text-white leading-snug pr-1">{advisory.title}</p>
 
-                {/* Quick-glance impact chips (compact, always visible) */}
-                {impactEntries.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {impactEntries.map(([k, v]) => {
-                      const str    = fmtImpact(v);
-                      const isPos  = str.startsWith('+');
-                      const isNeg  = str.startsWith('-');
-                      return (
-                        <span key={k} className={'text-[8px] rounded-full px-2 py-0.5 font-semibold border ' +
-                          (isPos ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                           isNeg ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                   'bg-white/5 border-white/10 text-slate-400')}>
-                          {titleCase(k)}: {str}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
+
               </button>
 
               {/* ── Expanded body ── */}
@@ -475,28 +454,26 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* ROOT CAUSE */}
                   {advisory.rootCause && (
                     <div className="px-3.5 py-3">
-                      <p className="flex items-center space-x-1.5 text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        <span>🔍</span><span>Root Cause</span>
-                      </p>
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Root Cause</p>
                       <div className="pl-2 border-l-2 border-amber-500/30 space-y-1.5">
                         {typeof advisory.rootCause === 'object' ? (
                           <>
                             {advisory.rootCause.primary      && (
                               <div>
-                                <span className="text-[7px] font-bold text-amber-500/70 uppercase tracking-wider">Primary · </span>
-                                <span className="text-[10px] text-slate-200">{advisory.rootCause.primary}</span>
+                                <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Primary · </span>
+                                <span className="text-xs text-white">{advisory.rootCause.primary}</span>
                               </div>
                             )}
                             {advisory.rootCause.contributing && (
                               <div>
-                                <span className="text-[7px] font-bold text-slate-300 uppercase tracking-wider">Contributing · </span>
-                                <span className="text-[10px] text-slate-400">{advisory.rootCause.contributing}</span>
+                                <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Contributing · </span>
+                                <span className="text-xs text-white">{advisory.rootCause.contributing}</span>
                               </div>
                             )}
                             {advisory.rootCause.systemic     && (
                               <div>
-                                <span className="text-[7px] font-bold text-slate-300 uppercase tracking-wider">Systemic · </span>
-                                <span className="text-[10px] text-slate-300">{advisory.rootCause.systemic}</span>
+                                <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Systemic · </span>
+                                <span className="text-xs text-white">{advisory.rootCause.systemic}</span>
                               </div>
                             )}
                             {/* Catch any extra keys not handled above */}
@@ -504,8 +481,8 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                               .filter(k => !['primary','contributing','systemic'].includes(k))
                               .map(k => (
                                 <div key={k}>
-                                  <span className="text-[7px] font-bold text-slate-300 uppercase tracking-wider">{titleCase(k)} · </span>
-                                  <span className="text-[10px] text-slate-400">
+                                  <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">{titleCase(k)} · </span>
+                                  <span className="text-xs text-white">
                                     {typeof advisory.rootCause[k] === 'object'
                                       ? Object.values(advisory.rootCause[k]).join(', ')
                                       : String(advisory.rootCause[k])}
@@ -514,7 +491,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                               ))}
                           </>
                         ) : (
-                          <p className="text-[10px] text-slate-300">{String(advisory.rootCause)}</p>
+                          <p className="text-xs text-white">{String(advisory.rootCause)}</p>
                         )}
                       </div>
                     </div>
@@ -523,14 +500,12 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* EVIDENCE */}
                   {advisory.evidence?.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="flex items-center space-x-1.5 text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        <span>📊</span><span>Evidence</span>
-                      </p>
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Evidence</p>
                       <div className="space-y-1">
                         {advisory.evidence.slice(0, 5).map((e, i) => (
                           <div key={i} className="flex items-start space-x-2">
-                            <span className="text-[8px] text-slate-400 mt-0.5 shrink-0 tabular-nums">{i + 1}.</span>
-                            <p className="text-[10px] text-slate-400 leading-snug">{toEvidenceStr(e)}</p>
+                            <span className="text-[10px] text-white/50 mt-0.5 shrink-0 tabular-nums">{i + 1}.</span>
+                            <p className="text-xs text-white leading-snug">{toEvidenceStr(e)}</p>
                           </div>
                         ))}
                       </div>
@@ -540,13 +515,11 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* RECOMMENDATIONS */}
                   {recs.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="flex items-center space-x-1.5 text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        <span>✅</span><span>Recommendations</span>
-                      </p>
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Recommendations</p>
                       <div className="space-y-1.5">
                         {recs.slice(0, 5).map((r, i) => (
-                          <div key={i} className="flex items-start space-x-2 pl-2 border-l-2 border-emerald-500/25">
-                            <p className="text-[10px] text-emerald-400 leading-snug">{toRecStr(r)}</p>
+                          <div key={i} className="flex items-start space-x-2 pl-2 border-l-2 border-white/15">
+                            <p className="text-xs text-white leading-snug">{toRecStr(r)}</p>
                           </div>
                         ))}
                       </div>
@@ -556,18 +529,14 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* PROJECTED IMPACT — full version (expanded) */}
                   {impactEntries.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="flex items-center space-x-1.5 text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        <span>📈</span><span>Projected Impact</span>
-                      </p>
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Projected Impact</p>
                       <div className="grid grid-cols-2 gap-1.5">
                         {impactEntries.map(([k, v]) => {
                           const str   = fmtImpact(v);
-                          const isPos = str.startsWith('+');
-                          const isNeg = str.startsWith('-');
                           return (
-                            <div key={k} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2.5 py-2">
-                              <p className={'text-sm font-bold leading-none ' + (isPos ? 'text-emerald-400' : isNeg ? 'text-red-400' : 'text-cyan-400')}>{str}</p>
-                              <p className="text-[8px] text-slate-400 mt-1 leading-tight">{titleCase(k)}</p>
+                            <div key={k} className="bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-2">
+                              <p className="text-sm font-bold leading-none text-white">{str}</p>
+                              <p className="text-[8px] text-white/60 mt-1 leading-tight">{titleCase(k)}</p>
                             </div>
                           );
                         })}
@@ -578,9 +547,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* ACTION BUTTONS */}
                   {advisory.actions?.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="flex items-center space-x-1.5 text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        <span>⚡</span><span>Actions</span>
-                      </p>
+                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Actions</p>
                       <div className="space-y-1.5">
                         {advisory.actions.map(action => {
                           const aType  = action.type || action;
@@ -607,10 +574,9 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
         })}
 
         {merged.length === 0 && (
-          <div className="text-center text-slate-400 py-12">
-            <div className="text-3xl mb-3">🧠</div>
-            <p className="text-sm font-medium">AI engine analyzing patterns…</p>
-            <p className="text-[10px] text-slate-400 mt-1">Advisories will appear here when detected</p>
+          <div className="text-center py-12">
+            <p className="text-sm font-medium text-white">AI engine analyzing patterns…</p>
+            <p className="text-[10px] text-white/60 mt-1">Advisories will appear here when detected</p>
           </div>
         )}
       </div>
