@@ -219,15 +219,12 @@ function DigitalTwinPreview() {
       <div className="flex items-center justify-between px-4 py-3 border-b border-cwm-border shrink-0">
         <div className="flex items-center space-x-3">
           <h3 className="text-sm font-bold text-white">Digital Twin – Live SWM Network</h3>
-          <span className="flex items-center space-x-1 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] text-emerald-400">Real-time</span>
-          </span>
         </div>
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate("/digital-twin")}
             className="cwm-btn px-3 py-1.5 text-[10px] font-medium"
+            style={{ background: '#3b7de8', color: '#fff' }}
           >
             Open Full Map →
           </button>
@@ -248,11 +245,6 @@ function ZoneStatusRow({ zone }) {
   const total = zone.collectedToday + zone.missedCollections;
   const coverage = total > 0 ? (zone.collectedToday / total * 100).toFixed(1) : '0.0';
   const covColor = parseFloat(coverage) >= 95 ? 'text-emerald-400' : parseFloat(coverage) >= 80 ? 'text-amber-400' : 'text-red-400';
-  const statusStyles = {
-    normal:    'bg-emerald-500/10 text-emerald-400',
-    attention: 'bg-yellow-500/10 text-yellow-400',
-    critical:  'bg-red-500/10 text-red-400',
-  };
   return (
     <div className="px-3 py-2 hover:bg-white/[0.02] rounded border-b border-white/[0.03] last:border-0">
       <div className="flex items-center gap-2 mb-1.5">
@@ -263,9 +255,6 @@ function ZoneStatusRow({ zone }) {
           </div>
         </div>
         <div className="text-[10px] text-slate-500 w-12 text-right shrink-0">{fill.toFixed(0)}% fill</div>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${statusStyles[zone.status] || statusStyles.attention}`}>
-          {zone.status || 'attention'}
-        </span>
       </div>
       <div className="flex items-center justify-between">
         <div className="flex gap-1 flex-wrap">
@@ -547,23 +536,15 @@ export default function Dashboard() {
       <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Page header with zone filter */}
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-white tracking-tight">SWM Operations Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">SWM Operations Dashboard</h1>
         <ZoneFilterBar value={zoneFilter} onChange={setZoneFilter} />
       </div>
-      {/* Zone scope banner — shows selected zone name, status, and wards */}
+      {/* Zone scope banner — shows selected zone name and wards */}
       {zoneFilter !== 'all' && filteredZones.length > 0 && (() => {
         const zone = filteredZones[0];
-        const sc = {
-          normal:    'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-          attention: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
-          critical:  'text-red-400 bg-red-500/10 border-red-500/30',
-        };
         return (
           <div className="flex items-center gap-3 bg-cwm-panel border border-cwm-border rounded-lg px-4 py-2">
             <span className="text-xs font-semibold text-white">{zone.name}</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold ${sc[zone.status] || sc.attention}`}>
-              {(zone.status || 'attention').toUpperCase()}
-            </span>
             <span className="text-[11px] text-slate-400">
               Wards: <span className="text-slate-300">{zone.wards?.join(' · ')}</span>
             </span>

@@ -60,11 +60,11 @@ function buildPalettes() {
   return {
     categorical: [t.accent, t.violet, t.success, t.warning, t.danger, t.info, t.accent, t.violet],
     area: {
-      cyan:   { border: t.accent,    fill: t.accentBg  },
-      violet: { border: t.violet,    fill: t.violetBg  },
-      blue:   { border: t.accent,    fill: t.accentBg  },
-      pink:   { border: t.danger,    fill: getCSSVar('--cwm-danger-bg')  },
-      slate:  { border: t.tickMuted, fill: getCSSVar('--cwm-surface-soft') },
+      cyan:   { border: '#3b7de8',                  fill: 'rgba(59, 125, 232, 0.15)' },
+      blue:   { border: '#3b7de8',                  fill: 'rgba(59, 125, 232, 0.15)' },
+      violet: { border: 'rgba(255, 255, 255, 0.85)', fill: 'rgba(255, 255, 255, 0.06)' },
+      pink:   { border: t.danger,                    fill: getCSSVar('--cwm-danger-bg')  },
+      slate:  { border: t.tickMuted,                 fill: getCSSVar('--cwm-surface-soft') },
     },
   };
 }

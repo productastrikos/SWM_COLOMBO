@@ -22,9 +22,9 @@ export default function ZoneFilterBar({ value, onChange, className = '' }) {
             onClick={() => onChange(z.id)}
             className="px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all"
             style={{
-              background:  active ? 'var(--cwm-accent-bg)'     : 'transparent',
-              borderColor: active ? 'var(--cwm-accent-border)'  : 'var(--cwm-border)',
-              color:       active ? 'var(--cwm-accent)'         : 'var(--cwm-text-faint)',
+              background:  active ? 'rgba(59, 125, 232, 0.15)' : 'transparent',
+              borderColor: active ? 'rgba(59, 125, 232, 0.45)' : 'var(--cwm-border)',
+              color:       active ? '#3b7de8'                   : 'var(--cwm-text-faint)',
             }}
           >
             {z.label}

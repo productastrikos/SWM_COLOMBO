@@ -241,11 +241,11 @@ export default function Layout({ children, user, onLogout, theme = 'dark', onThe
   const pageTitle            = PAGE_TITLES[location.pathname] || 'Dashboard';
 
   return (
-    <div className={`theme-${theme} h-screen w-screen flex overflow-hidden bg-cwm-dark`}>
+    <div className={`theme-${theme} h-screen w-screen flex overflow-hidden bg-cwm-darker`}>
 
       {/* ── SIDEBAR ──────────────────────────────────────────── */}
       <aside
-        className="flex flex-col shrink-0 overflow-hidden transition-all duration-200 bg-cwm-darker border-r border-cwm-border"
+        className="flex flex-col shrink-0 overflow-hidden transition-all duration-200 bg-cwm-dark border-r border-cwm-border"
         style={{ width: sidebarOpen ? 'var(--cwm-sidebar-w, 244px)' : '60px' }}
       >
         {/* Logo row */}
@@ -343,7 +343,7 @@ export default function Layout({ children, user, onLogout, theme = 'dark', onThe
         {/* ── TOPBAR ──────────────────────────────────────────── */}
         <header
           className="shrink-0 flex items-center gap-3 px-4 border-b border-cwm-border"
-          style={{ height: 'var(--cwm-header-h, 62px)', background: 'var(--cwm-surface)' }}
+          style={{ height: 'var(--cwm-header-h, 62px)', background: 'var(--cwm-chrome-bg)' }}
         >
           {/* Sidebar toggle */}
           <button

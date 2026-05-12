@@ -99,58 +99,55 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
       className="kpi-card"
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', aspectRatio: '1 / 1' }}
     >
-      {/* Icon + trend badge */}
-      <div className="flex items-start justify-between mb-4">
+      {/* Icon + Label — top row */}
+      <div className="flex items-center gap-2.5">
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-base leading-none flex-shrink-0"
-          style={{ color: r.iconClr }}
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl leading-none flex-shrink-0 cwm-kpi-icon"
+          style={{  }}
         >
           {icon || '▣'}
         </div>
-        {hasTrend && (
+        <p className="text-[18px] font-semibold leading-snug" style={{ color: 'var(--cwm-text)' }}>
+          {label}
+        </p>
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: '1px', background: 'var(--cwm-border)', margin: '10px 0 0' }} />
+
+      {/* Value — centred in remaining space */}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="leading-none">
           <span
-            className="kpi-trend-badge text-[10px] font-semibold px-2 py-1.5 rounded-lg flex flex-col items-center leading-tight"
-            style={{
-              color: r.badge.color,
-              minWidth: '2.8rem',
-              textAlign: 'center',
-            }}
+            className="text-[2.6rem] font-bold leading-none tracking-tight"
+            style={{ color: 'var(--cwm-text)' }}
           >
-            <span>{isPos ? '▲' : '▼'}</span>
-            <span>{Math.abs(trend).toFixed(1)}%</span>
+            {value}
           </span>
-        )}
+          {unit && (
+            <span className="text-sm font-medium ml-1" style={{ color: 'var(--cwm-text-faint)' }}>{unit}</span>
+          )}
+        </div>
       </div>
 
-      {/* Value */}
-      <div className="mb-1 leading-none text-center">
+      {/* Trend badge — bottom right */}
+      {hasTrend && (
         <span
-          className="text-[2.1rem] font-bold leading-none tracking-tight"
-          style={{ color: 'var(--cwm-text)' }}
+          className="kpi-trend-badge text-[12px] font-semibold px-2.5 py-1.5 rounded-lg flex items-center leading-tight gap-0.5"
+          style={{
+            color: r.badge.color,
+            background: r.badge.bg,
+            position: 'absolute',
+            bottom: '12px',
+            right: '12px',
+          }}
         >
-          {value}
+          <span>{isPos ? '+' : '-'}</span>
+          <span>{Math.abs(trend).toFixed(1)}%</span>
         </span>
-        {unit && (
-          <span className="text-xs font-medium ml-1" style={{ color: 'var(--cwm-text-faint)' }}>{unit}</span>
-        )}
-      </div>
-
-      {/* Label */}
-      <p className="text-[11px] font-medium mb-4 leading-snug text-center" style={{ color: 'var(--cwm-text-muted)' }}>
-        {label}
-      </p>
-
-      {/* RAG badge */}
-      <div className="flex items-center justify-center">
-        <span
-          className="text-[9px] font-bold px-2.5 py-0.5 rounded-full border tracking-wide"
-          style={r.badge}
-        >
-          {r.label}
-        </span>
-      </div>
+      )}
     </div>
   );
 }
