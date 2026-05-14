@@ -15,7 +15,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const COMPLAINT_TYPES = [
   { type: 'Missed Collection', count: 187, pct: 43.4, avgResolutionH: 1.4,  color: 'var(--cwm-danger)',     sla: 85 },
   { type: 'Bin Overflow',      count: 98,  pct: 22.7, avgResolutionH: 1.75, color: 'var(--cwm-warning)',    sla: 91 },
-  { type: 'Illegal Dumping',   count: 67,  pct: 15.5, avgResolutionH: 9.2,  color: 'var(--cwm-violet)',     sla: 62 },
+  { type: 'Illegal Dumping',   count: 67,  pct: 15.5, avgResolutionH: 9.2,  color: '#10b981',              sla: 62 },
   { type: 'Odor / Hygiene',    count: 52,  pct: 12.1, avgResolutionH: 4.1,  color: 'var(--cwm-info)',       sla: 78 },
   { type: 'Property Damage',   count: 27,  pct: 6.3,  avgResolutionH: 18.05,color: 'var(--cwm-text-faint)', sla: 44 },
 ];
@@ -237,12 +237,12 @@ export default function CitizenServices() {
   const [actionToast, setActionToast]   = useState('');
 
   const ACTION_TYPES = [
-    { value: 'dispatch',     label: '🚛 Dispatch Vehicle',          extraLabel: 'Vehicle ID (e.g. V-012)',  extraPlaceholder: 'V-0xx' },
-    { value: 'escalate',     label: '🚨 Escalate to Supervisor',    extraLabel: 'Supervisor Name',          extraPlaceholder: 'Name...' },
-    { value: 'investigate',  label: '🔍 Mark Investigating',        extraLabel: null,                       extraPlaceholder: null },
-    { value: 'schedule',     label: '📅 Schedule Collection',       extraLabel: 'Date & Time',              extraPlaceholder: 'dd/mm hh:mm' },
-    { value: 'acknowledge',  label: '✓ Acknowledge',               extraLabel: null,                       extraPlaceholder: null },
-    { value: 'resolve',      label: '✅ Resolve',                   extraLabel: null,                       extraPlaceholder: null },
+    { value: 'dispatch',     label: 'Dispatch Vehicle',          extraLabel: 'Vehicle ID (e.g. V-012)',  extraPlaceholder: 'V-0xx' },
+    { value: 'escalate',     label: 'Escalate to Supervisor',    extraLabel: 'Supervisor Name',          extraPlaceholder: 'Name...' },
+    { value: 'investigate',  label: 'Mark Investigating',        extraLabel: null,                       extraPlaceholder: null },
+    { value: 'schedule',     label: 'Schedule Collection',       extraLabel: 'Date & Time',              extraPlaceholder: 'dd/mm hh:mm' },
+    { value: 'acknowledge',  label: 'Acknowledge',               extraLabel: null,                       extraPlaceholder: null },
+    { value: 'resolve',      label: 'Resolve',                   extraLabel: null,                       extraPlaceholder: null },
   ];
 
   const handleOpenAction = (item) => {
@@ -272,7 +272,7 @@ export default function CitizenServices() {
 
   const complaintTypeData = useMemo(() => {
     const tok = getChartTokens();
-    const cols = [tok.danger, tok.warning, tok.violet, tok.info, tok.tickColor];
+    const cols = [tok.danger, tok.warning, tok.info, tok.info, tok.tickColor];
     return {
       labels: COMPLAINT_TYPES.map(ct => ct.type),
       datasets: [{
@@ -303,8 +303,8 @@ export default function CitizenServices() {
         {
           label: 'Resolved',
           data: resampleSeries(srcRes, activeTrendFrame.points),
-          borderColor: CHART_PALETTES.area.violet.border,
-          backgroundColor: CHART_PALETTES.area.violet.fill,
+          borderColor: CHART_PALETTES.area.emerald.border,
+          backgroundColor: CHART_PALETTES.area.emerald.fill,
           fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2,
         },
       ],
@@ -349,12 +349,12 @@ export default function CitizenServices() {
 
 
   const SECTIONS = [
-    { key: 'overview',   label: '📊 Overview' },
-    { key: 'complaints', label: '📋 By Type & Ward' },
-    { key: 'missed',     label: '⚠️ Missed Collections' },
-    { key: 'resolution', label: '⏱️ Resolution Times' },
-    { key: 'satisfaction', label: '😊 Satisfaction' },
-    { key: 'live_feed',    label: '📡 Live Feed' },
+    { key: 'overview',   label: 'Overview' },
+    { key: 'complaints', label: 'By Type & Ward' },
+    { key: 'missed',     label: 'Missed Collections' },
+    { key: 'resolution', label: 'Resolution Times' },
+    { key: 'satisfaction', label: 'Satisfaction' },
+    { key: 'live_feed',    label: 'Live Feed' },
   ];
 
   return (
@@ -403,7 +403,7 @@ export default function CitizenServices() {
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">Service Request Trend</h3>
                 <div className="flex items-center gap-3 text-[9px]">
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-cyan-500 inline-block" /> New</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500 inline-block" /> Resolved</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Resolved</span>
                   <ChartTimeframeControl options={TIMEFRAME_OPTIONS.weekly} value={trendFrame} onChange={setTrendFrame} />
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function CitizenServices() {
           </div>
           <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-cwm-border">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">⚠️ Missed Collection Reports — Linked to Ward Coverage</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Missed Collection Reports — Linked to Ward Coverage</h3>
               <p className="text-[10px] text-slate-500 mt-0.5">
                 Citizen-reported missed pickups matched to fleet RFID scan gaps
               </p>
@@ -709,13 +709,13 @@ export default function CitizenServices() {
           {/* Feed header stats */}
           <div className="grid grid-cols-4 gap-2.5">
             {[
-              { label: 'SMS / Text',    count: liveFeed.filter(c => c.channel === 'SMS').length,         cls: 'text-emerald-400', icon: '📱' },
-              { label: 'Phone Calls',   count: liveFeed.filter(c => c.channel === 'Phone Call').length,  cls: 'text-cyan-400',    icon: '📞' },
-              { label: 'Social Media',  count: liveFeed.filter(c => ['Twitter/X','Facebook'].includes(c.channel)).length, cls: 'text-blue-400', icon: '🌐' },
-              { label: 'App / Digital', count: liveFeed.filter(c => ['Mobile App','Email','WhatsApp'].includes(c.channel)).length, cls: 'text-purple-400', icon: '📲' },
+              { label: 'SMS / Text',    count: liveFeed.filter(c => c.channel === 'SMS').length,         cls: 'text-emerald-400', icon: 'SMS' },
+              { label: 'Phone Calls',   count: liveFeed.filter(c => c.channel === 'Phone Call').length,  cls: 'text-cyan-400',    icon: 'TEL' },
+              { label: 'Social Media',  count: liveFeed.filter(c => ['Twitter/X','Facebook'].includes(c.channel)).length, cls: 'text-blue-400', icon: 'WEB' },
+              { label: 'App / Digital', count: liveFeed.filter(c => ['Mobile App','Email','WhatsApp'].includes(c.channel)).length, cls: 'text-cyan-400', icon: 'APP' },
             ].map((s, i) => (
               <div key={i} className="bg-cwm-panel border border-cwm-border rounded-xl p-3 text-center">
-                <p className="text-lg">{s.icon}</p>
+                <p className="text-xs font-bold text-slate-500 tracking-widest">{s.icon}</p>
                 <p className={`text-xl font-bold ${s.cls} mt-0.5`}>{s.count}</p>
                 <p className="text-[10px] text-slate-500">{s.label}</p>
               </div>
@@ -726,7 +726,7 @@ export default function CitizenServices() {
           <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">📡 Live Incoming Complaints</h3>
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Live Incoming Complaints</h3>
                 <p className="text-[10px] text-slate-500 mt-0.5">Real-time intake across all citizen reporting channels · New complaint every ~4 seconds</p>
               </div>
               <span className="px-2 py-1 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-[10px] font-bold animate-pulse">● LIVE</span>
@@ -746,7 +746,7 @@ export default function CitizenServices() {
                         <span className="text-[10px] font-bold text-slate-300">{item.channel}</span>
                         <span className={`text-[9px] px-1.5 py-0.5 rounded border font-bold ${pm.cls}`}>{pm.label}</span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-slate-400">{item.type}</span>
-                        <span className="text-[9px] text-slate-500">📍 {item.ward}</span>
+                        <span className="text-[9px] text-slate-500">{item.ward}</span>
                         {actionedItems.has(item.id) && (
                           <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">✓ Actioned</span>
                         )}
@@ -760,7 +760,7 @@ export default function CitizenServices() {
                         onClick={() => handleOpenAction(item)}
                         className={`text-[9px] px-2 py-0.5 rounded font-bold transition-colors ${actionedItems.has(item.id) ? 'bg-slate-700/50 border border-slate-600/30 text-slate-500' : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'}`}
                       >
-                        ⚡ Action
+                        Action
                       </button>
                     </div>
                   </div>
@@ -777,10 +777,10 @@ export default function CitizenServices() {
                 liveFeed.reduce((acc, c) => { acc[c.channel] = (acc[c.channel] || 0) + 1; return acc; }, {})
               ).sort((a, b) => b[1] - a[1]).map(([ch, cnt], i) => {
                 const pct = ((cnt / liveFeed.length) * 100).toFixed(0);
-                const icons = { 'SMS': '📱', 'Phone Call': '📞', 'WhatsApp': '💬', 'Twitter/X': '𝕏', 'Facebook': '👤', 'Mobile App': '📲', 'Email': '📧', 'Walk-in': '🏢' };
+                const icons = { 'SMS': 'SMS', 'Phone Call': 'Tel', 'WhatsApp': 'WA', 'Twitter/X': 'X', 'Facebook': 'FB', 'Mobile App': 'App', 'Email': 'Eml', 'Walk-in': 'WI' };
                 return (
                   <div key={i} className="flex items-center gap-3">
-                    <span className="text-sm w-5 text-center">{icons[ch] || '📡'}</span>
+                    <span className="text-[9px] font-mono font-bold text-slate-500 w-8 text-center">{icons[ch] || 'Ch'}</span>
                     <span className="text-[10px] text-slate-400 w-24">{ch}</span>
                     <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
                       <div className="h-full bg-cyan-500/60 rounded-full transition-all" style={{ width: `${pct}%` }} />
@@ -816,7 +816,7 @@ export default function CitizenServices() {
                   <span className="text-[9px] text-slate-500">#{actionPanel.id}</span>
                 </div>
                 <p className="text-[11px] text-slate-300 leading-snug mb-1">{actionPanel.msg}</p>
-                <p className="text-[10px] text-slate-500">📍 {actionPanel.ward} · {actionPanel.type} · {actionPanel.time}</p>
+                <p className="text-[10px] text-slate-500">{actionPanel.ward} · {actionPanel.type} · {actionPanel.time}</p>
               </div>
               <button onClick={() => setActionPanel(null)}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors text-lg shrink-0">

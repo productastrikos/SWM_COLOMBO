@@ -35,6 +35,13 @@ export const IcoClipboard  = () => <Ico><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01
 export const IcoThermometer= () => <Ico><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></Ico>;
 export const IcoWind       = () => <Ico><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></Ico>;
 export const IcoTrendDown  = () => <Ico><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></Ico>;
+export const IcoEyeSmall   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+export const IcoFire       = () => <Ico><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-3.5-13.5"/></Ico>;
+export const IcoFuel       = () => <Ico><path d="M3 22V10l4-8h8l4 8v12"/><line x1="3" y1="10" x2="19" y2="10"/><path d="M15 22v-4a2 2 0 00-2-2h-2a2 2 0 00-2 2v4"/><path d="M19 10h1a2 2 0 012 2v2a2 2 0 01-2 2h-1"/></Ico>;
+export const IcoLink       = () => <Ico><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></Ico>;
+export const IcoSignal     = () => <Ico><path d="M2 20h.01M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></Ico>;
+export const IcoGlobe      = () => <Ico><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></Ico>;
+export const IcoAttendance = () => <Ico><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></Ico>;
 
 export function deriveRag(color) {
   if (!color) return 'normal';
@@ -56,82 +63,125 @@ export function deriveRag(color) {
  *   trend   — percent change number (positive = up, negative = down)
  *   onClick — makes card clickable
  */
-export default function KPICard({ label, value, unit, icon, color, rag: ragProp, trend, onClick }) {
+export default function KPICard({ label, value, unit, icon, color, rag: ragProp, trend, onClick, detailBtn }) {
   const hasTrend = trend !== null && trend !== undefined;
   const isPos    = (trend || 0) >= 0;
+  const rag      = ragProp || deriveRag(color);
+
+  const ragStyles = {
+    normal:   { color: '#22c55e', label: 'NORMAL'  },
+    warning:  { color: '#f59e0b', label: 'WARNING' },
+    critical: { color: '#ef4444', label: 'CRITICAL'},
+  }[rag] || { color: '#22c55e', label: 'NORMAL' };
 
   return (
     <div
       className="kpi-card"
       style={{
         cursor: 'default',
-        aspectRatio: '5 / 3',
         display: 'flex',
         flexDirection: 'column',
         padding: '10px 12px 8px',
         overflow: 'hidden',
+        minHeight: 0,
       }}
     >
-      {/* ── Top row: icon + label + info button ─────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+      {/* ── Row 1: icon left, trend badge right ─────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div
-          className="rounded-xl flex items-center justify-center text-xl leading-none cwm-kpi-icon"
-          style={{ width: '28px', height: '28px', flexShrink: 0 }}
+          className="rounded-xl flex items-center justify-center leading-none cwm-kpi-icon"
+          style={{ width: '28px', height: '28px', fontSize: '1.1rem', flexShrink: 0 }}
         >
           {icon || '▣'}
         </div>
-        <p
-          className="text-[12px] font-semibold leading-snug flex-1"
-          style={{ color: 'var(--cwm-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {label}
-        </p>
-        {onClick && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
-            aria-label={`Details for ${label}`}
-            className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center text-[9px] transition-colors"
-            style={{ flexShrink: 0 }}
-            title={`Details for ${label}`}
-          >
-            ℹ
-          </button>
+        {hasTrend && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span
+              className="kpi-trend-badge font-semibold flex items-center leading-tight gap-0.5"
+              style={{
+                fontSize: '10px',
+                color:      isPos ? '#22c55e' : '#ef4444',
+                background: isPos ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                padding: '2px 5px',
+                borderRadius: '5px',
+              }}
+            >
+              <span style={{ fontSize: '8px' }}>{isPos ? '▲' : '▼'}</span>
+              <span>{Math.abs(trend).toFixed(1)}%</span>
+            </span>
+            <span style={{ fontSize: '9px', color: 'var(--cwm-text-faint)', fontWeight: 500 }}>vs yesterday</span>
+          </div>
         )}
       </div>
 
-      {/* ── Divider ─────────────────────────────────────────────────────── */}
-      <div className="kpi-card-divider" style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
-
-      {/* ── Value — fills remaining height, centred ─────────────────────── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: 0 }}>
+      {/* ── Row 2: large value ──────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0, marginTop: '6px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
         <span
-          className="font-normal leading-none tracking-tight"
-          style={{ color: 'var(--cwm-text)', fontSize: 'clamp(1.2rem, 2.2rem, 2.2rem)' }}
+          className="font-bold leading-none tracking-tight"
+          style={{ color: 'var(--cwm-text)', fontSize: 'clamp(1.4rem, 3vw, 2.2rem)' }}
         >
           {value}
         </span>
         {unit && (
-          <span className="text-sm font-medium" style={{ color: 'var(--cwm-text-faint)' }}>{unit}</span>
+          <span style={{ color: 'var(--cwm-text-faint)', fontSize: '0.75rem', fontWeight: 500 }}>{unit}</span>
         )}
       </div>
 
-      {/* ── Trend row ───────────────────────────────────────────────────── */}
-      {hasTrend && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexShrink: 0, marginTop: '4px' }}>
-          <span
-            className="kpi-trend-badge text-[9px] font-semibold px-1.5 py-0.5 rounded-md flex items-center leading-tight gap-0.5"
-            style={{
-              color:      isPos ? '#16a34a' : '#dc2626',
-              background: isPos ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)',
-            }}
-          >
-            <span>{isPos ? '+' : '-'}</span>
-            <span>{Math.abs(trend).toFixed(1)}%</span>
-          </span>
-          <span style={{ fontSize: '9px', color: 'var(--cwm-text-muted)' }}>vs yesterday</span>
-        </div>
-      )}
+      {/* ── Row 3: label ────────────────────────────────────────────────── */}
+      <p
+        className="font-medium leading-snug"
+        style={{ color: 'var(--cwm-text)', fontSize: '14px', marginTop: '3px', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+      >
+        {label}
+      </p>
+
+      {/* ── Divider ─────────────────────────────────────────────────────── */}
+      <div className="kpi-card-divider" style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
+
+      {/* ── Row 4: RAG badge ────────────────────────────────────────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0 }}>
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            color: ragStyles.color,
+          }}
+        >
+          {ragStyles.label}
+        </span>
+      </div>
+
+      {/* ── Action button — bottom-right corner ─────────────────────────── */}
+      {onClick && (detailBtn?.text ? (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
+          aria-label={`Details for ${label}`}
+          title={`Details for ${label}`}
+          style={{
+            position: 'absolute', bottom: '8px', right: '10px',
+            background: 'none', border: 'none', padding: 0,
+            fontSize: '10px', fontWeight: 600, color: '#94a3b8',
+            textDecoration: detailBtn?.underline ? 'underline' : 'none',
+            cursor: 'pointer', display: 'flex', alignItems: 'center',
+            gap: '3px', letterSpacing: '0.01em', lineHeight: 1,
+          }}
+        >
+          {detailBtn.content}
+        </button>
+      ) : (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
+          aria-label={`Details for ${label}`}
+          className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center transition-colors"
+          style={{ position: 'absolute', bottom: '8px', right: '10px', fontSize: '9px' }}
+          title={`Details for ${label}`}
+        >
+          {detailBtn?.content ?? 'ℹ'}
+        </button>
+      ))}
     </div>
   );
 }

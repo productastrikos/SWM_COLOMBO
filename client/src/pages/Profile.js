@@ -46,7 +46,7 @@ const ACTIVITY = [
   { action: 'Reviewed Fleet Management dashboard', time: '18 min ago', dot: '#5b8de0' },
   { action: 'Exported sustainability report (PDF)', time: '1 hr ago', dot: '#16a34a' },
   { action: 'Adjusted collection route — V-009 Grandpass', time: '3 hr ago', dot: '#d97706' },
-  { action: 'Logged in from 192.168.1.24', time: 'Today 06:41', dot: '#8b5cf6' },
+  { action: 'Logged in from 192.168.1.24', time: 'Today 06:41', dot: '#06b6d4' },
   { action: 'Acknowledged advisory ADV-001', time: 'Yesterday 14:22', dot: '#0ea5e9' },
 ];
 
@@ -204,7 +204,7 @@ export default function Profile({ user }) {
         <StatCard label="Routes Optimised" value="17" color="var(--cwm-success)"
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>}
         />
-        <StatCard label="Reports Exported" value="9" color="var(--cwm-violet)"
+        <StatCard label="Reports Exported" value="9" color="var(--cwm-info)"
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>}
         />
       </div>
@@ -274,14 +274,16 @@ export default function Profile({ user }) {
           ].map((pref) => (
             <div
               key={pref.label}
-              className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
-              style={{ background: 'var(--cwm-bg)', border: '1px solid var(--cwm-border)' }}
+              className="flex items-center rounded-xl px-4 py-3"
+              style={{ background: 'var(--cwm-bg)', border: '1px solid var(--cwm-border)', minHeight: '56px', gap: '12px' }}
             >
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <p className="text-xs font-semibold" style={{ color: 'var(--cwm-text)' }}>{pref.label}</p>
                 <p className="text-[10px] mt-0.5" style={{ color: 'var(--cwm-text-faint)' }}>{pref.desc}</p>
               </div>
-              <Toggle defaultOn={pref.on} />
+              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                <Toggle defaultOn={pref.on} />
+              </div>
             </div>
           ))}
         </div>
@@ -299,15 +301,33 @@ function Toggle({ defaultOn }) {
       role="switch"
       aria-checked={on}
       onClick={() => setOn(s => !s)}
-      className="flex-shrink-0 w-9 h-5 rounded-full transition-colors duration-200 relative"
       style={{
-        background: on ? 'var(--cwm-accent)' : 'var(--cwm-surface-raised)',
-        border: '1px solid ' + (on ? 'var(--cwm-accent-border)' : 'var(--cwm-border)'),
+        flexShrink: 0,
+        position: 'relative',
+        width: '36px',
+        height: '20px',
+        borderRadius: '10px',
+        cursor: 'pointer',
+        transition: 'background 0.2s, border-color 0.2s',
+        background: on ? '#3b82f6' : '#c0c0c8',
+        border: '1px solid ' + (on ? '#2563eb' : '#a0a0aa'),
+        padding: 0,
+        outline: 'none',
       }}
     >
       <span
-        className="absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform duration-200"
-        style={{ transform: on ? 'translateX(17px)' : 'translateX(2px)', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' }}
+        style={{
+          position: 'absolute',
+          top: '2px',
+          left: on ? '17px' : '2px',
+          width: '14px',
+          height: '14px',
+          borderRadius: '50%',
+          background: '#ffffff',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+          transition: 'left 0.2s',
+          display: 'block',
+        }}
       />
     </button>
   );

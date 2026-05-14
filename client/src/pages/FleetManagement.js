@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getVehicles, dispatchVehicle } from '../services/api';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
-import KPICard, { IcoTruck, IcoCheck, IcoRoute, IcoTrash, IcoHourglass, IcoWrench } from '../components/KPICard';
+import KPICard, { IcoTruck, IcoCheck, IcoRoute, IcoTrash, IcoHourglass, IcoWrench, IcoFuel, IcoPin, IcoClock, IcoLeaf, IcoLink } from '../components/KPICard';
 import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -32,17 +32,17 @@ function DeployModal({ row, onClose }) {
   if (confirmed) return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-cwm-panel border border-emerald-500/40 rounded-xl p-6 w-full max-w-sm text-center shadow-2xl">
-        <div className="text-3xl mb-3">🚛</div>
+        <div className="text-cwm-accent mb-3 flex justify-center"><IcoTruck /></div>
         <p className="text-white font-bold text-sm mb-1">Deployed Successfully</p>
-        <p className="text-slate-400 text-xs"><span className="text-cyan-400 font-semibold">{row.secondary}</span> dispatched to cover <span className="text-amber-400">{row.zone}</span></p>
+        <p className="text-slate-400 text-xs">{row.secondary} is en route to cover remaining {100 - row.progress}% of zone {row.zone}.</p>
       </div>
     </div>
   );
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-5 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white">🚨 Deploy Secondary Vehicle</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-sm font-bold text-white">Deploy Secondary Vehicle</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-lg">×</button>
         </div>
         <div className="space-y-3 mb-5">
@@ -82,17 +82,17 @@ function ScheduleRouteModal({ row, onClose }) {
   if (saved) return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-cwm-panel border border-emerald-500/40 rounded-xl p-6 w-full max-w-sm text-center shadow-2xl">
-        <div className="text-3xl mb-3">📋</div>
+        <div className="text-cwm-accent mb-3 flex justify-center"><IcoCheck /></div>
         <p className="text-white font-bold text-sm mb-1">Route Scheduled</p>
-        <p className="text-slate-400 text-xs"><span className="text-cyan-400 font-semibold">{row.primary}</span> on <span className="text-amber-400">{row.zone}</span> at {time}</p>
+        <p className="text-slate-400 text-xs">Departure at {time} for zone {row.zone} via {row.primary} / {row.secondary}.</p>
       </div>
     </div>
   );
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-5 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white">📋 Schedule Route</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-sm font-bold text-white">Schedule Route</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-lg">×</button>
         </div>
         <div className="space-y-3 mb-5">
@@ -138,17 +138,17 @@ function DispatchModal({ alert, onClose }) {
   if (sent) return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-cwm-panel border border-emerald-500/40 rounded-xl p-6 w-full max-w-sm text-center shadow-2xl">
-        <div className="text-3xl mb-3">✅</div>
+        <div className="text-emerald-400 mb-3 flex justify-center"><IcoCheck /></div>
         <p className="text-white font-bold text-sm mb-1">Vehicle Dispatched</p>
-        <p className="text-slate-400 text-xs"><span className="text-cyan-400 font-semibold">{vehicle}</span> en route to <span className="text-amber-400">{alert.ward}</span></p>
+        <p className="text-slate-400 text-xs">{vehicle} dispatched to {alert.ward}. ETA 15–20 min.</p>
       </div>
     </div>
   );
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-5 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white">🚛 Dispatch Vehicle</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-cwm-panel border border-cwm-border rounded-xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-sm font-bold text-white">Dispatch Vehicle</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-lg">×</button>
         </div>
         <div className="space-y-3 mb-5">
@@ -183,7 +183,7 @@ function VehicleRow({ vehicle, onDispatch }) {
     active: 'bg-emerald-500/20 text-emerald-400',
     en_route: 'bg-cyan-500/20 text-cyan-400',
     collecting: 'bg-blue-500/20 text-blue-400',
-    returning: 'bg-purple-500/20 text-purple-400',
+    returning: 'bg-teal-500/20 text-teal-400',
     idle: 'bg-slate-500/20 text-slate-400',
     maintenance: 'bg-orange-500/20 text-orange-400',
     breakdown: 'bg-red-500/20 text-red-400',
@@ -197,7 +197,7 @@ function VehicleRow({ vehicle, onDispatch }) {
     <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3 hover:border-cwm-accent/30 transition-colors">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <span className="text-lg">🚛</span>
+          <IcoTruck />
           <div>
             <p className="text-xs font-semibold text-white">{vehicle.vehicleId}</p>
             <p className="text-[10px] text-slate-500">{vehicle.type || 'Compactor'} • {vehicleDTZone(vehicle) || vehicle.zone || '-'}</p>
@@ -304,7 +304,7 @@ export default function FleetManagement() {
   const kActive      = kEnRoute + kCollecting;
 
   // Activity chart values — 24 hourly values (midnight→23:00): overnight low, morning ramp, afternoon peak
-  const actVals = [8, 7, 6, 5, 6, 11, 22, 31, 34, 35, 34, 32, 30, 31, 34, 37, 36, 33, 26, 20, 16, 14, 12, 9];
+  const actVals = [5, 4, 3, 2, 3, 9, 19, 25, 27, 28, 26, 24, 22, 22, 24, 27, 26, 23, 16, 12, 10, 9, 7, 6];
   const displayedActVals = resampleSeries(
     activeActivityFrame.dataWindow ? actVals.slice(-activeActivityFrame.dataWindow) : actVals,
     activeActivityFrame.points
@@ -315,8 +315,8 @@ export default function FleetManagement() {
     datasets: [{
       label: 'Active Units',
       data: displayedActVals,
-      backgroundColor: displayedActVals.map(v => v >= 30 ? tFleet.successBar : v >= 22 ? tFleet.warningBar : tFleet.dangerBar),
-      borderColor: displayedActVals.map(v => v >= 30 ? tFleet.success : v >= 22 ? tFleet.warning : tFleet.danger),
+      backgroundColor: displayedActVals.map(v => v >= 25 ? tFleet.successBar : v >= 15 ? tFleet.warningBar : tFleet.dangerBar),
+      borderColor: displayedActVals.map(v => v >= 25 ? tFleet.success : v >= 15 ? tFleet.warning : tFleet.danger),
       borderWidth: 1.5, borderRadius: 4,
     }],
   };
@@ -368,18 +368,18 @@ export default function FleetManagement() {
       {/* Route Optimisation KPIs */}
       <div className="bg-cwm-panel border border-cwm-border rounded-xl p-4">
         <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center space-x-2">
-          <span>🛣️</span><span>Route Optimisation — Today's Savings</span>
+          <span className="w-4 h-4 text-slate-400"><IcoRoute /></span><span>Route Optimisation — Today's Savings</span>
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Fuel Saved',     value: 'Rs. 42,300',  sub: 'vs. unoptimised route', rag: 'green',  icon: '⛽' },
-            { label: 'Distance Saved', value: '312 km',      sub: '18.4% reduction',        rag: 'amber',  icon: '📍' },
-            { label: 'Time Saved',     value: '3.2 hrs',     sub: 'fleet-wide today',        rag: 'green',  icon: '⏱️' },
-            { label: 'CO₂ Avoided',   value: '334 kg',      sub: 'vs. baseline routes',    rag: 'green',  icon: '🌿' },
+            { label: 'Fuel Saved',     value: 'Rs. 42,300',  sub: 'vs. unoptimised route', rag: 'green',  icon: <IcoFuel /> },
+            { label: 'Distance Saved', value: '312 km',      sub: '18.4% reduction',        rag: 'amber',  icon: <IcoPin /> },
+            { label: 'Time Saved',     value: '3.2 hrs',     sub: 'fleet-wide today',        rag: 'green',  icon: <IcoClock /> },
+            { label: 'CO₂ Avoided',   value: '334 kg',      sub: 'vs. baseline routes',    rag: 'green',  icon: <IcoLeaf /> },
           ].map((m, i) => (
             <div key={i} className={`rounded-xl p-3 border ${m.rag === 'green' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
               <div className="flex items-center space-x-2 mb-1">
-                <span className="text-base">{m.icon}</span>
+                <div className="w-5 h-5 text-slate-400">{m.icon}</div>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider">{m.label}</p>
               </div>
               <p className={`text-lg font-bold ${m.rag === 'green' ? 'text-emerald-400' : 'text-amber-400'}`}>{m.value}</p>
@@ -392,11 +392,10 @@ export default function FleetManagement() {
       {/* Tab nav */}
       <div className="flex space-x-1 border-b border-cwm-border">
         {[
-          { key: 'fleet',    label: '🚛 Fleet Status' },
-          { key: 'routes',   label: '📋 Route History' },
-          { key: 'coord',    label: '🔗 Primary/Secondary Coord.' },
-
-          { key: 'attendance', label: '🧑‍💼 Attendance' },
+          { key: 'fleet',    label: 'Fleet Status' },
+          { key: 'routes',   label: 'Route History' },
+          { key: 'coord',    label: 'Primary/Secondary Coord.' },
+          { key: 'attendance', label: 'Attendance' },
         ].map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
             className={`px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${activeTab === t.key ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
@@ -455,7 +454,7 @@ export default function FleetManagement() {
       {activeTab === 'routes' && (
         <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">📋 Route History — Today's Trips</h3>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Route History — Today's Trips</h3>
             <span className="text-[10px] text-slate-500">{ROUTE_HISTORY.length} records</span>
           </div>
           <div className="overflow-x-auto">
@@ -506,7 +505,7 @@ export default function FleetManagement() {
         <div className="space-y-3">
           <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-cwm-border">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">🔗 Primary / Secondary Vehicle Coordination by Zone</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Primary / Secondary Vehicle Coordination by Zone</h3>
               <p className="text-[10px] text-slate-500 mt-0.5">Secondary vehicle auto-dispatches when primary reports breakdown or &gt;90min delay</p>
             </div>
             <div className="overflow-x-auto">
@@ -587,7 +586,7 @@ export default function FleetManagement() {
           </div>
           <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-cwm-border">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">🧑‍💼 Driver Attendance — Today</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Driver Attendance — Today</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">

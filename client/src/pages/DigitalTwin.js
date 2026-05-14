@@ -104,12 +104,12 @@ const Z4_BOUNDARY = [C_DE, C_Z4, C_CD, [6.888,79.934], [6.868,79.928]];
 const Z5_BOUNDARY = [C_S, C_Z5, C_DE, [6.868,79.928], [6.848,79.924]];
 
 const FACILITIES = [
-  { id:'F-001', name:'Karadiyana Landfill',       type:'landfill',  lat:6.8340, lng:79.9680, capPct:72, throughput:380, color:'#ef4444', icon:'🏔️' },
-  { id:'F-002', name:'Kerawalapitiya WTE Plant',  type:'wte',       lat:7.0107, lng:79.9012, capPct:88, throughput:260, color:'#f59e0b', icon:'🏭' },
-  { id:'F-003', name:'Borella Transfer Station',  type:'transfer',  lat:6.9115, lng:79.8690, capPct:70, throughput:180, color:'#06b6d4', icon:'🔄' },
-  { id:'F-004', name:'Dehiwala Transfer Station', type:'transfer',  lat:6.8600, lng:79.8695, capPct:63, throughput:140, color:'#06b6d4', icon:'🔄' },
-  { id:'F-005', name:'Nugegoda Recycling Centre', type:'recycling', lat:6.8720, lng:79.9005, capPct:62, throughput:95,  color:'#10b981', icon:'♻️' },
-  { id:'F-006', name:'Moratuwa Compost Plant',    type:'compost',   lat:6.7950, lng:79.8820, capPct:45, throughput:65,  color:'#84cc16', icon:'🌱' },
+  { id:'F-001', name:'Karadiyana Landfill',       type:'landfill',  lat:6.8340, lng:79.9680, capPct:72, throughput:380, color:'#ef4444', icon:'LF' },
+  { id:'F-002', name:'Kerawalapitiya WTE Plant',  type:'wte',       lat:7.0107, lng:79.9012, capPct:88, throughput:260, color:'#f59e0b', icon:'WTE' },
+  { id:'F-003', name:'Borella Transfer Station',  type:'transfer',  lat:6.9115, lng:79.8690, capPct:70, throughput:180, color:'#06b6d4', icon:'TS' },
+  { id:'F-004', name:'Dehiwala Transfer Station', type:'transfer',  lat:6.8600, lng:79.8695, capPct:63, throughput:140, color:'#06b6d4', icon:'TS' },
+  { id:'F-005', name:'Nugegoda Recycling Centre', type:'recycling', lat:6.8720, lng:79.9005, capPct:62, throughput:95,  color:'#10b981', icon:'RC' },
+  { id:'F-006', name:'Moratuwa Compost Plant',    type:'compost',   lat:6.7950, lng:79.8820, capPct:45, throughput:65,  color:'#84cc16', icon:'CP' },
 ];
 
 const centroidOf = (pts) => ([
@@ -136,10 +136,10 @@ const BASE_WARDS = [
   createWard('W07', 'Slave Island',   '#10b981', W07_PTS, 'Z3', 'mixed'),
   createWard('W08', 'Borella',        '#34d399', W08_PTS, 'Z3', 'institutional'),
   createWard('W09', 'Narahenpita',    '#6ee7b7', W09_PTS, 'Z3', 'hospital'),
-  // Zone 4 – Western Coastal (purple)
-  createWard('W10', 'Kollupitiya',    '#8b5cf6', W10_PTS, 'Z4', 'commercial'),
-  createWard('W11', 'Bambalapitiya',  '#a78bfa', W11_PTS, 'Z4', 'mixed'),
-  createWard('W12', 'Wellawatta',     '#c4b5fd', W12_PTS, 'Z4', 'coastal'),
+  // Zone 4 – Western Coastal (sky)
+  createWard('W10', 'Kollupitiya',    '#0ea5e9', W10_PTS, 'Z4', 'commercial'),
+  createWard('W11', 'Bambalapitiya',  '#38bdf8', W11_PTS, 'Z4', 'mixed'),
+  createWard('W12', 'Wellawatta',     '#7dd3fc', W12_PTS, 'Z4', 'coastal'),
   // Zone 5 – Southern (orange)
   createWard('W13', 'Kirulapone',     '#f97316', W13_PTS, 'Z5', 'residential'),
   createWard('W14', 'Havelock Town',  '#fb923c', W14_PTS, 'Z5', 'residential'),
@@ -161,7 +161,7 @@ const ZONE_POLYS = [
   { id:'Z1', name:'Zone 1 – Northern Port',   color:'#38bdf8', pts: Z1_BOUNDARY },
   { id:'Z2', name:'Zone 2 – Inner North',     color:'#f59e0b', pts: Z2_BOUNDARY },
   { id:'Z3', name:'Zone 3 – Central',         color:'#10b981', pts: Z3_BOUNDARY },
-  { id:'Z4', name:'Zone 4 – Western Coastal', color:'#8b5cf6', pts: Z4_BOUNDARY },
+  { id:'Z4', name:'Zone 4 – Western Coastal', color:'#0ea5e9', pts: Z4_BOUNDARY },
   { id:'Z5', name:'Zone 5 – Southern',        color:'#f97316', pts: Z5_BOUNDARY },
 ];
 
@@ -257,7 +257,7 @@ const ROUTE_BLUEPRINTS = {
   },
   R4: {
     name: 'Narahenpita-Rajagiriya Secondary Loop',
-    color: '#a855f7',
+    color: '#0ea5e9',
     service: 'collection',
     hierarchy: 'secondary',
     wardIds: ['W09', 'W12', 'W15'],
@@ -287,7 +287,7 @@ const ROUTE_BLUEPRINTS = {
   },
   R7: {
     name: 'Grandpass Freight Secondary Loop',
-    color: '#8b5cf6',
+    color: '#06b6d4',
     service: 'collection',
     hierarchy: 'secondary',
     wardIds: ['W02', 'W03', 'W05', 'W06'],
@@ -653,14 +653,14 @@ const STAFF_INIT = STAFF_BLUEPRINTS.map((blueprint) => {
 });
 
 const LAYER_CONFIG = [
-  { key:'zones',        label:'Zone Boundaries', icon:'🗺️' },
-  { key:'wards',        label:'Ward Boundaries', icon:'🏘️' },
-  { key:'vehicles',     label:'Vehicles (GPS)',  icon:'🚛' },
-  { key:'bins',         label:'Smart Bins',      icon:'🗑️' },
-  { key:'weighbridges', label:'Weighbridges',    icon:'⚖️' },
-  { key:'staff',        label:'Staff Tracking',  icon:'👷' },
-  { key:'complaints',   label:'Complaints',      icon:'📋' },
-  { key:'cameras',      label:'CCTV Cameras',    icon:'📷' },
+  { key:'zones',        label:'Zone Boundaries', icon:'Zn' },
+  { key:'wards',        label:'Ward Boundaries', icon:'Wr' },
+  { key:'vehicles',     label:'Vehicles (GPS)',  icon:'Vh' },
+  { key:'bins',         label:'Smart Bins',      icon:'Bn' },
+  { key:'weighbridges', label:'Weighbridges',    icon:'Wb' },
+  { key:'staff',        label:'Staff Tracking',  icon:'St' },
+  { key:'complaints',   label:'Complaints',      icon:'Cp' },
+  { key:'cameras',      label:'CCTV Cameras',    icon:'Cv' },
 ];
 
 // ── ZONE FILTERING HELPERS ─────────────────────────────────────────────────
@@ -680,21 +680,21 @@ const ROUTE_ZONE_SETS = Object.fromEntries(
 
 // ── UTILITY / ICON FUNCTIONS ────────────────────────────────────────────────
 const getBinColor  = (f) => f > 85 ? '#ef4444' : f > 65 ? '#f59e0b' : '#10b981';
-const getVehColor  = (s) => ({ active:'#10b981', collecting:'#3b82f6', en_route:'#06b6d4', idle:'#6b7280', breakdown:'#ef4444', maintenance:'#f59e0b', returning:'#a855f7' })[s] || '#6b7280';
+const getVehColor  = (s) => ({ active:'#10b981', collecting:'#3b82f6', en_route:'#06b6d4', idle:'#6b7280', breakdown:'#ef4444', maintenance:'#f59e0b', returning:'#0ea5e9' })[s] || '#6b7280';
 const getStatBg    = (s) => ({ active:'text-emerald-400', collecting:'text-blue-400', en_route:'text-cyan-400', idle:'text-slate-400', breakdown:'text-red-400', on_route:'text-emerald-400', break:'text-amber-400', absent:'text-red-400' })[s] || 'text-slate-400';
 
 function mkVehIcon(v, sel) {
   const c = getVehColor(v.status);
-  const em = v.type === 'Pushcart' ? '🛒' : v.type === 'Tractor' ? '🚜' : v.routeClass === 'primary' ? '🚚' : '🚛';
+  const em = v.type === 'Pushcart' ? 'P' : v.type === 'Tractor' ? 'T' : v.routeClass === 'primary' ? 'V' : 'V';
   const sz = sel ? 22 : v.routeClass === 'primary' ? 18 : 16;
   return L.divIcon({
-    html: '<div style="background:' + c + 'dd;border:' + (sel ? '2px solid #fff' : '1px solid rgba(255,255,255,0.22)') + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:' + (sz/2.7) + 'px;box-shadow:0 0 ' + (sel?12:4) + 'px ' + c + '66;opacity:' + (sel ? '1' : '0.82') + ';">' + (v.status === 'breakdown' ? '⚠️' : em) + '</div>',
+    html: '<div style="background:' + c + 'dd;border:' + (sel ? '2px solid #fff' : '1px solid rgba(255,255,255,0.22)') + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:' + (sz/2.7) + 'px;font-weight:800;font-family:monospace;box-shadow:0 0 ' + (sel?12:4) + 'px ' + c + '66;opacity:' + (sel ? '1' : '0.82') + ';">' + (v.status === 'breakdown' ? '!' : em) + '</div>',
     className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2],
   });
 }
 function mkBinIcon(bin, sel) {
   const fillColor = getBinColor(bin.fill);
-  const emoji = '🗑️'; // uniform icon for all bin types; color-coded by fill level
+  const emoji = 'B'; // uniform icon for all bin types; color-coded by fill level
   const size = sel ? 22 : bin.fill > 85 ? 20 : bin.fill > 65 ? 18 : 16;
   return L.divIcon({
     html: '<div style="background:' + fillColor + '28;border:' + (sel ? '2px solid #fff' : '1.5px solid ' + fillColor) + ';border-radius:999px;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size * 0.54) + 'px;box-shadow:0 0 ' + (sel ? 12 : 5) + 'px ' + fillColor + '55;opacity:' + (sel ? '1' : '0.88') + ';">' + emoji + '</div>',
@@ -719,7 +719,7 @@ function mkWeighIcon(bridge, sel) {
   const clr = bridge.status === 'queued' ? '#f59e0b' : bridge.status === 'offline' ? '#6b7280' : '#10b981';
   const size = sel ? 36 : 32;
   return L.divIcon({
-    html: '<div style="position:relative;width:' + size + 'px;height:' + (size + 16) + 'px;"><div style="position:absolute;inset:0;background:' + clr + '22;border:' + (sel ? '2.5px solid #fff' : '2px solid ' + clr) + ';border-radius:12px;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size * 0.62) + 'px;box-shadow:0 0 ' + (sel ? 22 : 16) + 'px ' + clr + '66;">⚖️' + (bridge.queue > 0 ? '<div style="position:absolute;top:-6px;right:-6px;background:' + (bridge.queue > 3 ? '#ef4444' : clr) + ';color:#fff;border-radius:999px;min-width:14px;height:14px;padding:0 3px;font-size:8px;line-height:14px;font-weight:800;">' + bridge.queue + '</div>' : '') + '</div><div style="position:absolute;top:' + (size + 4) + 'px;left:50%;transform:translateX(-50%);font-size:7px;color:' + clr + ';white-space:nowrap;font-weight:800;letter-spacing:0.06em;text-shadow:0 0 8px rgba(0,0,0,0.7);">WEIGHBRIDGE</div></div>',
+    html: '<div style="position:relative;width:' + size + 'px;height:' + (size + 16) + 'px;"><div style="position:absolute;inset:0;background:' + clr + '22;border:' + (sel ? '2.5px solid #fff' : '2px solid ' + clr) + ';border-radius:12px;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size * 0.44) + 'px;font-weight:800;color:' + clr + ';box-shadow:0 0 ' + (sel ? 22 : 16) + 'px ' + clr + '66;">W' + (bridge.queue > 0 ? '<div style="position:absolute;top:-6px;right:-6px;background:' + (bridge.queue > 3 ? '#ef4444' : clr) + ';color:#fff;border-radius:999px;min-width:14px;height:14px;padding:0 3px;font-size:8px;line-height:14px;font-weight:800;">' + bridge.queue + '</div>' : '') + '</div><div style="position:absolute;top:' + (size + 4) + 'px;left:50%;transform:translateX(-50%);font-size:7px;color:' + clr + ';white-space:nowrap;font-weight:800;letter-spacing:0.06em;text-shadow:0 0 8px rgba(0,0,0,0.7);">WEIGHBRIDGE</div></div>',
     className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
   });
 }
@@ -728,27 +728,27 @@ function mkCamIcon(c) {
   const glow  = c.status === 'alert' ? 'box-shadow:0 0 10px #ef444466;' : c.status !== 'offline' ? 'box-shadow:0 0 4px ' + clr + '44;' : '';
   const badge = c.status === 'alert' ? '<div style="position:absolute;top:-4px;right:-4px;background:#ef4444;border-radius:50%;width:7px;height:7px;"/>' : '';
   return L.divIcon({
-    html: '<div style="position:relative;background:' + clr + '25;border:1.5px solid ' + clr + ';border-radius:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;' + glow + '">📷' + badge + '</div>',
+    html: '<div style="position:relative;background:' + clr + '25;border:1.5px solid ' + clr + ';border-radius:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:' + clr + ';' + glow + '">C' + badge + '</div>',
     className: '', iconSize: [22, 22], iconAnchor: [11, 11],
   });
 }
 function mkCmpIcon(c) {
   const clr  = c.priority === 'critical' ? '#ef4444' : c.priority === 'high' ? '#f59e0b' : c.priority === 'medium' ? '#3b82f6' : '#6b7280';
-  const em   = c.type === 'overflow_bin' ? '🗑' : c.type === 'illegal_dump' ? '⛔' : c.type === 'odor' ? '💨' : '📅';
+  const em   = c.type === 'overflow_bin' ? 'B' : c.type === 'illegal_dump' ? 'X' : c.type === 'odor' ? 'O' : 'C';
   const sz   = c.priority === 'critical' ? 28 : c.priority === 'high' ? 22 : 18;
   const brd  = c.priority === 'critical' ? '2px solid ' + clr : '1.5px solid ' + clr;
   const glow = c.priority === 'critical' ? 'box-shadow:0 0 12px ' + clr + '77;' : c.priority === 'high' ? 'box-shadow:0 0 6px ' + clr + '55;' : '';
   return L.divIcon({
-    html: '<div style="background:' + clr + '25;border:' + brd + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(sz * 0.52) + 'px;' + glow + '">' + em + '</div>',
+    html: '<div style="background:' + clr + '25;border:' + brd + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(sz * 0.44) + 'px;font-weight:800;color:' + clr + ';' + glow + '">' + em + '</div>',
     className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
   });
 }
 function mkStfIcon(s) {
   const clr  = s.status === 'on_route' ? '#06b6d4' : s.status === 'break' ? '#f59e0b' : s.status === 'absent' ? '#ef4444' : '#6b7280';
-  const em   = s.type === 'collector' ? '🧹' : '👷';
+  const em   = s.type === 'collector' ? 'C' : 'W';
   const sz   = 17;
   return L.divIcon({
-    html: '<div style="background:' + clr + '33;border:1px solid ' + clr + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:8px;">' + em + '</div>',
+    html: '<div style="background:' + clr + '33;border:1px solid ' + clr + ';border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:' + clr + ';">' + em + '</div>',
     className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
   });
 }
@@ -831,7 +831,7 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
     bin:       { badge:'SMART BIN',    clr:'#10b981' },
     facility:  { badge:'FACILITY',     clr:'#f59e0b' },
     complaint: { badge:'INCIDENT',     clr:'#ef4444' },
-    camera:    { badge:'CCTV UNIT',    clr:'#8b5cf6' },
+    camera:    { badge:'CCTV UNIT',    clr:'#06b6d4' },
     staff:     { badge:'FIELD STAFF',  clr:'#06b6d4' },
     ward:      { badge:'WARD METRICS', clr:'#22c55e' },
     weighbridge:{ badge:'WEIGHBRIDGE', clr:'#f59e0b' },
@@ -848,7 +848,7 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
   };
   const STATUS_CLR = {
     active:'#10b981', collecting:'#3b82f6', en_route:'#06b6d4', idle:'#6b7280',
-    breakdown:'#ef4444', maintenance:'#f59e0b', returning:'#a855f7',
+    breakdown:'#ef4444', maintenance:'#f59e0b', returning:'#0ea5e9',
     on_route:'#10b981', break:'#f59e0b', absent:'#ef4444',
     normal:'#10b981', needs_collection:'#f59e0b', overflow:'#ef4444',
     open:'#ef4444', assigned:'#f59e0b', resolved:'#10b981',
@@ -916,7 +916,7 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
           amber:  'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25',
           red:    'bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25',
           emerald:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25',
-          purple: 'bg-purple-500/15 border-purple-500/30 text-purple-400 hover:bg-purple-500/25',
+          purple: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25',
         };
         return <button key={i} onClick={onClick} className={'py-2 text-[10px] font-semibold rounded-lg border transition-colors '+(C[clr]||C.cyan)}>{label}</button>;
       })}
@@ -989,13 +989,13 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
 
           {data.status==='breakdown' && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 text-[10px] text-red-400 flex items-start space-x-2">
-              <span>⚠️</span><span>Vehicle breakdown — dispatch secondary unit immediately</span>
+              <span className="text-red-400 font-bold shrink-0">!</span><span>Vehicle breakdown — dispatch secondary unit immediately</span>
             </div>
           )}
 
           <BtnRow btns={[
-            {label:'🚛 Dispatch',  onClick:()=>onAction('dispatch',data), clr:'cyan'},
-            {label:'📡 Send Alert',onClick:()=>onAction('alert',data),    clr:'amber'},
+            {label:'Dispatch',  onClick:()=>onAction('dispatch',data), clr:'cyan'},
+            {label:'Send Alert',onClick:()=>onAction('alert',data),    clr:'amber'},
           ]} />
           <MonitorBtn label="Open Vehicle Monitoring" onClick={()=>onAction('monitor',data)} />
         </>
@@ -1112,13 +1112,13 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
 
           {data.capPct>80 && (
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2.5 text-[10px] text-amber-400">
-              ⚠️ Approaching capacity limit — coordinate incoming loads
+              Approaching capacity limit — coordinate incoming loads
             </div>
           )}
 
           <BtnRow btns={[
-            {label:'📋 Work Order',onClick:()=>onAction('workorder',data),clr:'amber'},
-            {label:'🚛 Dispatch',  onClick:()=>onAction('dispatch',data), clr:'cyan'},
+            {label:'Work Order',onClick:()=>onAction('workorder',data),clr:'amber'},
+            {label:'Dispatch',  onClick:()=>onAction('dispatch',data), clr:'cyan'},
           ]} />
           <MonitorBtn label="Open Facility Monitoring" onClick={()=>onAction('report',data)} />
         </>
@@ -1167,8 +1167,8 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
           </div>
 
           <BtnRow btns={[
-            {label:'🚛 Assign Vehicle', onClick:()=>{ onRerouteToAlert && onRerouteToAlert({ id:data.id, type:'complaint', lat:data.lat, lng:data.lng, name:data.type.replace(/_/g,' ')+' — '+data.ward }); onAction('assign',data); }, clr:'red'},
-            {label:'✓ Resolve',        onClick:()=>onAction('resolve',data), clr:'emerald'},
+            {label:'Assign Vehicle', onClick:()=>{ onRerouteToAlert && onRerouteToAlert({ id:data.id, type:'complaint', lat:data.lat, lng:data.lng, name:data.type.replace(/_/g,' ')+' — '+data.ward }); onAction('assign',data); }, clr:'red'},
+            {label:'Resolve',        onClick:()=>onAction('resolve',data), clr:'emerald'},
           ]} />
           <MonitorBtn label="Open Incident Monitoring" onClick={()=>onAction('escalate',data)} />
         </>
@@ -1258,8 +1258,8 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
           </div>
 
           <BtnRow btns={[
-            {label:'📹 Open Video Feed', onClick:()=>onAction('feed',data), clr:'purple'},
-            {label:'⚙️ Calibrate', onClick:()=>onAction('calibrate',data), clr:'amber'},
+            {label:'Open Video Feed', onClick:()=>onAction('feed',data), clr:'purple'},
+            {label:'Calibrate', onClick:()=>onAction('calibrate',data), clr:'amber'},
           ]} />
           <MonitorBtn label="Open Weighbridge Monitoring" onClick={()=>onAction('monitor',data)} />
         </>
@@ -1417,15 +1417,15 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
 // ── LEFT CONTROL PANEL ───────────────────────────────────────────────────────
 const ALERT_ACTIONS = {
   critical: [
-    { label:'🚨 Escalate',  clr:'bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25'        },
-    { label:'🚛 Dispatch',  clr:'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25'    },
+    { label:'Escalate',   clr:'bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25'        },
+    { label:'Dispatch',   clr:'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25'    },
   ],
   warning: [
-    { label:'📋 Assign',    clr:'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25' },
-    { label:'🔍 Inspect',   clr:'bg-blue-500/15 border-blue-500/30 text-blue-400 hover:bg-blue-500/25'   },
+    { label:'Assign',     clr:'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25' },
+    { label:'Inspect',    clr:'bg-blue-500/15 border-blue-500/30 text-blue-400 hover:bg-blue-500/25'   },
   ],
   info: [
-    { label:'✓ Acknowledge',clr:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25' },
+    { label:'Acknowledge',clr:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25' },
   ],
 };
 
@@ -1455,7 +1455,7 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
   return (
     <div className="w-56 bg-cwm-darker border-r border-cwm-border flex flex-col shrink-0 overflow-hidden">
       <div className="flex border-b border-cwm-border shrink-0">
-        {[['layers','Layers'],['alerts','Alerts'],['routes','🛣️'],['assets','Assets'],['wards','Wards']].map(([k,l]) => (
+        {[['layers','Layers'],['alerts','Alerts'],['routes','Routes'],['assets','Assets'],['wards','Wards']].map(([k,l]) => (
           <button key={k} onClick={()=>setTab(k)} className={'flex-1 py-2 text-[10px] font-semibold border-b-2 transition-colors relative ' + (tab===k?'border-cyan-500 text-cyan-400':'border-transparent text-slate-500 hover:text-slate-300')}>
             {l}
             {k==='alerts' && critCount>0 && (
@@ -1479,7 +1479,7 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
         {tab === 'layers' && LAYER_CONFIG.map(lc => (
           <button key={lc.key} onClick={()=>setLayers(p=>({...p,[lc.key]:!p[lc.key]}))}
             className={'w-full flex items-center space-x-2 px-2 py-2 rounded-lg transition-all text-left ' + (layers[lc.key]?'bg-cwm-accent/15 border border-cwm-accent/30':'bg-white/[0.02] border border-transparent hover:bg-white/[0.04]')}>
-            <span className="text-sm leading-none">{lc.icon}</span>
+            <span className="text-[9px] font-mono font-bold text-slate-500 leading-none">{lc.icon}</span>
             <span className="text-[11px] font-medium text-slate-300 flex-1">{lc.label}</span>
             <div className={'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors ' + (layers[lc.key]?'bg-cyan-400':'bg-slate-700')} />
           </button>
@@ -1493,16 +1493,16 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
             <div className="grid grid-cols-2 gap-1">
               <button onClick={() => setActiveRouteIds(new Set(Object.keys(ROUTE_DEFS).filter(k => ROUTE_DEFS[k].service === 'collection')))}
                 className="py-1.5 text-[9px] font-semibold rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 hover:bg-cyan-500/20 transition-colors">
-                🚛 All Collection
+                All Collection
               </button>
               <button onClick={() => setActiveRouteIds(new Set(Object.keys(ROUTE_DEFS).filter(k => ROUTE_DEFS[k].service === 'haul')))}
                 className="py-1.5 text-[9px] font-semibold rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-400 hover:bg-amber-500/20 transition-colors">
-                🔄 All Haul
+                All Haul
               </button>
               {selectedZoneId && (
                 <button onClick={() => setActiveRouteIds(new Set(Object.keys(ROUTE_DEFS).filter(k => ROUTE_ZONE_SETS[k]?.has(selectedZoneId))))}
                   className="col-span-2 py-1.5 text-[9px] font-semibold rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
-                  🗺️ Zone {selectedZoneId} Routes
+                  Zone {selectedZoneId} Routes
                 </button>
               )}
               <button onClick={() => { setActiveRouteIds(new Set()); setFocusedRouteId(null); }}
@@ -1560,7 +1560,9 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
 
             {visible.length === 0 && (
               <div className="text-center py-8">
-                <div className="text-2xl mb-1">✅</div>
+              <div className="flex justify-center mb-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-emerald-500/50"><path d="M5 13l4 4L19 7"/></svg>
+              </div>
                 <p className="text-[10px] text-slate-600">No active alerts</p>
               </div>
             )}
@@ -1606,9 +1608,9 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
                       if (!assetId) return null;
                       return (
                         <button
-                          onClick={() => { onRerouteFromAlert(assetId); doAction(a, '🚛 Assigned'); }}
+                          onClick={() => { onRerouteFromAlert(assetId); doAction(a, 'Assigned'); }}
                           className="text-[8px] font-semibold px-2 py-1 rounded-lg border transition-colors bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25">
-                          🚛 Assign Vehicle
+                          Assign Vehicle
                         </button>
                       );
                     })()}
@@ -1653,10 +1655,10 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[8px]">
-                    <span className="text-slate-500">🗑 {w.bins}</span>
-                    {w.overflow > 0 ? <span className="text-amber-400 font-semibold">⚠ {w.overflow}</span> : <span className="text-emerald-500">✓ clean</span>}
-                    {w.complaints > 0 && <span className="text-red-400">📋{w.complaints}</span>}
-                    <span className="text-slate-500">👷{w.staff}</span>
+                    <span className="text-slate-500">Bins: {w.bins}</span>
+                    {w.overflow > 0 ? <span className="text-amber-400 font-semibold">! {w.overflow}</span> : <span className="text-emerald-500">clean</span>}
+                    {w.complaints > 0 && <span className="text-red-400">C:{w.complaints}</span>}
+                    <span className="text-slate-500">S:{w.staff}</span>
                   </div>
                 </button>
               );
@@ -1665,18 +1667,18 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
         )}
 
         {tab === 'assets' && [
-          { icon:'🚛', label:'Total Fleet',    v:stats.totalVehicles, vc:'text-white' },
-          { icon:'✅', label:'Active Now',     v:stats.activeVehicles, vc:'text-emerald-400' },
-          { icon:'🔴', label:'Breakdown',      v:stats.breakdown, vc:'text-red-400' },
-          { icon:'🗑️', label:'Total Bins',     v:stats.totalBins, vc:'text-cyan-400' },
-          { icon:'⚠️', label:'Overflow Bins',  v:stats.overflow, vc:'text-amber-400' },
-          { icon:'👷', label:'Staff On Route', v:stats.staffOnRoute, vc:'text-emerald-400' },
-          { icon:'📋', label:'Open Cases',     v:stats.openComplaints, vc:'text-amber-400' },
-          { icon:'📷', label:'Live Cameras',   v:stats.liveCameras, vc:'text-cyan-400' },
-          { icon:'⚖️', label:'Weighbridges',   v:stats.liveWeighbridges, vc:'text-amber-400' },
+          { icon:'V',  label:'Total Fleet',    v:stats.totalVehicles, vc:'text-white' },
+          { icon:'A',  label:'Active Now',     v:stats.activeVehicles, vc:'text-emerald-400' },
+          { icon:'X',  label:'Breakdown',      v:stats.breakdown, vc:'text-red-400' },
+          { icon:'B',  label:'Total Bins',     v:stats.totalBins, vc:'text-cyan-400' },
+          { icon:'!',  label:'Overflow Bins',  v:stats.overflow, vc:'text-amber-400' },
+          { icon:'S',  label:'Staff On Route', v:stats.staffOnRoute, vc:'text-emerald-400' },
+          { icon:'C',  label:'Open Cases',     v:stats.openComplaints, vc:'text-amber-400' },
+          { icon:'Cv', label:'Live Cameras',   v:stats.liveCameras, vc:'text-cyan-400' },
+          { icon:'Wb', label:'Weighbridges',   v:stats.liveWeighbridges, vc:'text-amber-400' },
         ].map(s => (
           <div key={s.label} className="flex items-center justify-between px-2 py-1.5 rounded bg-white/[0.02]">
-            <div className="flex items-center space-x-2"><span className="text-xs">{s.icon}</span><span className="text-[10px] text-slate-400">{s.label}</span></div>
+            <div className="flex items-center space-x-2"><span className="text-[9px] font-mono font-bold text-slate-500 w-5 text-center">{s.icon}</span><span className="text-[10px] text-slate-400">{s.label}</span></div>
             <span className={'text-[11px] font-bold ' + s.vc}>{s.v}</span>
           </div>
         ))}
@@ -1890,7 +1892,7 @@ function WTE3DViewer({ facility, onClose }) {
         const t = ((frame * 0.003 + i * 0.33) % 1);
         const gx = -2.8 + t * 3.3, gy = 2.5 + i * 0.35;
         const [vx, vy] = toIso(gx, gy, 0);
-        ctx.font = '13px serif'; ctx.textAlign = 'center'; ctx.fillText('🚛', vx, vy + 5);
+        ctx.font = '11px monospace'; ctx.textAlign = 'center'; ctx.fillText('V', vx, vy + 5);
         ctx.font = '6px monospace'; ctx.fillStyle = 'rgba(6,182,212,0.75)';
         ctx.fillText(id, vx, vy - 5);
       });
@@ -1936,12 +1938,12 @@ function WTE3DViewer({ facility, onClose }) {
   ];
 
   const flowStages = [
-    { icon: '🚛', label: 'Waste Reception & Tipping Hall',  val: liveStats.wasteIn + ' t/day', clr: '#10b981', pct: Math.min(100, (liveStats.wasteIn / 280) * 100) },
-    { icon: '🔥', label: 'Combustion Chamber & Boiler',     val: liveStats.boilerTemp + '°C',  clr: '#f97316', pct: Math.min(100, ((liveStats.boilerTemp - 800) / 100) * 100) },
-    { icon: '💨', label: 'Steam Generation (HP Turbine)',   val: liveStats.steamPressure + ' bar', clr: '#06b6d4', pct: Math.min(100, (liveStats.steamPressure / 65) * 100) },
-    { icon: '⚡', label: 'Turbine & Grid Power Output',     val: liveStats.powerOut + ' MW',    clr: '#f59e0b', pct: Math.min(100, (liveStats.powerOut / 15) * 100) },
-    { icon: '🌫️', label: 'Flue Gas Treatment (FGT)',       val: liveStats.fgtTemp + '°C',      clr: '#8b5cf6', pct: Math.min(100, (liveStats.fgtTemp / 200) * 100) },
-    { icon: '🏔️', label: 'Residue / Ash Handling',         val: liveStats.ashOut + ' t/h',     clr: '#6b7280', pct: Math.min(100, (liveStats.ashOut / 35) * 100) },
+    { icon: 'V', label: 'Waste Reception & Tipping Hall',  val: liveStats.wasteIn + ' t/day', clr: '#10b981', pct: Math.min(100, (liveStats.wasteIn / 280) * 100) },
+    { icon: 'F', label: 'Combustion Chamber & Boiler',     val: liveStats.boilerTemp + '°C',  clr: '#f97316', pct: Math.min(100, ((liveStats.boilerTemp - 800) / 100) * 100) },
+    { icon: 'S', label: 'Steam Generation (HP Turbine)',   val: liveStats.steamPressure + ' bar', clr: '#06b6d4', pct: Math.min(100, (liveStats.steamPressure / 65) * 100) },
+    { icon: 'E', label: 'Turbine & Grid Power Output',     val: liveStats.powerOut + ' MW',    clr: '#f59e0b', pct: Math.min(100, (liveStats.powerOut / 15) * 100) },
+    { icon: 'G', label: 'Flue Gas Treatment (FGT)',       val: liveStats.fgtTemp + '°C',      clr: '#06b6d4', pct: Math.min(100, (liveStats.fgtTemp / 200) * 100) },
+    { icon: 'A', label: 'Residue / Ash Handling',         val: liveStats.ashOut + ' t/h',     clr: '#6b7280', pct: Math.min(100, (liveStats.ashOut / 35) * 100) },
   ];
 
   return (
@@ -1954,7 +1956,8 @@ function WTE3DViewer({ facility, onClose }) {
           style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.07) 0%,transparent 55%)' }}>
           <div className="flex items-center space-x-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0"
-              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)' }}>🏭</div>
+              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)' }}>
+                <svg className="w-6 h-6" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
             <div>
               <h2 className="text-sm font-bold text-white">{facility.name}</h2>
               <p className="text-[10px] text-amber-300/70 mt-0.5 font-mono">
@@ -1975,7 +1978,7 @@ function WTE3DViewer({ facility, onClose }) {
 
         {/* TAB BAR */}
         <div className="flex border-b border-cwm-border shrink-0 px-6 bg-black/20">
-          {[['3d', '🏗️  3D Plant View'], ['sensors', '📡  Live Sensors'], ['flow', '⚡  Process Flow']].map(([k, l]) => (
+          {[['3d', '3D Plant View'], ['sensors', 'Live Sensors'], ['flow', 'Process Flow']].map(([k, l]) => (
             <button key={k} onClick={() => setTab(k)}
               className={'px-5 py-2.5 text-[11px] font-semibold border-b-2 transition-colors ' + (tab === k ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-300')}>
               {l}
@@ -1994,11 +1997,11 @@ function WTE3DViewer({ facility, onClose }) {
                 <canvas ref={canvasRef} width={660} height={475}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div className="absolute top-3 left-3 text-[8px] font-mono text-cyan-400/55 space-y-0.5 pointer-events-none">
-                  <div>🏭 Kerawalapitiya WTE — Isometric 3D View</div>
+                  <div>Kerawalapitiya WTE — Isometric 3D View</div>
                   <div>Double-click any facility on the map to open sub-twin</div>
                 </div>
                 <div className="absolute bottom-3 left-3 flex flex-wrap gap-1 pointer-events-none">
-                  {[['🟩', 'Tipping Hall'], ['🟧', 'Combustion / Boiler'], ['🟦', 'Turbine Hall'], ['🟪', 'FGT / Stacks'], ['⬛', 'Ash / Utilities']].map(([em, lbl]) => (
+                  {[['G', 'Tipping Hall'], ['O', 'Combustion / Boiler'], ['B', 'Turbine Hall'], ['C', 'FGT / Stacks'], ['S', 'Ash / Utilities']].map(([em, lbl]) => (
                     <span key={lbl} className="text-[8px] bg-black/65 rounded px-1.5 py-0.5 text-slate-400">{em} {lbl}</span>
                   ))}
                 </div>
@@ -2041,7 +2044,7 @@ function WTE3DViewer({ facility, onClose }) {
                     {flowStages.map((s, i) => (
                       <div key={i}>
                         <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                          <span className="text-base shrink-0">{s.icon}</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-500 shrink-0 w-5 text-center">{s.icon}</span>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-baseline mb-1.5">
                               <p className="text-[10px] font-semibold text-white truncate">{s.label}</p>
@@ -2071,19 +2074,19 @@ function WTE3DViewer({ facility, onClose }) {
           <div className="w-52 border-l border-cwm-border bg-black/25 p-3 flex flex-col gap-2 overflow-y-auto shrink-0">
             <p className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">PLANT KPIs</p>
             {[
-              { label: 'Power Output',  val: liveStats.powerOut + ' MW',      vc: 'text-amber-400',   icon: '⚡' },
-              { label: 'Waste Intake',  val: liveStats.wasteIn + ' t/day',    vc: 'text-emerald-400', icon: '🚛' },
-              { label: 'Boiler Temp',   val: liveStats.boilerTemp + '°C',     vc: 'text-orange-400',  icon: '🌡️' },
-              { label: 'Steam Press',   val: liveStats.steamPressure + ' bar', vc: 'text-cyan-400',   icon: '💨' },
-              { label: 'Turbine RPM',   val: liveStats.turbineRPM + ' rpm',   vc: 'text-blue-400',    icon: '⚙️' },
-              { label: 'FGT Temp',      val: liveStats.fgtTemp + '°C',        vc: 'text-purple-400',  icon: '🌫️' },
-              { label: 'Ash Output',    val: liveStats.ashOut + ' t/h',       vc: 'text-slate-400',   icon: '🏔️' },
-              { label: 'Capacity',      val: facility.capPct + '%',           vc: facility.capPct > 80 ? 'text-red-400' : 'text-amber-400', icon: '📊' },
-              { label: 'System Uptime', val: '99.2%',                         vc: 'text-emerald-400', icon: '✅' },
+              { label: 'Power Output',  val: liveStats.powerOut + ' MW',      vc: 'text-amber-400',   icon: 'E' },
+              { label: 'Waste Intake',  val: liveStats.wasteIn + ' t/day',    vc: 'text-emerald-400', icon: 'V' },
+              { label: 'Boiler Temp',   val: liveStats.boilerTemp + '°C',     vc: 'text-orange-400',  icon: 'B' },
+              { label: 'Steam Press',   val: liveStats.steamPressure + ' bar', vc: 'text-cyan-400',   icon: 'S' },
+              { label: 'Turbine RPM',   val: liveStats.turbineRPM + ' rpm',   vc: 'text-blue-400',    icon: 'T' },
+              { label: 'FGT Temp',      val: liveStats.fgtTemp + '°C',        vc: 'text-cyan-400',    icon: 'G' },
+              { label: 'Ash Output',    val: liveStats.ashOut + ' t/h',       vc: 'text-slate-400',   icon: 'A' },
+              { label: 'Capacity',      val: facility.capPct + '%',           vc: facility.capPct > 80 ? 'text-red-400' : 'text-amber-400', icon: 'C' },
+              { label: 'System Uptime', val: '99.2%',                         vc: 'text-emerald-400', icon: 'U' },
             ].map(s => (
               <div key={s.label} className="flex items-center justify-between px-2 py-2 rounded-lg bg-white/[0.025] border border-white/[0.05]">
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-xs leading-none">{s.icon}</span>
+                  <span className="text-[9px] font-mono font-bold text-slate-600 leading-none">{s.icon}</span>
                   <span className="text-[9px] text-slate-500">{s.label}</span>
                 </div>
                 <span className={'text-[10px] font-bold ' + s.vc}>{s.val}</span>
@@ -2450,7 +2453,7 @@ export default function DigitalTwin({ isPreview = false }) {
     setActiveRouteIds(prev => new Set([...prev, nearest.routeId]));
     setFocusedRouteId(nearest.routeId);
 
-    setRerouteToast(`🚛 ${nearest.id} rerouted → ${target.name || target.id}`);
+    setRerouteToast(`${nearest.id} rerouted → ${target.name || target.id}`);
     setLiveAlerts(prev => [{
       id: 'ALT-' + Date.now(), sev: 'info',
       msg: `${nearest.id} dispatched to ${target.id} — en route`,
@@ -2527,7 +2530,7 @@ export default function DigitalTwin({ isPreview = false }) {
       {/* REROUTE TOAST */}
       {!isPreview && rerouteToast && (
         <div className="absolute top-12 left-1/2 -translate-x-1/2 z-[2000] bg-cyan-500/20 backdrop-blur border border-cyan-500/40 rounded-lg px-4 py-2 text-xs text-cyan-400 font-semibold shadow-xl pointer-events-none">
-          🚛 {rerouteToast}
+          {rerouteToast}
         </div>
       )}
 
@@ -2540,13 +2543,13 @@ export default function DigitalTwin({ isPreview = false }) {
         </div>
         <div className="flex items-center space-x-2 overflow-x-auto">
           {[
-            { icon:'🚛', label:'Active Vehicles', v: stats.activeVehicles, vc:'text-emerald-400' },
-            { icon:'🚨', label:'Critical Alerts',  v: stats.critAlerts,     vc:'text-red-400' },
-            { icon:'🗑️', label:'Overflow Bins',    v: stats.overflow,       vc:'text-amber-400' },
-            { icon:'👷', label:'Staff On Route',   v: stats.staffOnRoute,   vc:'text-cyan-400' },
+            { icon:'V',  label:'Active Vehicles', v: stats.activeVehicles, vc:'text-emerald-400' },
+            { icon:'!',  label:'Critical Alerts',  v: stats.critAlerts,     vc:'text-red-400' },
+            { icon:'B',  label:'Overflow Bins',    v: stats.overflow,       vc:'text-amber-400' },
+            { icon:'S',  label:'Staff On Route',   v: stats.staffOnRoute,   vc:'text-cyan-400' },
           ].map(s => (
             <div key={s.label} className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] shrink-0">
-              <span className="text-sm">{s.icon}</span>
+              <span className="text-[9px] font-mono font-bold text-slate-500 w-4 text-center">{s.icon}</span>
               <div><p className={'text-sm font-bold leading-none ' + s.vc}>{s.v}</p><p className="text-[9px] text-slate-600 mt-0.5">{s.label}</p></div>
             </div>
           ))}
@@ -2789,7 +2792,7 @@ export default function DigitalTwin({ isPreview = false }) {
           {/* Active route count badge (all-zones view) */}
           {!selectedZoneId && activeRouteIds.size > 0 && !isPreview && (
             <div className="absolute top-2 left-2 z-[999] flex items-center space-x-2 bg-cwm-panel/90 backdrop-blur-sm border border-cwm-border rounded-lg px-3 py-1.5 shadow-xl">
-              <span className="text-[10px] text-cyan-400 font-semibold">🛣️ {activeRouteIds.size} route{activeRouteIds.size > 1 ? 's' : ''} active</span>
+              <span className="text-[10px] text-cyan-400 font-semibold">{activeRouteIds.size} route{activeRouteIds.size > 1 ? 's' : ''} active</span>
               <button onClick={() => { setActiveRouteIds(new Set()); setFocusedRouteId(null); }}
                 className="text-[9px] text-slate-500 hover:text-red-400 transition-colors font-semibold border border-slate-700 rounded px-1.5 py-0.5">
                 ✕ Clear
@@ -2821,7 +2824,7 @@ export default function DigitalTwin({ isPreview = false }) {
                     allZoneActive ? 'border-cyan-500/50 text-cyan-400' : 'border-cwm-border text-slate-500 hover:text-slate-300'
                   }`}
                 >
-                  <span>🛣️</span><span>Routes {allZoneActive ? 'On' : 'Off'}</span>
+                  <span>Routes {allZoneActive ? 'On' : 'Off'}</span>
                 </button>
               </div>
             );
@@ -2843,7 +2846,7 @@ export default function DigitalTwin({ isPreview = false }) {
                 {vehicles.filter(v => v.rerouteInfo).map(v => {
                   const ri = v.rerouteInfo;
                   const pct = Math.min(100, Math.round((ri.rerouteIdx / Math.max(1, ri.reroutePath.length - 1)) * 100));
-                  const phaseLabel = ri.phase === 'heading' ? `En route — ${pct}%` : '📍 Arrived — servicing';
+                  const phaseLabel = ri.phase === 'heading' ? `En route — ${pct}%` : 'Arrived — servicing';
                   return (
                     <div key={v.id} className="flex items-center space-x-2 px-2 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
                       <span className="text-[9px] font-mono font-bold text-cyan-400 shrink-0">{v.id}</span>
@@ -2888,11 +2891,11 @@ export default function DigitalTwin({ isPreview = false }) {
             {/* Header */}
             <div className={'flex items-center justify-between px-5 py-4 border-b border-cwm-border ' + (alertActionModal.alert.sev === 'critical' ? 'bg-red-500/5' : alertActionModal.alert.sev === 'warning' ? 'bg-amber-500/5' : 'bg-blue-500/5')}>
               <div className="flex items-center space-x-3">
-                <div className={'text-xl ' + (alertActionModal.action.includes('Escalate') ? '🚨' : alertActionModal.action.includes('Dispatch') ? '🚛' : '✓')}>
-                  {alertActionModal.action.includes('Escalate') ? '🚨' : alertActionModal.action.includes('Dispatch') ? '🚛' : alertActionModal.action.includes('Assign') ? '📋' : '✓'}
+                <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-300"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">{alertActionModal.action.replace(/[🚨🚛✓📋🔍]/g, '').trim()}</p>
+                  <p className="text-xs font-bold text-white">{alertActionModal.action}</p>
                   <p className={'text-[9px] font-mono mt-0.5 ' + (alertActionModal.alert.sev === 'critical' ? 'text-red-400' : alertActionModal.alert.sev === 'warning' ? 'text-amber-400' : 'text-blue-400')}>
                     {alertActionModal.alert.sev?.toUpperCase()} · {alertActionModal.alert.id} · {alertActionModal.alert.time}
                   </p>
@@ -2972,12 +2975,12 @@ export default function DigitalTwin({ isPreview = false }) {
               <button
                 onClick={() => {
                   setAlertActionModal(null);
-                  setActionMsg(alertActionModal.action.replace(/[🚨🚛✓📋🔍]/g, '').trim() + ' — submitted successfully');
+                  setActionMsg(alertActionModal.action + ' — submitted successfully');
                   setTimeout(() => setActionMsg(null), 2800);
                 }}
                 className={'w-full py-2.5 rounded-xl text-[11px] font-bold tracking-wide transition-colors border ' + (alertActionModal.action.includes('Escalate') ? 'bg-red-500/15 border-red-500/40 text-red-400 hover:bg-red-500/25' : alertActionModal.action.includes('Dispatch') ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/25' : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25')}
               >
-                Confirm {alertActionModal.action.replace(/[🚨🚛✓📋🔍]/g, '').trim()}
+                Confirm {alertActionModal.action}
               </button>
             </div>
           </div>

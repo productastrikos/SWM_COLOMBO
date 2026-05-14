@@ -26,7 +26,7 @@ const modules = [
   { id: 'hr', name: 'Human Resources', icon: '👥', color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30' },
   { id: 'finance', name: 'Finance & Budget', icon: '💰', color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30' },
   { id: 'procurement', name: 'Procurement', icon: '📦', color: 'from-amber-500/20 to-amber-600/10 border-amber-500/30' },
-  { id: 'it', name: 'IT & Security', icon: '🔒', color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30' },
+  { id: 'it', name: 'IT & Security', icon: '🔒', color: 'from-slate-500/20 to-slate-600/10 border-slate-500/30' },
   { id: 'legal', name: 'Legal & Compliance', icon: '⚖️', color: 'from-red-500/20 to-red-600/10 border-red-500/30' },
   { id: 'esg', name: 'ESG Reporting', icon: '🌿', color: 'from-green-500/20 to-green-600/10 border-green-500/30' },
   { id: 'citizen', name: 'Citizen Services', icon: '📱', color: 'from-cyan-500/20 to-cyan-600/10 border-cyan-500/30' },
@@ -270,7 +270,7 @@ export default function Enterprise() {
           <p className="text-sm text-slate-500 mt-1">HR · Finance · Procurement · IT · Legal · ESG · Citizen Services</p>
         </div>
         <div className="flex items-center space-x-2 text-[10px]">
-          <span className="px-2 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-purple-400">MIS INTEGRATED</span>
+          <span className="px-2 py-1 bg-slate-500/10 border border-slate-500/30 rounded text-slate-400">MIS INTEGRATED</span>
         </div>
       </div>
       {/* Module Selector */}

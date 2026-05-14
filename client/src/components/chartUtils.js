@@ -3,7 +3,8 @@ import React from 'react';
 /* ─── CSS-variable reader ─────────────────────────────────── */
 export function getCSSVar(name) {
   if (typeof document === 'undefined') return '';
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const el = document.body || document.documentElement;
+  return getComputedStyle(el).getPropertyValue(name).trim();
 }
 
 /* ─── Snapshot of all chart colour tokens for the current theme ─ */
@@ -16,7 +17,7 @@ export function getChartTokens() {
     gridColor:     getCSSVar('--cwm-chart-grid'),
     tickColor:     getCSSVar('--cwm-text-faint'),
     tickMuted:     getCSSVar('--cwm-text-muted'),
-    legendColor:   getCSSVar('--cwm-text-muted'),
+    legendColor:   getCSSVar('--cwm-text'),
     success:       getCSSVar('--cwm-success'),
     warning:       getCSSVar('--cwm-warning'),
     danger:        getCSSVar('--cwm-danger'),
@@ -58,13 +59,15 @@ export function chartScales(overrides = {}) {
 function buildPalettes() {
   const t = getChartTokens();
   return {
-    categorical: [t.accent, t.violet, t.info, '#14b8a6', '#e879f9', '#ec4899', '#6366f1', '#a78bfa'],
+    categorical: [t.accent, t.info, '#14b8a6', '#f59e0b', '#ec4899', '#6366f1', '#a3e635', '#94a3b8'],
     area: {
-      cyan:   { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
-      blue:   { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
-      violet: { border: '#8b5cf6',  fill: 'rgba(139, 92, 246, 0.12)' },
-      pink:   { border: '#ec4899',  fill: 'rgba(236, 72, 153, 0.10)' },
-      slate:  { border: t.tickMuted, fill: getCSSVar('--cwm-surface-soft') },
+      cyan:    { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
+      blue:    { border: '#3b7de8',  fill: 'rgba(59, 125, 232, 0.15)' },
+      violet:  { border: '#8b5cf6',  fill: 'rgba(139, 92, 246, 0.12)' },
+      pink:    { border: '#ec4899',  fill: 'rgba(236, 72, 153, 0.10)' },
+      emerald: { border: '#10b981',  fill: 'rgba(16, 185, 129, 0.12)' },
+      amber:   { border: '#f59e0b',  fill: 'rgba(245, 158, 11, 0.12)' },
+      slate:   { border: t.tickMuted, fill: getCSSVar('--cwm-surface-soft') },
     },
   };
 }

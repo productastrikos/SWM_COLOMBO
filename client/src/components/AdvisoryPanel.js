@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { executeAdvisoryAction } from '../services/api';
 
 const PRIORITY_META = {
-  critical:    { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'CRITICAL' },
-  high:        { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'HIGH' },
-  medium:      { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'MEDIUM' },
-  info:        { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'INFO' },
-  low:         { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'LOW' },
-  predictive:  { border:'border-white/20', bg:'', badge:'text-white font-semibold',  label:'PREDICTIVE' },
+  critical:    { border:'border-white/35', bg:'', badge:'bg-red-500/60 text-white font-semibold px-1.5 py-0.5 rounded',        label:'CRITICAL' },
+  high:        { border:'border-white/35', bg:'', badge:'bg-orange-500/60 text-white font-semibold px-1.5 py-0.5 rounded',     label:'HIGH' },
+  medium:      { border:'border-white/35', bg:'', badge:'bg-amber-400/60 text-black font-semibold px-1.5 py-0.5 rounded',      label:'MEDIUM' },
+  info:        { border:'border-white/35', bg:'', badge:'bg-blue-500/60 text-white font-semibold px-1.5 py-0.5 rounded',       label:'INFO' },
+  low:         { border:'border-white/35', bg:'', badge:'bg-slate-400/60 text-white font-semibold px-1.5 py-0.5 rounded',      label:'LOW' },
+  predictive:  { border:'border-white/35', bg:'', badge:'bg-violet-500/60 text-white font-semibold px-1.5 py-0.5 rounded',    label:'PREDICTIVE' },
 };
 
 // Safely render an evidence item — never shows raw JSON
@@ -240,7 +240,7 @@ const STATIC_ADVISORIES = [
 
 const ACTION_FORMS = {
   dispatch_crew: {
-    title: '🚛 Dispatch Crew',
+    title: 'Dispatch Crew',
     color: 'cyan',
     fields: [
       { key:'zone',     label:'Target Zone',       type:'select',   opts:['Zone 1 – Northern Port','Zone 2 – Inner North','Zone 3 – Central','Zone 4 – Western Coastal','Zone 5 – Southern'] },
@@ -250,7 +250,7 @@ const ACTION_FORMS = {
     ],
   },
   optimize_routes: {
-    title: '🗺️ Optimize Routes',
+    title: 'Optimize Routes',
     color: 'emerald',
     fields: [
       { key:'zones',    label:'Target Zones',       type:'select',   opts:['All Zones','Zone 1 – Northern Port','Zone 2 – Inner North','Zone 3 – Central','Zone 4 – Western Coastal','Zone 5 – Southern'] },
@@ -260,7 +260,7 @@ const ACTION_FORMS = {
     ],
   },
   notify_citizens: {
-    title: '📢 Notify Citizens',
+    title: 'Notify Citizens',
     color: 'amber',
     fields: [
       { key:'area',     label:'Affected Area',      type:'select',   opts:['Pettah Ward','Borella Ward','Grandpass Ward','Kotahena Ward','Kirulapone Ward','Rajagiriya Ward','All Colombo'] },
@@ -270,7 +270,7 @@ const ACTION_FORMS = {
     ],
   },
   create_work_order: {
-    title: '📋 Create Work Order',
+    title: 'Create Work Order',
     color: 'purple',
     fields: [
       { key:'title',    label:'Work Order Title',   type:'text',     placeholder:'e.g. Emergency cleanup – Grandpass junction' },
@@ -283,10 +283,10 @@ const ACTION_FORMS = {
 };
 
 const COLOR_MAP = {
-  cyan:   { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
-  emerald:{ ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
-  amber:  { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
-  purple: { ring:'focus:ring-white/20', btn:'bg-white/8 border-white/15 text-white hover:bg-white/15' },
+  cyan:   { ring:'focus:ring-cyan-700/30',    btn:'bg-cyan-600/15 border border-cyan-700/50 text-cyan-800 hover:bg-cyan-600/25' },
+  emerald:{ ring:'focus:ring-emerald-700/30', btn:'bg-emerald-600/15 border border-emerald-700/50 text-emerald-800 hover:bg-emerald-600/25' },
+  amber:  { ring:'focus:ring-amber-700/30',   btn:'bg-amber-600/15 border border-amber-700/50 text-amber-800 hover:bg-amber-600/25' },
+  purple: { ring:'focus:ring-purple-700/30',  btn:'bg-purple-600/15 border border-purple-700/50 text-purple-900 hover:bg-purple-600/25' },
 };
 
 export default function AdvisoryPanel({ advisories = [], onClose }) {
@@ -340,8 +340,8 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
       {/* HEADER */}
       <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between shrink-0">
         <div>
-          <h3 className="text-base font-semibold text-white">AI Advisories</h3>
-          <p className="text-xs text-white/60">{merged.length} active recommendations</p>
+          <h3 className="text-base font-semibold text-black">AI Advisories</h3>
+          <p className="text-xs text-black/60">{merged.length} active recommendations</p>
         </div>
         <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,7 +356,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
           {/* Form header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-cwm-border shrink-0">
             <div>
-              <p className="text-[11px] font-bold text-white">{ACTION_FORMS[actionForm.actionType]?.title}</p>
+              <p className="text-[11px] font-bold text-black">{ACTION_FORMS[actionForm.actionType]?.title}</p>
               <p className="text-[9px] text-slate-400 mt-0.5 line-clamp-1">{actionForm.advisoryTitle}</p>
             </div>
             <button onClick={() => setActionForm(null)} className="text-slate-400 hover:text-white text-xl leading-none transition-colors w-7 h-7 flex items-center justify-center rounded hover:bg-white/10">×</button>
@@ -423,7 +423,8 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
 
           return (
             <div key={advisory.advisoryId}
-              className={'border rounded-xl overflow-hidden transition-all duration-200 ' + pm.border + ' ' + pm.bg}>
+              className={'advisory-card rounded-xl overflow-hidden transition-all duration-200 ' + pm.bg}
+              style={{ background: '#d9d3ff' }}>
 
               {/* ── Card header (always visible) ── */}
               <button className="w-full text-left px-3.5 pt-3 pb-2.5 group"
@@ -433,29 +434,29 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <span className={'text-[10px] ' + pm.badge}>{pm.label}</span>
-                    <span className="text-[10px] text-slate-400">{titleCase(advisory.template)}</span>
+                    <span className="text-[10px] text-white">{titleCase(advisory.template)}</span>
                   </div>
-                  <svg className={'w-3.5 h-3.5 text-slate-400 transition-transform group-hover:text-slate-200 ' + (isExpanded ? 'rotate-180' : '')}
+                  <svg className={'w-3.5 h-3.5 text-white transition-transform group-hover:text-white/70 ' + (isExpanded ? 'rotate-180' : '')}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
 
                 {/* Advisory title */}
-                <p className="text-[13px] font-semibold text-white leading-snug pr-1">{advisory.title}</p>
+                <p className="text-[13px] font-semibold leading-snug pr-1">{advisory.title}</p>
 
 
               </button>
 
               {/* ── Expanded body ── */}
               {isExpanded && (
-                <div className="border-t border-white/[0.055] divide-y divide-white/[0.04]">
+                <div className="border-t-2 border-black/15 divide-y-2 divide-black/10">
 
                   {/* ROOT CAUSE */}
                   {advisory.rootCause && (
                     <div className="px-3.5 py-3">
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Root Cause</p>
-                      <div className="pl-2 border-l-2 border-amber-500/30 space-y-1.5">
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Root Cause</p>
+                      <div className="pl-2 border-l-4 border-black/25 space-y-1.5">
                         {typeof advisory.rootCause === 'object' ? (
                           <>
                             {advisory.rootCause.primary      && (
@@ -500,7 +501,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* EVIDENCE */}
                   {advisory.evidence?.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Evidence</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Evidence</p>
                       <div className="space-y-1">
                         {advisory.evidence.slice(0, 5).map((e, i) => (
                           <div key={i} className="flex items-start space-x-2">
@@ -515,10 +516,10 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* RECOMMENDATIONS */}
                   {recs.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Recommendations</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Recommendations</p>
                       <div className="space-y-1.5">
                         {recs.slice(0, 5).map((r, i) => (
-                          <div key={i} className="flex items-start space-x-2 pl-2 border-l-2 border-white/15">
+                          <div key={i} className="flex items-start space-x-2 pl-2 border-l-4 border-black/25">
                             <p className="text-xs text-white leading-snug">{toRecStr(r)}</p>
                           </div>
                         ))}
@@ -529,12 +530,12 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* PROJECTED IMPACT — full version (expanded) */}
                   {impactEntries.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Projected Impact</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Projected Impact</p>
                       <div className="grid grid-cols-2 gap-1.5">
                         {impactEntries.map(([k, v]) => {
                           const str   = fmtImpact(v);
                           return (
-                            <div key={k} className="bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-2">
+                            <div key={k} className="bg-black/[0.06] border-2 border-black/15 rounded-lg px-2.5 py-2">
                               <p className="text-sm font-bold leading-none text-white">{str}</p>
                               <p className="text-[8px] text-white/60 mt-1 leading-tight">{titleCase(k)}</p>
                             </div>
@@ -547,7 +548,7 @@ export default function AdvisoryPanel({ advisories = [], onClose }) {
                   {/* ACTION BUTTONS */}
                   {advisory.actions?.length > 0 && (
                     <div className="px-3.5 py-3">
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">Actions</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Actions</p>
                       <div className="space-y-1.5">
                         {advisory.actions.map(action => {
                           const aType  = action.type || action;

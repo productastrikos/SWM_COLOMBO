@@ -721,7 +721,6 @@ function generateCurrentKPIs() {
   const allBins = Array.from(state.bins.values());
   const allVehicles = Array.from(state.vehicles.values());
   const allFacilities = Array.from(state.facilities.values());
-  const timeMult = getTimeMultiplier();
 
   const activeBins = allBins.filter(b => b.status !== 'offline');
   const avgFillLevel = activeBins.reduce((s, b) => s + b.currentFillLevel, 0) / (activeBins.length || 1);
@@ -740,7 +739,12 @@ function generateCurrentKPIs() {
   const avgSegregation = zones.reduce((s, z) => s + z.segregationRate, 0) / (zones.length || 1);
   const avgCollectionEff = zones.reduce((s, z) => s + z.collectionEfficiency, 0) / (zones.length || 1);
 
-  const totalDailyWaste = COLOMBO_CONFIG.dailyWasteGeneration.base * timeMult + noise.gaussian(0, 30);
+  // Use day+month multipliers only (no hourly factor) so daily tonnage KPIs represent
+  // realistic full-day estimates rather than instantaneous off-peak rates.
+  const _kpiNow = new Date();
+  const _dayMonthMult = (COLOMBO_CONFIG.dailyPattern[_kpiNow.getDay()] || 1.0) *
+                        (COLOMBO_CONFIG.monthlyPattern[_kpiNow.getMonth()] || 1.0);
+  const totalDailyWaste = COLOMBO_CONFIG.dailyWasteGeneration.base * _dayMonthMult + noise.gaussian(0, 30);
   const wasteCollected = totalDailyWaste * (avgCollectionEff / 100);
   const wasteDiverted = totalDailyWaste * (avgSegregation / 100) * 0.6;
 

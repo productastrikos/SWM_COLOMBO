@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { IcoBolt, IcoTrash, IcoBarChart, IcoThermometer, IcoWind, IcoRecycle } from '../components/KPICard';
+import { IcoBolt, IcoTrash, IcoBarChart, IcoThermometer, IcoWind, IcoRecycle, IcoFire } from '../components/KPICard';
 import { DataContext } from '../services/socket';
 import { getWTE } from '../services/api';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, BarElement, Tooltip, Filler } from 'chart.js';
 import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, BarElement, Tooltip, Filler);
+
+const SmIcon = ({ children }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}
+    strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 text-slate-400">
+    {children}
+  </svg>
+);
 
 function GaugeCard({ label, value, max, unit, icon }) {
   const pct = Math.min((value / max) * 100, 100);
@@ -16,7 +23,7 @@ function GaugeCard({ label, value, max, unit, icon }) {
   const badgeStyle  = ragKey === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/25' : ragKey === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/25' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
   const badgeLabel  = ragKey === 'critical' ? 'CRITICAL' : ragKey === 'warning' ? 'WARNING' : 'NORMAL';
   return (
-    <div className={`bg-cwm-bg border border-white/[0.07] border-l-2 ${borderColor} rounded-xl p-3.5 text-center shadow-sm`}>
+    <div className={`bg-white/[0.05] border border-white/[0.07] border-l-2 ${borderColor} rounded-xl p-3.5 text-center shadow-sm`}>
       <div className="flex items-start justify-between mb-2">
         <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-base leading-none">{icon}</div>
         <div className={`w-2 h-2 rounded-full mt-1 ${dotColor}`} />
@@ -32,7 +39,7 @@ function GaugeCard({ label, value, max, unit, icon }) {
         </div>
       </div>
       <p className="text-[10px] text-slate-400 font-medium mb-1">{label}</p>
-      <p className="text-[10px] text-slate-600 mb-2">{unit}</p>
+      <p className="text-[10px] text-slate-400 mb-2">{unit}</p>
       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeStyle}`}>{badgeLabel}</span>
     </div>
   );
@@ -47,7 +54,7 @@ function FurnaceStatus({ furnace }) {
     <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <span className="text-lg">🔥</span>
+          <IcoFire />
           <p className="text-xs font-semibold text-white">{furnace.name || furnace.furnaceId}</p>
         </div>
         <div className="flex items-center space-x-1">
@@ -147,13 +154,37 @@ export default function WTEPlant() {
   );
   const powerOutputData = {
     labels: buildTimeframeLabels(activePowerFrame.value, activePowerFrame.points),
-    datasets: [{
-      label: 'MW Output',
-      data: powerVals,
-      borderColor: CHART_PALETTES.area.cyan.border, backgroundColor: CHART_PALETTES.area.cyan.fill,
-      fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
-    }]
+    datasets: [
+      {
+        label: 'MW Output',
+        data: powerVals,
+        borderColor: CHART_PALETTES.area.cyan.border, backgroundColor: CHART_PALETTES.area.cyan.fill,
+        fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
+      },
+      {
+        label: '— Target (≥ 7 MW)',
+        data: Array(activePowerFrame.points).fill(7),
+        borderColor: getChartTokens().successBar, borderDash: [5, 4], borderWidth: 1.5,
+        pointRadius: 0, fill: false, tension: 0,
+      },
+      {
+        label: '— Warning (< 4 MW)',
+        data: Array(activePowerFrame.points).fill(4),
+        borderColor: getChartTokens().warningBar, borderDash: [3, 3], borderWidth: 1.5,
+        pointRadius: 0, fill: false, tension: 0,
+      },
+    ]
   };
+
+  const WASTE_COLORS = [
+    'rgba(16,185,129,0.8)',
+    'rgba(59,130,246,0.8)',
+    'rgba(245,158,11,0.8)',
+    'rgba(6,182,212,0.8)',
+    'rgba(239,68,68,0.8)',
+    'rgba(249,115,22,0.8)',
+    'rgba(148,163,184,0.8)',
+  ];
 
   const sevenDayData = {
     labels: buildTimeframeLabels(activeEnergyFrame.value, activeEnergyFrame.points),
@@ -165,7 +196,7 @@ export default function WTEPlant() {
           : THIRTY_DAY_ENERGY,
         activeEnergyFrame.points
       ),
-      backgroundColor: getChartTokens().accentBg,
+      backgroundColor: 'rgba(6, 182, 212, 0.7)',
       borderColor: CHART_PALETTES.area.cyan.border,
       borderRadius: 4,
     }]
@@ -176,8 +207,8 @@ export default function WTEPlant() {
     datasets: [{
       label: 'Tonnes',
       data: WASTE_INPUT.map(w => w.tonnes),
-      backgroundColor: getChartTokens().accentBg,
-      borderColor: CHART_PALETTES.area.cyan.border,
+      backgroundColor: WASTE_COLORS,
+      borderColor: WASTE_COLORS.map(c => c.replace('0.8)', '1)')),
       borderWidth: 1,
       borderRadius: 4,
     }]
@@ -221,7 +252,7 @@ export default function WTEPlant() {
 
       {/* KPI Gauges */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-        <GaugeCard icon={<IcoBolt />} label="Power Output" value={k.wteOutput || plant.powerOutput || plant.energyOutput || 8.2} max={12} unit="MW" />
+        <GaugeCard icon={<IcoBolt />} label="Power Output" value={k.wteOutput || plant.powerOutput || plant.energyOutput || 8.2} max={10} unit="MW" />
         <GaugeCard icon={<IcoTrash />} label="Daily Intake" value={k.wteIntake || plant.dailyIntake || plant.currentIntake || 620} max={700} unit="tons" />
         <GaugeCard icon={<IcoBarChart />} label="Efficiency" value={k.wteEfficiency || plant.efficiency || 82} max={100} unit="%" />
         <GaugeCard icon={<IcoThermometer />} label="Avg Temp" value={plant.avgTemperature || plant.furnaceTemp || 850} max={1200} unit="°C" />
@@ -287,7 +318,10 @@ export default function WTEPlant() {
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <button onClick={() => toggle('efficiency')}
           className="w-full flex items-center justify-between px-4 py-3 border-b border-cwm-border hover:bg-white/[0.02]">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">⚡ Plant Efficiency Analysis</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <SmIcon><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></SmIcon>
+            Plant Efficiency Analysis
+          </h3>
           <span className="text-slate-500 text-xs">{expanded.has('efficiency') ? '▲' : '▼'}</span>
         </button>
         {expanded.has('efficiency') && (
@@ -332,7 +366,10 @@ export default function WTEPlant() {
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <button onClick={() => toggle('waste_input')}
           className="w-full flex items-center justify-between px-4 py-3 border-b border-cwm-border hover:bg-white/[0.02]">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">🗑️ Waste Input Breakdown — 620 t/day</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <SmIcon><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></SmIcon>
+            Waste Input Breakdown — 620 t/day
+          </h3>
           <span className="text-slate-500 text-xs">{expanded.has('waste_input') ? '▲' : '▼'}</span>
         </button>
         {expanded.has('waste_input') && (
@@ -369,7 +406,10 @@ export default function WTEPlant() {
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <button onClick={() => toggle('energy_7day')}
           className="w-full flex items-center justify-between px-4 py-3 border-b border-cwm-border hover:bg-white/[0.02]">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">📊 Energy Output Trend</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <SmIcon><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></SmIcon>
+            Energy Output Trend
+          </h3>
           <span className="text-slate-500 text-xs">{expanded.has('energy_7day') ? '▲' : '▼'}</span>
         </button>
         {expanded.has('energy_7day') && (
@@ -397,7 +437,10 @@ export default function WTEPlant() {
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <button onClick={() => toggle('downtime')}
           className="w-full flex items-center justify-between px-4 py-3 border-b border-cwm-border hover:bg-white/[0.02]">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">🔧 Downtime Tracking — 3.2% (≈46 min/day)</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <SmIcon><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></SmIcon>
+            Downtime Tracking — 3.2% (≈46 min/day)
+          </h3>
           <span className="text-slate-500 text-xs">{expanded.has('downtime') ? '▲' : '▼'}</span>
         </button>
         {expanded.has('downtime') && (

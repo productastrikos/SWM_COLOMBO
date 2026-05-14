@@ -104,7 +104,7 @@ function getKpiTimeRanges(kpi) {
 }
 
 /* ─── Threshold side-label plugin (per-instance) ─────────── */
-function makePlugin(target, warn) {
+function makePlugin(target, warn, inverted = false) {
   return {
     id: 'threshLineLabels',
     afterDraw(chart) {
@@ -120,8 +120,10 @@ function makePlugin(target, warn) {
         ctx.fillStyle = color;
         ctx.fillText(text, right + 4, y.getPixelForValue(val) + 3);
       };
-      draw(target, getCSSVar('--cwm-text-faint'), 'Target');
-      draw(warn,   getCSSVar('--cwm-violet'),     'Warn');
+      // For inverted KPIs: upper line = Limit (amber), lower line = Optimal (green)
+      // For normal KPIs:   upper line = Target (green), lower line = Warn (amber)
+      draw(target, getCSSVar(inverted ? '--cwm-warning' : '--cwm-success'), inverted ? 'Limit'   : 'Target');
+      draw(warn,   getCSSVar(inverted ? '--cwm-success' : '--cwm-warning'), inverted ? 'Optimal' : 'Warn');
       ctx.restore();
     },
   };
@@ -194,10 +196,26 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
     [showPrediction, histLabels, predLabels],
   );
 
-  /* Threshold reference values */
-  const warnVal = kpi?.thresholds ? kpi.thresholds.amber : null;
+  /* Threshold reference values
+   * For non-inverted KPIs: chartTargetVal = green (upper, goal), chartWarnVal = amber (lower, warning)
+   * For inverted KPIs:     chartTargetVal = amber (upper limit to stay below), chartWarnVal = green (optimal level)
+   * This guarantees the "Target" reference line is always drawn ABOVE the "Warn/Optimal" line.
+   */
+  const chartTargetVal = useMemo(() =>
+    kpi?.thresholds
+      ? (kpi.inverted ? kpi.thresholds.amber : kpi.thresholds.green)
+      : targetNum,
+    [kpi, targetNum],
+  );
+  const chartWarnVal = useMemo(() =>
+    kpi?.thresholds ? (kpi.inverted ? kpi.thresholds.green : kpi.thresholds.amber) : null,
+    [kpi],
+  );
 
-  const threshPlugin = useMemo(() => makePlugin(targetNum, warnVal), [targetNum, warnVal]);
+  const threshPlugin = useMemo(
+    () => makePlugin(chartTargetVal, chartWarnVal, kpi?.inverted),
+    [chartTargetVal, chartWarnVal, kpi?.inverted],
+  );
 
   /* Threshold bands */
   const bands = useMemo(() => {
@@ -242,15 +260,17 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2.5,
       },
       ...(kpi?.thresholds ? [{
-        label: 'Target',
-        data: Array(allLabels.length).fill(targetNum),
-        borderColor: getChartTokens().tickMuted, borderWidth: 1.5, borderDash: [6, 4],
+        label: kpi?.inverted ? 'Limit' : 'Target',
+        data: Array(allLabels.length).fill(chartTargetVal),
+        borderColor: kpi?.inverted ? getChartTokens().warningBar : getChartTokens().successBar,
+        borderWidth: 1.5, borderDash: [6, 4],
         pointRadius: 0, fill: false, tension: 0,
       }] : []),
-      ...(warnVal != null ? [{
-        label: 'Warn',
-        data: Array(allLabels.length).fill(warnVal),
-        borderColor: getChartTokens().violet, borderWidth: 1.5, borderDash: [3, 3],
+      ...(chartWarnVal != null ? [{
+        label: kpi?.inverted ? 'Optimal' : 'Warn',
+        data: Array(allLabels.length).fill(chartWarnVal),
+        borderColor: kpi?.inverted ? getChartTokens().successBar : getChartTokens().warningBar,
+        borderWidth: 1.5, borderDash: [3, 3],
         pointRadius: 0, fill: false, tension: 0,
       }] : []),
       ...(showPrediction ? [{
@@ -264,14 +284,25 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
       }] : []),
     ];
     return { labels: allLabels, datasets };
-  }, [hist, pred, allLabels, showPrediction, kpi, targetNum, warnVal, activeTimeRange]);
+  }, [hist, pred, allLabels, showPrediction, kpi, targetNum, chartTargetVal, chartWarnVal, activeTimeRange]);
 
   const chartOpts = useMemo(() => ({
     responsive: true, maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     layout: { padding: { right: kpi?.thresholds ? 46 : 8 } },
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          color: getCSSVar('--cwm-text-muted'),
+          font: { size: 9 },
+          boxWidth: 18,
+          padding: 10,
+          usePointStyle: true,
+          filter: (item) => !item.text.startsWith(`${activeTimeRange} Actual`),
+        },
+      },
       tooltip: {
         ...chartTooltip(),
         callbacks: {
@@ -300,27 +331,24 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
       <div className="relative h-full kpi-modal kpi-modal-card flex flex-col shadow-2xl animate-slide-in-right" style={{ width: 680, borderLeft: '1px solid var(--cwm-border)', borderRadius: 0 }}>
 
         {/* ── HEADER ─────────────────────────────────────────── */}
-        <div className="px-6 py-4 border-b border-cwm-border flex items-center justify-between kpi-modal-card" style={{ borderRadius: 0 }}>
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: rag.solidBg, border: `1px solid ${rag.solidBorder}` }}>
+        <div className="px-5 py-3 border-b border-cwm-border flex items-center justify-between kpi-modal-card" style={{ borderRadius: 0, flexShrink: 0 }}>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'var(--cwm-surface-raised)', border: '1px solid var(--cwm-border)' }}>
               {kpi.icon}
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-[0.2em] font-semibold mb-1">
+              <p className="text-[9px] text-slate-400 uppercase tracking-[0.2em] font-bold mb-0.5">
                 {code} · {category}
               </p>
-              <h2 className="text-xl font-bold text-white leading-tight">{kpi.label}</h2>
+              <h2 className="text-lg font-bold text-white leading-tight">{kpi.label}</h2>
             </div>
           </div>
           <div className="flex items-center space-x-3 flex-shrink-0">
             <span className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold ${rag.text}`} style={{ background: rag.badgeSolidBg, borderColor: rag.badgeSolidBorder }}>
-              <span className={`w-1.5 h-1.5 rounded-full ${rag.dot} animate-pulse`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${rag.dot}`} />
               <span>{rag.label}</span>
             </span>
-            <button
-              onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-            >
+            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -328,206 +356,126 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
           </div>
         </div>
 
-        {/* ── BODY ───────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin' }}>
+        {/* ── BODY — no scroll, flex column fills height ─────── */}
+        <div className="flex-1 overflow-hidden flex flex-col p-3" style={{ gap: 8 }}>
 
-          {/* Compact 4-card metric strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1">Current Value</p>
-              <p className="text-2xl font-bold leading-none text-white">
-                {kpi.value}
-                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
-              </p>
-              <p className={`text-[9px] mt-1.5 font-medium ${ (kpi.trend || 0) >= 0 ? 'text-green-600' : 'text-red-600' }`}>
-                {(kpi.trend || 0) >= 0 ? '+' : '-'}{Math.abs(kpi.trend || 0).toFixed(1)}% vs yesterday
-              </p>
-            </div>
-
-            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
-                <span>⊙</span><span>Target</span>
-              </p>
-              <p className="text-2xl font-bold leading-none text-white">
-                {targetNum}
-                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
-              </p>
-            </div>
-
-            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
-                <span>📅</span><span>YTD Avg</span>
-              </p>
-              <p className="text-2xl font-bold leading-none text-white">
-                {ytdAvg}
-                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
-              </p>
-            </div>
-
-            <div className="kpi-modal-card rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--cwm-border)' }}>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1">
-                <span>◈</span><span>30-Day Avg</span>
-              </p>
-              <p className="text-2xl font-bold leading-none text-white">
-                {thirtyDayAvg}
-                {kpi.unit && <span className="text-xs font-normal ml-1 text-slate-400">{kpi.unit}</span>}
-              </p>
-            </div>
+          {/* Metric strip — 4 columns */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, flexShrink: 0 }}>
+            {[
+              { label: 'Current', val: kpi.value, unit: kpi.unit, sub: `${(kpi.trend||0)>=0?'+':'−'}${Math.abs(kpi.trend||0).toFixed(1)}% vs yesterday`, subColor: (kpi.trend||0) >= 0 ? '#22c55e' : '#ef4444' },
+              { label: 'Target',  val: targetNum,  unit: kpi.unit },
+              { label: 'YTD Avg', val: ytdAvg,     unit: kpi.unit },
+              { label: '30-Day Avg', val: thirtyDayAvg, unit: kpi.unit },
+            ].map((m, i) => (
+              <div key={i} style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{m.label}</p>
+                <p style={{ fontSize: 19, fontWeight: 700, color: 'var(--cwm-text)', lineHeight: 1 }}>
+                  {m.val}{m.unit && <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--cwm-text-muted)', marginLeft: 3 }}>{m.unit}</span>}
+                </p>
+                {m.sub && <p style={{ fontSize: 9, color: m.subColor || 'var(--cwm-text-muted)', marginTop: 4, fontWeight: m.subColor ? 600 : 400 }}>{m.sub}</p>}
+              </div>
+            ))}
           </div>
 
-          {/* Main bento: chart (2 cols) + thresholds/definition (1 col) */}
-          <div className="grid grid-cols-3 gap-3 mb-3">
-
-            {/* Chart – spans 2 columns */}
-            <div className="col-span-2 kpi-modal-card rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <p className="text-[10px] font-bold text-white uppercase tracking-wider">{cfg.title}</p>
-                <div className="flex items-center space-x-2">
-                  <div className="cwm-timeframe-control">
-                    {availableRanges.map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => { setTimeRange(r); setShowPrediction(false); }}
-                        className={`cwm-timeframe-btn ${activeTimeRange === r ? 'is-active' : ''}`}
-                      >
-                        {r}
-                      </button>
-                    ))}
+          {/* Chart — grows to fill remaining space */}
+          <div className="flex-1 min-h-0" style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '10px 14px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexShrink: 0 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cfg.title}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="cwm-timeframe-control">
+                  {availableRanges.map((r) => (
+                    <button key={r} onClick={() => { setTimeRange(r); setShowPrediction(false); }}
+                      className={`cwm-timeframe-btn ${activeTimeRange === r ? 'is-active' : ''}`}>{r}</button>
+                  ))}
+                </div>
+                <button onClick={() => setShowPrediction((p) => !p)}
+                  className={`cwm-advisory-btn${showPrediction ? ' is-on' : ''}`}
+                  style={{ height: 24, padding: '0 8px', fontSize: 10, borderRadius: 5, boxShadow: showPrediction ? undefined : 'none' }}>
+                  <span>✦</span><span>Predict</span>
+                </button>
+              </div>
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
+            </div>
+            {/* Threshold bands — inline text row, no boxes */}
+            <div style={{ display: 'flex', gap: 24, paddingTop: 8, borderTop: '1px solid var(--cwm-border)', marginTop: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              {bands.map((b, i) => {
+                const c = b.color === 'emerald' ? getCSSVar('--cwm-success') : b.color === 'amber' ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-danger');
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
+                    <span style={{ fontSize: 9, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{b.label}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--cwm-text)' }}>{b.desc}</span>
                   </div>
-                  <button
-                    onClick={() => setShowPrediction((p) => !p)}
-                    className={`cwm-advisory-btn${showPrediction ? ' is-on' : ''}`}
-                    style={{ height: 26, padding: '0 10px', fontSize: 10, borderRadius: 6, boxShadow: showPrediction ? undefined : 'none' }}
-                  >
-                    <span>✦</span><span>Predict Trend</span>
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ height: 210 }}>
-                <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
-              </div>
-
-              {showPrediction && (
-                <div className="mt-2 pt-2 border-t border-cwm-border flex items-center justify-between text-[10px]">
-                  <span className="text-slate-400">◄ {activeTimeRange} historical (3 parts)</span>
-                  <span className="text-violet-400">8h predicted trend (1 part) ►</span>
-                </div>
-              )}
-            </div>
-
-            {/* Right column: threshold bands + definition */}
-            <div className="col-span-1 flex flex-col gap-2">
-
-              {/* Compact threshold bands */}
-              <div className="rounded-xl p-3" style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)' }}>
-                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Threshold Bands</p>
-                <div className="flex flex-col gap-1.5">
-                  {bands.map((b, i) => {
-                    const s = bandStyle[b.color];
-                    return (
-                      <div key={i} className="flex items-center justify-between rounded-lg px-2.5 py-2"
-                        style={{ background: s.solidBg, border: `1px solid ${s.solidBorder}` }}>
-                        <p className={`text-[9px] font-bold ${s.title} uppercase tracking-wider`}>{b.label}</p>
-                        <p className={`text-xs font-bold ${s.title}`}>{b.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Definition & Methodology */}
-              {kpi.definition && (
-                <div className="rounded-xl p-3 flex-1" style={{ background: 'var(--cwm-modal-teal-bg)', border: '1px solid var(--cwm-modal-teal-border)' }}>
-                  <p className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center space-x-1">
-                    <span>ℹ</span><span>Definition</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 leading-relaxed">{kpi.definition}</p>
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
 
-          {/* Bottom row: anomalies + related metrics */}
-          <div className={`grid gap-3 mb-3 ${subs.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {/* Definition */}
+          {kpi.definition && (
+            <div style={{ flexShrink: 0, background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '7px 14px' }}>
+              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Definition</p>
+              <p style={{ fontSize: 11, color: 'var(--cwm-text)', lineHeight: 1.5 }}>{kpi.definition}</p>
+            </div>
+          )}
 
-            {/* Detected Anomalies & Events */}
-            <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2">
-                Detected Anomalies &amp; Events
-              </p>
-              <div className="space-y-1.5">
-                {events.map((e, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start space-x-3 rounded-xl px-3 py-2.5"
-                    style={{
-                    background: e.sev === 'critical' ? 'var(--cwm-modal-danger-bg)' : e.sev === 'warning' ? 'var(--cwm-modal-warning-bg)' : 'var(--cwm-modal-info-bg)',
-                    border: `1px solid ${e.sev === 'critical' ? 'var(--cwm-modal-danger-border)' : e.sev === 'warning' ? 'var(--cwm-modal-warning-border)' : 'var(--cwm-modal-info-border)'}`
-                    }}
-                  >
-                    <span className={`text-sm mt-0.5 ${
-                      e.sev === 'critical' ? 'text-red-400' :
-                      e.sev === 'warning'  ? 'text-amber-400' : 'text-blue-400'
-                    }`}>
-                      {e.sev === 'critical' ? '⊘' : e.sev === 'warning' ? '⚠' : 'ℹ'}
-                    </span>
-                    <div>
-                      <span className={`text-[10px] font-bold ${
-                        e.sev === 'critical' ? 'text-red-400' :
-                        e.sev === 'warning'  ? 'text-amber-400' : 'text-blue-400'
-                      }`}>{e.time}</span>
-                      <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">{e.text}</p>
+          {/* Anomalies + Related Metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: subs.length > 0 ? '1fr 1fr' : '1fr', gap: 8, flexShrink: 0 }}>
+
+            {/* Anomalies */}
+            <div style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
+              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Anomalies &amp; Events</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {events.map((e, i) => {
+                  const sevColor = e.sev === 'critical' ? getCSSVar('--cwm-danger') : e.sev === 'warning' ? getCSSVar('--cwm-warning') : 'var(--cwm-text-faint)';
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: sevColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums', marginTop: 1 }}>{e.time}</span>
+                      <p style={{ fontSize: 10, color: 'var(--cwm-text)', lineHeight: 1.4 }}>{e.text}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Related Metrics */}
             {subs.length > 0 && (
-              <div>
-                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mb-2 flex items-center gap-1.5">
-                  <span style={{ color: 'var(--cwm-accent)' }}>◈</span> Related Metrics
-                </p>
-                {mainSubs.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {mainSubs.map((m, i) => {
-                      const isCrit = /critical|danger|error|failed/i.test(m.label);
-                      const isWarn = /miss|overdue|lost|excess|pending/i.test(m.label);
-                      const bg = isCrit ? 'var(--cwm-modal-danger-bg)' : isWarn ? 'var(--cwm-modal-warning-bg)' : 'var(--cwm-surface-soft)';
-                      const borderClr = isCrit ? 'var(--cwm-modal-danger-border)' : isWarn ? 'var(--cwm-modal-warning-border)' : 'var(--cwm-border)';
-                      const valClr = isCrit ? 'var(--cwm-danger)' : isWarn ? 'var(--cwm-warning)' : 'var(--cwm-text)';
-                      return (
-                        <div key={i} className="rounded-xl px-3 py-2.5" style={{ background: bg, border: `1px solid ${borderClr}` }}>
-                          <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--cwm-text-faint)' }}>{m.label}</p>
-                          <p className="text-xl font-bold leading-none" style={{ color: valClr }}>{m.value}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {targetSubs.map((m, i) => (
-                  <div key={i} className="flex items-center gap-4 rounded-xl px-3 py-2.5 mt-2" style={{ background: 'var(--cwm-modal-info-bg)', border: '1px solid var(--cwm-modal-info-border)' }}>
-                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--cwm-accent)' }}>Target</span>
-                    <span className="text-sm font-bold" style={{ color: 'var(--cwm-text)' }}>{m.value}</span>
-                  </div>
-                ))}
+              <div style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Related Metrics</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+                  {mainSubs.map((m, i) => {
+                    const isCrit = /critical|danger|error|failed/i.test(m.label);
+                    const isWarn = /miss|overdue|lost|excess|pending/i.test(m.label);
+                    const valClr = isCrit ? getCSSVar('--cwm-danger') : isWarn ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-accent');
+                    return (
+                      <div key={i} style={{ borderLeft: `2px solid ${valClr}`, paddingLeft: 8 }}>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{m.label}</p>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: valClr, lineHeight: 1 }}>{m.value}</p>
+                      </div>
+                    );
+                  })}
+                  {targetSubs.map((m, i) => (
+                    <div key={i} style={{ borderLeft: '2px solid var(--cwm-border)', paddingLeft: 8 }}>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>Target</p>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--cwm-text)', lineHeight: 1 }}>{m.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
           {/* AI Advisory */}
           {showAnalysis && analyses.length > 0 && (
-            <div className="rounded-xl p-4" style={{ background: 'var(--cwm-modal-advisory-bg)', border: '1px solid var(--cwm-modal-advisory-border)' }}>
-              <p className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-3 flex items-center space-x-2">
-                <span>ⓘ</span><span>AI Advisory</span>
-              </p>
-              <div className="space-y-2">
+            <div style={{ flexShrink: 0, background: 'var(--cwm-modal-advisory-bg)', border: '1px solid var(--cwm-modal-advisory-border)', borderRadius: 10, padding: '8px 14px' }}>
+              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-advisory)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>AI Advisory</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                 {analyses.map((s, i) => (
-                  <div key={i} className="flex items-start space-x-2">
-                    <span className="text-violet-500 mt-0.5 font-bold text-xs">→</span>
-                    <p className="text-xs text-slate-400 leading-relaxed">{s.trim()}.</p>
+                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--cwm-advisory)', fontWeight: 700, fontSize: 11, flexShrink: 0, marginTop: 1 }}>→</span>
+                    <p style={{ fontSize: 11, color: 'var(--cwm-text)', lineHeight: 1.4 }}>{s.trim()}.</p>
                   </div>
                 ))}
               </div>
@@ -536,7 +484,7 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
         </div>
 
         {/* ── FOOTER ─────────────────────────────────────────── */}
-        <div className="px-6 py-3 border-t border-cwm-border kpi-modal-card flex items-center justify-between" style={{ borderRadius: 0 }}>
+        <div className="px-5 py-2.5 border-t border-cwm-border kpi-modal-card flex items-center justify-between" style={{ borderRadius: 0, flexShrink: 0 }}>
           <p className="text-[10px] text-slate-400">
             Last updated: {new Date().toLocaleTimeString()} · Smart SWM Platform · Colombo
           </p>

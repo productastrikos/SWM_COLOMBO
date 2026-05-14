@@ -13,7 +13,7 @@ function SDGCard({ goal, title, score, target, icon }) {
   return (
     <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3">
       <div className="flex items-center space-x-2 mb-2">
-        <span className="text-lg">{icon}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-400 shrink-0"><path d={icon} /></svg>
         <div>
           <p className="text-[10px] text-slate-500">SDG {goal}</p>
           <p className="text-xs font-semibold text-white">{title}</p>
@@ -53,18 +53,23 @@ export default function Sustainability() {
         fill: true, tension: 0.4, pointRadius: 2, borderWidth: 1.5,
       },
       {
-        label: 'Target',
+        label: 'Target (≤ 130 t)',
         data: Array(activeEmissionsFrame.points).fill(130),
-        borderColor: getChartTokens().tickColor, borderDash: [5, 5], borderWidth: 1, pointRadius: 0,
+        borderColor: getChartTokens().successBar, borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0,
+      },
+      {
+        label: 'Warning (> 155 t)',
+        data: Array(activeEmissionsFrame.points).fill(155),
+        borderColor: getChartTokens().warningBar, borderDash: [3, 3], borderWidth: 1.5, pointRadius: 0,
       }
     ]
   };
 
   const circularEconomyData = {
-    labels: ['Recycled', 'Composted', 'Energy Recovery', 'Landfilled', 'Other'],
+    labels: ['Recycled', 'Composted', 'Energy Recovery', 'Landfilled'],
     datasets: [{
-      data: [15, 8, 50, 20, 7],
-      backgroundColor: CHART_PALETTES.categorical.slice(0, 5),
+      data: [23, 8, 50, 19],
+      backgroundColor: CHART_PALETTES.categorical.slice(0, 4),
       borderWidth: 0,
     }]
   };
@@ -239,11 +244,11 @@ export default function Sustainability() {
       <div>
         <h3 className="text-xs font-semibold text-white mb-2">UN SDG Alignment</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          <SDGCard goal={6} title="Clean Water" score={71} target={100} icon="💧" />
-          <SDGCard goal={7} title="Clean Energy" score={62} target={100} icon="⚡" />
-          <SDGCard goal={11} title="Sustainable Cities" score={74} target={100} icon="🏙️" />
-          <SDGCard goal={12} title="Responsible Consumption" score={42} target={100} icon="♻️" />
-          <SDGCard goal={13} title="Climate Action" score={61} target={100} icon="🌍" />
+          <SDGCard goal={6} title="Clean Water" score={71} target={100} icon="M12 2c-4 5-6 8-6 11a6 6 0 0012 0c0-3-2-6-6-11z" />
+          <SDGCard goal={7} title="Clean Energy" score={62} target={100} icon="M13 10V3L4 14h7v7l9-11h-7z" />
+          <SDGCard goal={11} title="Sustainable Cities" score={74} target={100} icon="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10" />
+          <SDGCard goal={12} title="Responsible Consumption" score={42} target={100} icon="M17 8C8 10 5.9 16.17 3.82 19c3.18-3 8.18-3 8.18-3 3.8 0 6.07 2.59 6.07 2.59 1.95-1.13 2.93-3.82 2.93-6.07C21 9.5 19.5 7 17 8z" />
+          <SDGCard goal={13} title="Climate Action" score={61} target={100} icon="M12 2a10 10 0 100 20A10 10 0 0012 2zM2 12h20M12 2c-2.5 3.5-4 6.8-4 10s1.5 6.5 4 10M12 2c2.5 3.5 4 6.8 4 10s-1.5 6.5-4 10" />
         </div>
       </div>
     </div>

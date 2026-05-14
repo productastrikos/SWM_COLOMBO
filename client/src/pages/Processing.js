@@ -9,10 +9,10 @@ ChartJS.register(ArcElement, Tooltip);
 
 function FacilityCard({ facility }) {
   const typeIcons = {
-    recycling_center: '♻️',
-    transfer_station: '🔄',
-    composting: '🌱',
-    material_recovery: '🏭',
+    recycling_center: 'RC',
+    transfer_station: 'TS',
+    composting: 'CP',
+    material_recovery: 'MR',
   };
   // Known daily throughput values (t/day) keyed by facilityId — used as reliable fallback
   const KNOWN_THROUGHPUT = {
@@ -31,7 +31,7 @@ function FacilityCard({ facility }) {
     <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3 hover:border-cwm-accent/30 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <span className="text-lg">{typeIcons[facility.type] || '🏭'}</span>
+          <span className="text-[10px] font-mono font-bold text-slate-500 w-8 text-center">{typeIcons[facility.type] || 'MR'}</span>
           <div>
             <p className="text-xs font-semibold text-white">{facility.name}</p>
             <p className="text-[10px] text-slate-500">{(facility.type || '').replace(/_/g, ' ')}</p>
@@ -228,7 +228,7 @@ export default function Processing() {
       {/* Transfer Stations */}
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">🔄 Transfer Stations</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Transfer Stations</h3>
           <span className="text-[10px] text-slate-500">Total incoming: 627 t/day</span>
         </div>
         <div className="divide-y divide-white/5">
@@ -266,7 +266,7 @@ export default function Processing() {
       {/* Recycling Plants */}
       <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-cwm-border flex items-center justify-between">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">♻️ Recycling Plants</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Recycling Plants</h3>
           <span className="text-[10px] text-slate-500">Total processed: 287 t/day · 23.0% diversion rate</span>
         </div>
         <div className="divide-y divide-white/5">

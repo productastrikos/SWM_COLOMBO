@@ -13,7 +13,7 @@ function EscalationModal({ ward, onClose }) {
   if (sent) return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-cwm-panel border border-emerald-500/40 rounded-xl p-6 w-full max-w-sm text-center shadow-2xl">
-        <div className="text-3xl mb-3">✅</div>
+        <div className="text-emerald-400 mb-3 flex justify-center"><IcoCheck /></div>
         <p className="text-white font-bold text-sm mb-1">Escalation Sent</p>
         <p className="text-slate-400 text-xs">Notified <span className="text-emerald-400">{target}</span> — response expected within 30 min</p>
       </div>
@@ -24,7 +24,7 @@ function EscalationModal({ ward, onClose }) {
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-cwm-panel border border-cwm-border rounded-xl p-5 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white">🚨 Escalate: {ward.ward}</h3>
+          <h3 className="text-sm font-bold text-white">Escalate: {ward.ward}</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-lg leading-none">×</button>
         </div>
         <div className="space-y-3 mb-5">
@@ -257,7 +257,7 @@ export default function WasteCollection() {
         <div className="space-y-3">
           <div className="bg-cwm-panel border border-cwm-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">🗺️ Ward Coverage Rate — RAG Status</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Ward Coverage Rate — RAG Status</h3>
               <div className="flex items-center gap-2 text-[9px]">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-500/70 inline-block" /> ≥95%</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-amber-500/70 inline-block" /> 85–94%</span>
@@ -348,7 +348,7 @@ export default function WasteCollection() {
 
           <div className="bg-cwm-panel border border-cwm-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-cwm-border">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">⚠️ Missed Collections — Ranked by Impact</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Missed Collections — Ranked by Impact</h3>
               <p className="text-[10px] text-slate-500 mt-0.5">Causes matched to fleet vehicle status · Total: {totalMissed} pts</p>
             </div>
             <div className="divide-y divide-white/5">

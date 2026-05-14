@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DigitalTwin from './DigitalTwin';
 import { DataContext } from '../services/socket';
 import KPIDetailModal from '../components/KPIDetailModal';
-import KPICard, { IcoCoverage, IcoAlert, IcoRoute, IcoTrash, IcoRecycle, IcoBarChart } from '../components/KPICard';
+import KPICard, { IcoCoverage, IcoAlert, IcoRoute, IcoTrash, IcoRecycle, IcoBarChart, IcoEyeSmall } from '../components/KPICard';
 import ZoneFilterBar from '../components/ZoneFilterBar';
 import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from '../components/chartUtils';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
@@ -53,11 +53,11 @@ const ZONE_GROUP_MAP = {
 // Canonical zone data — authoritative source for all zone filtering and KPI computation.
 // This is module-level so it is completely independent of server/socket state.
 const ZONE_DATA = [
-  { zoneId:'Z1', name:'Zone 1 - Northern Port',    wards:['Fort','Pettah','Kotahena'],                 avgFillLevel:58.2, status:'normal',    collectedToday:1012, missedCollections:18 },
-  { zoneId:'Z2', name:'Zone 2 - Inner North',      wards:['Maradana','Grandpass','Dematagoda'],        avgFillLevel:63.5, status:'attention', collectedToday:812,  missedCollections:34 },
-  { zoneId:'Z3', name:'Zone 3 - Central',          wards:['Slave Island','Borella','Narahenpita'],     avgFillLevel:50.8, status:'normal',    collectedToday:818,  missedCollections:12 },
-  { zoneId:'Z4', name:'Zone 4 - Western Coastal',  wards:['Kollupitiya','Bambalapitiya','Wellawatta'], avgFillLevel:56.4, status:'normal',    collectedToday:804,  missedCollections:21 },
-  { zoneId:'Z5', name:'Zone 5 - Southern',         wards:['Kirulapone','Havelock Town','Rajagiriya'],  avgFillLevel:69.8, status:'attention', collectedToday:984,  missedCollections:38 },
+  { zoneId:'Z1', name:'Zone 1 - Northern Port',    wards:['Fort','Pettah','Kotahena'],                 avgFillLevel:62.4, status:'normal',    collectedToday:1012, missedCollections:18 },
+  { zoneId:'Z2', name:'Zone 2 - Inner North',      wards:['Maradana','Grandpass','Dematagoda'],        avgFillLevel:71.2, status:'attention', collectedToday:812,  missedCollections:34 },
+  { zoneId:'Z3', name:'Zone 3 - Central',          wards:['Slave Island','Borella','Narahenpita'],     avgFillLevel:54.8, status:'normal',    collectedToday:818,  missedCollections:12 },
+  { zoneId:'Z4', name:'Zone 4 - Western Coastal',  wards:['Kollupitiya','Bambalapitiya','Wellawatta'], avgFillLevel:66.8, status:'attention', collectedToday:804,  missedCollections:21 },
+  { zoneId:'Z5', name:'Zone 5 - Southern',         wards:['Kirulapone','Havelock Town','Rajagiriya'],  avgFillLevel:83.6, status:'attention', collectedToday:984,  missedCollections:38 },
 ];
 const ZONE_TOTAL_PTS = ZONE_DATA.reduce((s, z) => s + z.collectedToday, 0); // 4162
 
@@ -92,8 +92,8 @@ function makeChartDefaults() {
 // Realistic 24-hour collection profile: low overnight, ramp up at 06:00, peak 08-10 & 14-16, drop off at night
 const COLLECTION_PROFILE = [18,12,8,5,10,42,78,91,95,89,82,74,61,58,72,88,86,79,62,44,38,31,24,19];
 // Realistic vehicle activity: overnight low, morning ramp, afternoon peak
-const VEHICLE_ACTIVE_PROFILE  = [8,7,6,5,6,12,22,31,34,32,30,28,24,25,29,33,31,27,19,14,11,10,9,8];
-const VEHICLE_ENROUTE_PROFILE = [3,2,2,1,2,5,9,14,16,15,13,11,9,10,12,15,14,11,7,5,4,3,3,2];
+const VEHICLE_ACTIVE_PROFILE  = [4,3,3,2,3,8,16,22,25,26,24,22,19,18,21,24,23,19,13,10,8,7,6,5];
+const VEHICLE_ENROUTE_PROFILE = [2,1,1,1,1,3,6,8,9,9,8,8,7,7,8,9,8,7,5,4,3,2,2,2];
 
 // KPICard is now imported from ../components/KPICard
 
@@ -145,7 +145,7 @@ function MiniChart({ title, subtitle, type, data, height = 120, showLegend = fal
     display: true,
     position: type === 'doughnut' ? 'right' : 'top',
     labels: {
-      color: getChartTokens().legendColor, font: { size: 8 }, boxWidth: 8, usePointStyle: true, padding: 4,
+      color: getChartTokens().legendColor, font: { size: 10 }, boxWidth: 10, usePointStyle: true, padding: 10,
       filter: (item) => !item.text.startsWith('––'),
     },
   } : { display: false };
@@ -367,7 +367,7 @@ function GraphInfoPanel({ chart, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-cwm-border shrink-0">
           <div>
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-0.5">Chart Details</p>
+            <p className="text-[9px] font-bold text-white uppercase tracking-widest mb-0.5">Chart Details</p>
             <h2 className="text-sm font-bold text-white leading-tight">{chart.title}</h2>
           </div>
           <button onClick={onClose} className="w-6 h-6 rounded-full flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/[0.06] transition-colors text-lg leading-none">×</button>
@@ -376,19 +376,19 @@ function GraphInfoPanel({ chart, onClose }) {
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {chart.subtitle && (
             <div>
-              <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider mb-2">About This Chart</p>
+              <p className="text-[9px] font-bold text-white uppercase tracking-wider mb-2">About This Chart</p>
               <p className="text-xs text-slate-300 leading-relaxed">{chart.subtitle}</p>
             </div>
           )}
           <div>
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider mb-2">Chart Preview</p>
+            <p className="text-[9px] font-bold text-white uppercase tracking-wider mb-2">Chart Preview</p>
             <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3" style={{ height: 220 }}>
               <ChartComp data={chart.type === 'doughnut' ? chart.data : displayData} options={opts} />
             </div>
           </div>
           {indicators.length > 0 && (
             <div>
-              <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider mb-2">Level Indicators</p>
+              <p className="text-[9px] font-bold text-white uppercase tracking-wider mb-2">Level Indicators</p>
               <div className="space-y-2">
                 {indicators.map(({ level, color, desc }) => {
                   const s = LEVEL_COLORS[color];
@@ -491,7 +491,7 @@ export default function Dashboard() {
     labels: ['Organic', 'Plastic', 'Paper', 'Glass', 'Metal', 'Hazardous', 'Other'],
     datasets: [{
       data: k.composition || [62, 12, 9, 6, 3, 2, 6],
-      backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#06b6d4', '#e879f9', '#6366f1', '#a78bfa'],
+      backgroundColor: ['#0ea5e9', '#f97316', '#ec4899', '#06b6d4', '#a3e635', '#6366f1', '#94a3b8'],
       borderWidth: 0,
     }]
   }), [k.composition, isLight]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -522,8 +522,8 @@ export default function Dashboard() {
       {
         label: 'Returning',
         data: VEHICLE_ENROUTE_PROFILE,
-        borderColor: CHART_PALETTES.area.violet.border,
-        backgroundColor: CHART_PALETTES.area.violet.fill,
+        borderColor: CHART_PALETTES.area.pink.border,
+        backgroundColor: CHART_PALETTES.area.pink.fill,
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
       }
     ]
@@ -575,6 +575,7 @@ export default function Dashboard() {
         <KPICard icon={<IcoAlert />} label="Missed Collections" value={`${(kz.missedCollections || 9.9).toFixed(1)}%`}
           trend={-(kz.missedTrend || 0.4)} color={col2}
           subValues={[{ label: 'Points', value: kz.missedPoints || 457 }, { label: 'Alerts', value: kz.overdueAlerts || 8 }]}
+          detailBtn={{ content: 'VIEW DETAILS', text: true, underline: true }}
           onClick={() => showKPIDetail({
             icon: <IcoAlert />, label: 'Missed Collections', value: (kz.missedCollections || 9.9).toFixed(1), unit: '%',
             trend: -(kz.missedTrend || 0.4), color: col2,
@@ -590,6 +591,7 @@ export default function Dashboard() {
         <KPICard icon={<IcoRoute />} label="Route Savings" value={`${(k.routeSavings || 18.4).toFixed(1)}%`}
           trend={k.routeTrend || 2.3} color={col3}
           subValues={[{ label: 'Fuel', value: `Rs.${(k.fuelSaved || 42).toFixed(0)}k` }, { label: 'km saved', value: k.kmSaved || 312 }]}
+          detailBtn={{ content: 'VIEW DETAILS →', text: true }}
           onClick={() => showKPIDetail({
             icon: <IcoRoute />, label: 'Route Optimisation Savings', value: (k.routeSavings || 18.4).toFixed(1), unit: '%',
             trend: k.routeTrend || 2.3, color: col3,
@@ -605,6 +607,7 @@ export default function Dashboard() {
         <KPICard icon={<IcoTrash />} label="Daily Collection" value={(kz.dailyCollectionTons ?? 1247).toFixed(0)}
           unit="t/day" trend={kz.collectionTrend || 3.2} color={col4}
           subValues={[{ label: 'Target', value: zoneFilter === 'all' ? '1,400t' : `${Math.round((kz.dailyCollectionTons || 249) / (k.dailyCollectionTons || 1247) * 1400)}t` }, { label: 'Rate', value: `${(kz.collectionRate || 72).toFixed(0)}%` }]}
+          detailBtn={{ content: <IcoEyeSmall /> }}
           onClick={() => showKPIDetail({
             icon: <IcoTrash />, label: 'Total Waste Collected', value: (kz.dailyCollectionTons ?? 1247).toFixed(0), unit: 't/day',
             trend: kz.collectionTrend || 3.2, color: col4,
@@ -620,6 +623,7 @@ export default function Dashboard() {
         <KPICard icon={<IcoRecycle />} label="Recycling Rate" value={`${(k.recyclingRate || 23.0).toFixed(1)}%`}
           trend={k.recyclingTrend || 1.8} color={col5}
           subValues={[{ label: 'Material', value: '287t' }, { label: 'Revenue', value: 'Rs.2.1M' }]}
+          detailBtn={{ content: <><IcoEyeSmall />{' '}VIEW DETAILS</>, text: true }}
           onClick={() => showKPIDetail({
             icon: <IcoRecycle />, label: 'Recycling / Reuse Rate', value: (k.recyclingRate || 23.0).toFixed(1), unit: '%',
             trend: k.recyclingTrend || 1.8, color: col5,
@@ -635,6 +639,7 @@ export default function Dashboard() {
         <KPICard icon={<IcoBarChart />} label="Overflow Incidents" value={`${(bins.overflowPct || 1.8).toFixed(1)}%`}
           trend={-(k.overflowTrend || 0.3)} color={col6}
           subValues={[{ label: 'Bins', value: `${bins.overflow || 8}/${bins.total || 445}` }, { label: 'Alerts', value: bins.alerts || 8 }]}
+          detailBtn={{ content: <>VIEW DETAILS <span style={{ fontSize: '13px' }}>↘</span></>, text: true, underline: true }}
           onClick={() => showKPIDetail({
             icon: <IcoBarChart />, label: 'Bin Overflow Incidents', value: (bins.overflowPct || 1.8).toFixed(1), unit: '%',
             trend: -(k.overflowTrend || 0.3), color: col6,

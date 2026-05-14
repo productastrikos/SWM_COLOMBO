@@ -40,7 +40,9 @@ function LandfillCard({ landfill }) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <span className="text-2xl">🏔️</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-slate-400 shrink-0">
+            <path d="M2 20h20M6 20c0-4 2-8 6-8s6 4 6 8" />
+          </svg>
           <div>
             <h3 className="text-sm font-bold text-white">{landfill.name}</h3>
             <p className="text-[10px] text-slate-500">{typeof landfill.location === 'string' ? landfill.location : 'Colombo Region'}</p>
@@ -208,6 +210,7 @@ export default function Landfills() {
   const ARUWAKKALU_12M  = [25.2,26.4,27.8,28.6,29.4,30.2,31.0,31.9,32.7,33.4,34.0,34.2];
   const KARADIYANA_12M  = [93.1,94.2,95.0,95.8,96.4,96.9,97.2,97.6,97.9,98.1,98.3,98.5];
 
+  const tCapacity = getChartTokens();
   const capacityTrendData = {
     labels: buildTimeframeLabels(activeCapacityFrame.value, activeCapacityFrame.points),
     datasets: [
@@ -226,9 +229,21 @@ export default function Landfills() {
           activeCapacityFrame.dataWindow ? KARADIYANA_12M.slice(-activeCapacityFrame.dataWindow) : KARADIYANA_12M,
           activeCapacityFrame.points
         ),
-        borderColor: CHART_PALETTES.area.violet.border, backgroundColor: CHART_PALETTES.area.violet.fill,
+        borderColor: CHART_PALETTES.area.pink.border, backgroundColor: CHART_PALETTES.area.pink.fill,
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
-      }
+      },
+      {
+        label: '— Warning (60%)',
+        data: Array(activeCapacityFrame.points).fill(60),
+        borderColor: tCapacity.warningBar, borderDash: [5, 4], borderWidth: 1.5,
+        pointRadius: 0, fill: false, tension: 0,
+      },
+      {
+        label: '— Critical (80%)',
+        data: Array(activeCapacityFrame.points).fill(80),
+        borderColor: tCapacity.dangerBar, borderDash: [3, 3], borderWidth: 1.5,
+        pointRadius: 0, fill: false, tension: 0,
+      },
     ]
   };
 
@@ -332,7 +347,7 @@ export default function Landfills() {
             <Line data={capacityTrendData} options={{
               responsive: true, maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top', labels: { color: getChartTokens().legendColor, font: { size: 9 } } },
+                legend: { position: 'top', labels: { color: getChartTokens().legendColor, font: { size: 9 }, filter: (item) => !item.text.startsWith('—') } },
                 tooltip: chartTooltip(),
               },
               scales: chartScales({ x: { grid: { display: false } }, y: { max: 100, title: { display: true, text: '% Used', color: getChartTokens().tickColor, font: { size: 9 } } } })

@@ -44,12 +44,12 @@ body[data-theme='dark'] {
   --cwm-panel-border:  transparent;
 
   /* Logo image: invert the silver-on-white PNG so it's visible on the dark sidebar */
-  --cwm-logo-filter: invert(1) brightness(2);
+  --cwm-logo-filter:  brightness(2);
 
   /* Advisory accent (purple) */
   --cwm-advisory:        #8b5cf6;
   --cwm-advisory-strong: #7c3aed;
-  --cwm-advisory-panel:  rgba(59, 31, 140, 0.90);
+  --cwm-advisory-panel:  rgb(130, 90, 210);
   --cwm-advisory-border: rgba(139, 92, 246, 0.45);
 
   /* Status */
@@ -76,9 +76,9 @@ body[data-theme='dark'] {
   --cwm-chart-grid:           rgba(255, 255, 255, 0.04);
 
   /* Chart bar fills — RAG status, semi-opaque */
-  --cwm-success-bar:   rgba(22,  163,  74, 0.65);
-  --cwm-warning-bar:   rgba(217, 119,   6, 0.65);
-  --cwm-danger-bar:    rgba(220,  38,  38, 0.65);
+  --cwm-success-bar:   rgba(22,  163,  74, 0.90);
+  --cwm-warning-bar:   rgba(245, 158,  11, 0.90);
+  --cwm-danger-bar:    rgba(220,  38,  38, 0.90);
 
   /* Text on coloured/accent backgrounds (e.g. notification badge) */
   --cwm-on-color:      #ffffff;
@@ -122,9 +122,9 @@ body[data-theme='light'] {
   --cwm-border:        rgba(0, 0, 0, 0.12);
   --cwm-border-soft:   rgba(0, 0, 0, 0.07);
 
-  --cwm-text:          #0a1628;
-  --cwm-text-muted:    #1a3150;
-  --cwm-text-faint:    #2c4a70;
+  --cwm-text:          #0d0d0d;
+  --cwm-text-muted:    #1f1f1f;
+  --cwm-text-faint:    #4a4a4a;
 
   --cwm-accent:        #3b6dbf;
   --cwm-accent-strong: #2d5ca8;
@@ -140,14 +140,14 @@ body[data-theme='light'] {
   /* General panel border — visible in light mode */
   --cwm-panel-border:  rgba(0, 0, 0, 0.10);
 
-  /* Logo image: no filter needed, silver logo is visible on light sidebar */
-  --cwm-logo-filter: none;
+  /* Logo image: darken for light theme */
+  --cwm-logo-filter: brightness(0.1) saturate(0);
 
   /* Advisory accent (purple) */
   --cwm-advisory:        #7c3aed;
   --cwm-advisory-strong: #6d28d9;
-  --cwm-advisory-panel:  rgba(74, 34, 168, 0.90);
-  --cwm-advisory-border: rgba(124, 58, 237, 0.80);
+  --cwm-advisory-panel:  rgb(130, 90, 210);
+  --cwm-advisory-border: rgba(139, 92, 246, 0.45);
 
   --cwm-success:       #15803d;
   --cwm-success-bg:    rgba(21, 128, 61, 0.11);
@@ -169,9 +169,9 @@ body[data-theme='light'] {
   --cwm-chart-tooltip-border: #c5d9f5;
   --cwm-chart-grid:           rgba(15, 35, 75, 0.07);
 
-  --cwm-success-bar:   rgba(21,  128,  61, 0.50);
-  --cwm-warning-bar:   rgba(194,  65,  12, 0.50);
-  --cwm-danger-bar:    rgba(185,  28,  28, 0.50);
+  --cwm-success-bar:   rgba(21,  128,  61, 0.88);
+  --cwm-warning-bar:   rgba(245, 158,  11, 0.88);
+  --cwm-danger-bar:    rgba(185,  28,  28, 0.88);
 
   --cwm-on-color:      #ffffff;
 
@@ -701,12 +701,28 @@ body[data-theme='light'] .cwm-kpi-icon { color: #3b7de8 !important; }
   border-left-color: var(--cwm-advisory-border) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  color: #ffffff;
+  /* Scope dark-theme CSS variables so internals look identical in both themes */
+  --cwm-border: transparent;
+  --cwm-border-soft: transparent;
+  color: #fef9ef;
 }
-/* Both themes use a dark purple bg — force all text to white */
-.cwm-advisory-panel * { color: rgba(255,255,255,0.90) !important; }
-body[data-theme='light'] .cwm-advisory-panel *,
-body[data-theme='light'] .cwm-advisory-panel .text-white { color: rgba(255,255,255,0.90) !important; }
+/* Force action-form slide-over to stay dark in light theme */
+body[data-theme='light'] .cwm-advisory-panel .bg-cwm-darker { background-color: #0a0a0a !important; }
+/* Override Tailwind white → pure white throughout the panel (light theme scoped for specificity win) */
+.cwm-advisory-panel .text-white,
+body[data-theme='light'] .cwm-advisory-panel .text-white { color: #ffffff !important; }
+/* Override white/opacity variants → dimmed cream */
+.cwm-advisory-panel [class*="text-white/"],
+body[data-theme='light'] .cwm-advisory-panel [class*="text-white/"] { color: rgba(254, 249, 239, 0.55) !important; }
+/* Explicit black labels (section headings etc.) stay black */
+.cwm-advisory-panel .text-black { color: #000000 !important; }
+
+/* Advisory cards have light background — use dark purple text */
+.advisory-card { color: #2d1b69; }
+.advisory-card .text-white,
+body[data-theme='light'] .advisory-card .text-white { color: #2d1b69 !important; }
+.advisory-card [class*="text-white/"],
+body[data-theme='light'] .advisory-card [class*="text-white/"] { color: rgba(45, 27, 105, 0.55) !important; }
 
 /* ─── Info / detail modal backdrops (transparent click-catcher) ─ */
 .cwm-modal-backdrop {
