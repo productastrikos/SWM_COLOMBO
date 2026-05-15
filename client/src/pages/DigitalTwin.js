@@ -910,7 +910,7 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
 
   const BtnRow = ({ btns }) => (
     <div className={'grid gap-1.5 '+(btns.length===1?'grid-cols-1':'grid-cols-2')}>
-      {btns.map(({ label, onClick, clr='cyan' },i) => {
+      {btns.map(({ label, onClick, clr='cyan', iconPath },i) => {
         const C = {
           cyan:   'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25',
           amber:  'bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25',
@@ -918,7 +918,16 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
           emerald:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25',
           purple: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25',
         };
-        return <button key={i} onClick={onClick} className={'py-2 text-[10px] font-semibold rounded-lg border transition-colors '+(C[clr]||C.cyan)}>{label}</button>;
+        return (
+          <button key={i} onClick={onClick} className={'py-2 text-[10px] font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 '+(C[clr]||C.cyan)}>
+            {iconPath && (
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="#3b82f6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d={iconPath} />
+              </svg>
+            )}
+            {label}
+          </button>
+        );
       })}
     </div>
   );
@@ -1055,11 +1064,11 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
             const needsService = data.status === 'needs_collection' || data.status === 'overflow';
             if (needsService && onRerouteToAlert) {
               return [
-                { label:'🗓️ Schedule Collection', onClick:()=>onAction('collect',data), clr:'emerald' },
-                { label:'🚨 Assign Nearest Vehicle', onClick:()=>onRerouteToAlert({ id:data.id, type:'bin', lat:data.lat, lng:data.lng, name:'Bin '+data.id+' — '+data.ward }), clr:'red' },
+                { label:'Schedule Collection', iconPath:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', onClick:()=>onAction('collect',data), clr:'emerald' },
+                { label:'Assign Nearest Vehicle', iconPath:'M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 17h2M17 17h2M1 9h18M13 3H1v14h12V3zM13 5h4l3 6H13V5z', onClick:()=>onRerouteToAlert({ id:data.id, type:'bin', lat:data.lat, lng:data.lng, name:'Bin '+data.id+' — '+data.ward }), clr:'red' },
               ];
             }
-            return [{ label:'🗓️ Schedule Collection', onClick:()=>onAction('collect',data), clr:'emerald' }];
+            return [{ label:'Schedule Collection', iconPath:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', onClick:()=>onAction('collect',data), clr:'emerald' }];
           })()} />
           <MonitorBtn label="Open Bin Monitoring" onClick={()=>onAction('monitor',data)} />
         </>
@@ -1216,7 +1225,7 @@ function EntityPanel({ entity, onClose, onAction, routePaths, onRerouteToAlert }
           </div>
 
           {data.status==='alert' && (
-            <BtnRow btns={[{label:'🚨 Dispatch Response Team',onClick:()=>onAction('respond',data),clr:'red'}]} />
+            <BtnRow btns={[{label:'Dispatch Response Team', iconPath:'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', onClick:()=>onAction('respond',data),clr:'red'}]} />
           )}
           <MonitorBtn label="Open Full Camera Feed" onClick={()=>onAction('feed',data)} />
         </>

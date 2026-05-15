@@ -9,6 +9,26 @@ import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTime
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Tooltip, Filler, Legend);
 
+/* ── Channel SVG icon paths (blue) ───────────────────────────────── */
+const CHANNEL_ICON_PATHS = {
+  'SMS':        'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
+  'Phone Call': 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
+  'WhatsApp':   'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+  'Twitter/X':  'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
+  'Facebook':   'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+  'Mobile App': 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+  'Email':      'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+  'Walk-in':    'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+};
+function ChannelIcon({ channel }) {
+  const d = CHANNEL_ICON_PATHS[channel] || CHANNEL_ICON_PATHS['SMS'];
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="#3b82f6" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d={d} />
+    </svg>
+  );
+}
+
 /* ── Static data ──────────────────────────────────────────────────── */
 
 // 431 total active complaints across all wards
@@ -737,8 +757,8 @@ export default function CitizenServices() {
                 return (
                   <div key={item.id} className="px-4 py-3 flex items-start gap-3 hover:bg-white/[0.02] transition-colors">
                     {/* Channel icon */}
-                    <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-base shrink-0 mt-0.5">
-                      {item.icon}
+                    <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center shrink-0 mt-0.5">
+                      <ChannelIcon channel={item.channel} />
                     </div>
                     {/* Content */}
                     <div className="flex-1 min-w-0">
@@ -810,7 +830,7 @@ export default function CitizenServices() {
             <div className="flex items-start justify-between px-5 pt-5 pb-4 border-b border-cwm-border">
               <div className="flex-1 min-w-0 pr-3">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="text-lg">{actionPanel.icon}</span>
+                  <ChannelIcon channel={actionPanel.channel} />
                   <span className="text-xs font-bold text-white">{actionPanel.channel}</span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded border font-bold ${pm.cls}`}>{pm.label}</span>
                   <span className="text-[9px] text-slate-500">#{actionPanel.id}</span>
