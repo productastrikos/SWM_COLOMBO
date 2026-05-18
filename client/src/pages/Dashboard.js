@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DigitalTwin from './DigitalTwin';
 import { DataContext } from '../services/socket';
 import KPIDetailModal from '../components/KPIDetailModal';
-import KPICard, { IcoCoverage, IcoAlert, IcoRoute, IcoTrash, IcoRecycle, IcoBarChart, IcoEyeSmall } from '../components/KPICard';
+import KPICard, { IcoCoverage, IcoAlert, IcoRoute, IcoTrash, IcoRecycle, IcoBarChart } from '../components/KPICard';
 import ZoneFilterBar from '../components/ZoneFilterBar';
 import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, CHART_PALETTES, getChartTokens, chartTooltip, chartScales, getCSSVar } from '../components/chartUtils';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
