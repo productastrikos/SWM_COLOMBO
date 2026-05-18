@@ -286,9 +286,9 @@ body[data-theme='light'] .bg-black\/75              { background-color: rgba(20,
   background: var(--cwm-surface);
   border: none;
   border-radius: 16px;
-  padding: 17px 14px;
+  padding: 18px 20px 16px;
   box-shadow: none;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -296,6 +296,7 @@ body[data-theme='light'] .bg-black\/75              { background-color: rgba(20,
 }
 .kpi-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
 }
 
 /* Shared surface for KPI Detail Modal cards — same tokens as .kpi-card */

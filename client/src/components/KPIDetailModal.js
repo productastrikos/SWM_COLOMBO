@@ -155,7 +155,10 @@ function toCode(label) {
 export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
   const [timeRange, setTimeRange]           = useState('24H');
   const [showPrediction, setShowPrediction] = useState(false);
-  const isLight = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
+  const isLight    = typeof document !== 'undefined' && document.body?.dataset?.theme === 'light';
+  const tileBg      = isLight ? 'var(--cwm-surface-raised)' : 'var(--cwm-surface)';
+  const tileBorder  = `1px solid ${isLight ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.07)'}`;
+  const innerDiv    = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
 
   const numValue    = useMemo(() => parseFloat(kpi?.value) || 0, [kpi]);
   const rag         = useMemo(() => {
@@ -242,12 +245,6 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
     ];
   }, [kpi]);
 
-  const bandStyle = {
-    emerald: { title: 'text-emerald-400', solidBg: 'var(--cwm-modal-success-bg)', solidBorder: 'var(--cwm-modal-success-border)' },
-    amber:   { title: 'text-amber-400',   solidBg: 'var(--cwm-modal-warning-bg)', solidBorder: 'var(--cwm-modal-warning-border)' },
-    red:     { title: 'text-red-400',     solidBg: 'var(--cwm-modal-danger-bg)',  solidBorder: 'var(--cwm-modal-danger-border)' },
-  };
-
   /* Chart datasets */
   const chartData = useMemo(() => {
     const actualData = showPrediction ? [...hist, ...Array(8).fill(null)] : hist;
@@ -284,7 +281,7 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
       }] : []),
     ];
     return { labels: allLabels, datasets };
-  }, [hist, pred, allLabels, showPrediction, kpi, targetNum, chartTargetVal, chartWarnVal, activeTimeRange]);
+  }, [hist, pred, allLabels, showPrediction, kpi, chartTargetVal, chartWarnVal, activeTimeRange]);
 
   const chartOpts = useMemo(() => ({
     responsive: true, maintainAspectRatio: false,
@@ -328,10 +325,10 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
     <div className="fixed inset-0 z-[1100] flex justify-end">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} onClick={onClose} />
 
-      <div className="relative h-full kpi-modal kpi-modal-card flex flex-col shadow-2xl animate-slide-in-right" style={{ width: 680, borderLeft: '1px solid var(--cwm-border)', borderRadius: 0 }}>
+      <div className="relative h-full kpi-modal flex flex-col shadow-2xl animate-slide-in-right" style={{ width: 680, borderLeft: '1px solid var(--cwm-border)', borderRadius: 0, background: 'var(--cwm-panel)' }}>
 
         {/* ── HEADER ─────────────────────────────────────────── */}
-        <div className="px-5 py-3 border-b border-cwm-border flex items-center justify-between kpi-modal-card" style={{ borderRadius: 0, flexShrink: 0 }}>
+        <div className="px-5 py-3 flex items-center justify-between" style={{ borderRadius: 0, flexShrink: 0, borderBottom: isLight ? '1px solid var(--cwm-border)' : '1px solid rgba(255,255,255,0.09)' }}>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'var(--cwm-surface-raised)', border: '1px solid var(--cwm-border)' }}>
               {kpi.icon}
@@ -356,126 +353,143 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
           </div>
         </div>
 
-        {/* ── BODY — no scroll, flex column fills height ─────── */}
-        <div className="flex-1 overflow-hidden flex flex-col p-3" style={{ gap: 8 }}>
+        {/* ── BODY — Bento grid, no-scroll ──────────────────── */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 14px' }}>
 
-          {/* Metric strip — 4 columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, flexShrink: 0 }}>
+          {/* ── ROW 1: Metric strip ─────────────────────────── */}
+          <div style={{ flexShrink: 0, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
             {[
-              { label: 'Current', val: kpi.value, unit: kpi.unit, sub: `${(kpi.trend||0)>=0?'+':'−'}${Math.abs(kpi.trend||0).toFixed(1)}% vs yesterday`, subColor: (kpi.trend||0) >= 0 ? '#22c55e' : '#ef4444' },
-              { label: 'Target',  val: targetNum,  unit: kpi.unit },
-              { label: 'YTD Avg', val: ytdAvg,     unit: kpi.unit },
-              { label: '30-Day Avg', val: thirtyDayAvg, unit: kpi.unit },
+              { label: 'Current',    val: kpi.value,      unit: kpi.unit, sub: `${(kpi.trend||0)>=0?'+':'−'}${Math.abs(kpi.trend||0).toFixed(1)}% vs yesterday`, subColor: (kpi.trend||0) >= 0 ? '#22c55e' : '#ef4444' },
+              { label: 'Target',     val: targetNum,       unit: kpi.unit },
+              { label: 'YTD Avg',    val: ytdAvg,          unit: kpi.unit },
+              { label: '30-Day Avg', val: thirtyDayAvg,    unit: kpi.unit },
             ].map((m, i) => (
-              <div key={i} style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
-                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{m.label}</p>
-                <p style={{ fontSize: 19, fontWeight: 700, color: 'var(--cwm-text)', lineHeight: 1 }}>
-                  {m.val}{m.unit && <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--cwm-text-muted)', marginLeft: 3 }}>{m.unit}</span>}
+              <div key={i} style={{ background: i === 0 ? rag.solidBg : tileBg, border: i === 0 ? `1px solid ${rag.solidBorder}` : tileBorder, borderRadius: 10, padding: '10px 14px' }}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>{m.label}</p>
+                <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--cwm-text)', lineHeight: 1 }}>
+                  {m.val}{m.unit && <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--cwm-text-faint)', marginLeft: 3 }}>{m.unit}</span>}
                 </p>
-                {m.sub && <p style={{ fontSize: 9, color: m.subColor || 'var(--cwm-text-muted)', marginTop: 4, fontWeight: m.subColor ? 600 : 400 }}>{m.sub}</p>}
+                {m.sub && <p style={{ fontSize: 9, color: m.subColor, marginTop: 5, fontWeight: 600 }}>{m.sub}</p>}
               </div>
             ))}
           </div>
 
-          {/* Chart — grows to fill remaining space */}
-          <div className="flex-1 min-h-0" style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '10px 14px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexShrink: 0 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cfg.title}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div className="cwm-timeframe-control">
-                  {availableRanges.map((r) => (
-                    <button key={r} onClick={() => { setTimeRange(r); setShowPrediction(false); }}
-                      className={`cwm-timeframe-btn ${activeTimeRange === r ? 'is-active' : ''}`}>{r}</button>
-                  ))}
-                </div>
-                <button onClick={() => setShowPrediction((p) => !p)}
-                  className={`cwm-advisory-btn${showPrediction ? ' is-on' : ''}`}
-                  style={{ height: 24, padding: '0 8px', fontSize: 10, borderRadius: 5, boxShadow: showPrediction ? undefined : 'none' }}>
-                  <span>✦</span><span>Predict</span>
-                </button>
-              </div>
-            </div>
-            <div style={{ flex: 1, minHeight: 0 }}>
-              <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
-            </div>
-            {/* Threshold bands — inline text row, no boxes */}
-            <div style={{ display: 'flex', gap: 24, paddingTop: 8, borderTop: '1px solid var(--cwm-border)', marginTop: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              {bands.map((b, i) => {
-                const c = b.color === 'emerald' ? getCSSVar('--cwm-success') : b.color === 'amber' ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-danger');
-                return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
-                    <span style={{ fontSize: 9, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{b.label}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--cwm-text)' }}>{b.desc}</span>
+          {/* ── ROW 2: Main bento row — chart (left) + side panel (right) ── */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 8 }}>
+
+            {/* Chart panel */}
+            <div style={{ flex: 3, minWidth: 0, background: tileBg, border: tileBorder, borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexShrink: 0 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cfg.title}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="cwm-timeframe-control">
+                    {availableRanges.map((r) => (
+                      <button key={r} onClick={() => { setTimeRange(r); setShowPrediction(false); }}
+                        className={`cwm-timeframe-btn ${activeTimeRange === r ? 'is-active' : ''}`}>{r}</button>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Definition */}
-          {kpi.definition && (
-            <div style={{ flexShrink: 0, background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '7px 14px' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Definition</p>
-              <p style={{ fontSize: 11, color: 'var(--cwm-text)', lineHeight: 1.5 }}>{kpi.definition}</p>
-            </div>
-          )}
-
-          {/* Anomalies + Related Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: subs.length > 0 ? '1fr 1fr' : '1fr', gap: 8, flexShrink: 0 }}>
-
-            {/* Anomalies */}
-            <div style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Anomalies &amp; Events</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {events.map((e, i) => {
-                  const sevColor = e.sev === 'critical' ? getCSSVar('--cwm-danger') : e.sev === 'warning' ? getCSSVar('--cwm-warning') : 'var(--cwm-text-faint)';
+                  <button onClick={() => setShowPrediction((p) => !p)}
+                    className={`cwm-advisory-btn${showPrediction ? ' is-on' : ''}`}
+                    style={{ height: 24, padding: '0 8px', fontSize: 10, borderRadius: 5, boxShadow: showPrediction ? undefined : 'none' }}>
+                    <span>✦</span><span>Predict</span>
+                  </button>
+                </div>
+              </div>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                <Line data={chartData} options={chartOpts} plugins={[threshPlugin]} />
+              </div>
+              <div style={{ display: 'flex', gap: 20, paddingTop: 8, borderTop: `1px solid ${innerDiv}`, marginTop: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                {bands.map((b, i) => {
+                  const c = b.color === 'emerald' ? getCSSVar('--cwm-success') : b.color === 'amber' ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-danger');
                   return (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: sevColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums', marginTop: 1 }}>{e.time}</span>
-                      <p style={{ fontSize: 10, color: 'var(--cwm-text)', lineHeight: 1.4 }}>{e.text}</p>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
+                      <span style={{ fontSize: 9, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{b.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--cwm-text)' }}>{b.desc}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Related Metrics */}
-            {subs.length > 0 && (
-              <div style={{ background: 'var(--cwm-panel)', border: '1px solid var(--cwm-border)', borderRadius: 10, padding: '8px 12px' }}>
-                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Related Metrics</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-                  {mainSubs.map((m, i) => {
-                    const isCrit = /critical|danger|error|failed/i.test(m.label);
-                    const isWarn = /miss|overdue|lost|excess|pending/i.test(m.label);
-                    const valClr = isCrit ? getCSSVar('--cwm-danger') : isWarn ? getCSSVar('--cwm-warning') : getCSSVar('--cwm-accent');
+            {/* Side panel: Definition + Anomalies + Related Metrics + AI Advisory */}
+            <div style={{ flex: 2, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+              {/* Definition */}
+              {kpi.definition && (
+                <div style={{ flexShrink: 0, background: tileBg, border: tileBorder, borderRadius: 12, padding: '10px 12px' }}>
+                  <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Definition</p>
+                  <p style={{ fontSize: 11, color: 'var(--cwm-text)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{kpi.definition}</p>
+                </div>
+              )}
+
+              {/* Anomalies & Events — fills all remaining space */}
+              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', background: tileBg, border: tileBorder, borderRadius: 12, padding: '10px 12px' }}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Anomalies &amp; Events</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {events.map((e, i) => {
+                    const sevColor = e.sev === 'critical' ? getCSSVar('--cwm-danger') : e.sev === 'warning' ? getCSSVar('--cwm-warning') : 'var(--cwm-text-faint)';
                     return (
-                      <div key={i} style={{ borderLeft: `2px solid ${valClr}`, paddingLeft: 8 }}>
-                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{m.label}</p>
-                        <p style={{ fontSize: 15, fontWeight: 700, color: valClr, lineHeight: 1 }}>{m.value}</p>
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: sevColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums', marginTop: 1 }}>{e.time}</span>
+                        <p style={{ fontSize: 10, color: 'var(--cwm-text)', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{e.text}</p>
                       </div>
                     );
                   })}
-                  {targetSubs.map((m, i) => (
-                    <div key={i} style={{ borderLeft: '2px solid var(--cwm-border)', paddingLeft: 8 }}>
-                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>Target</p>
-                      <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--cwm-text)', lineHeight: 1 }}>{m.value}</p>
-                    </div>
-                  ))}
                 </div>
               </div>
-            )}
+
+              {/* Related Metrics — fixed height tile */}
+              {subs.length > 0 && (
+                <div style={{ flexShrink: 0, background: tileBg, border: tileBorder, borderRadius: 12, padding: '10px 12px' }}>
+                  <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Related Metrics</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px 12px' }}>
+                    {mainSubs.map((m, i) => (
+                      <div key={i} style={{ borderLeft: '2px solid #60a5fa', paddingLeft: 8 }}>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{m.label}</p>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: '#60a5fa', lineHeight: 1 }}>{m.value}</p>
+                      </div>
+                    ))}
+                    {targetSubs.map((m, i) => (
+                      <div key={i} style={{ borderLeft: `2px solid ${innerDiv}`, paddingLeft: 8 }}>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Target</p>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--cwm-text-muted)', lineHeight: 1 }}>{m.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
           </div>
 
-          {/* AI Advisory */}
+          {/* ── ROW 3: AI Advisory — full-width bottom bar ───────────────── */}
           {showAnalysis && analyses.length > 0 && (
-            <div style={{ flexShrink: 0, background: 'var(--cwm-modal-advisory-bg)', border: '1px solid var(--cwm-modal-advisory-border)', borderRadius: 10, padding: '8px 14px' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--cwm-advisory)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>AI Advisory</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {analyses.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <span style={{ color: 'var(--cwm-advisory)', fontWeight: 700, fontSize: 11, flexShrink: 0, marginTop: 1 }}>→</span>
-                    <p style={{ fontSize: 11, color: 'var(--cwm-text)', lineHeight: 1.4 }}>{s.trim()}.</p>
+            <div style={{
+              flexShrink: 0,
+              background: 'var(--cwm-modal-advisory-bg)',
+              border: '1px solid var(--cwm-modal-advisory-border)',
+              borderRadius: 12,
+              padding: '10px 14px',
+            }}>
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--cwm-advisory)', textTransform: 'uppercase', letterSpacing: '0.18em', flexShrink: 0 }}>✦ AI Advisory</span>
+                <div style={{ flex: 1, height: '1px', background: innerDiv }} />
+                <span style={{ fontSize: 9, color: 'var(--cwm-text-faint)', fontStyle: 'italic', flexShrink: 0 }}>CWM Insight Engine</span>
+              </div>
+              {/* 3-column insight grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 14px' }}>
+                {analyses.slice(0, 3).map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                    <span style={{
+                      minWidth: 17, height: 17, borderRadius: '50%',
+                      background: 'var(--cwm-advisory)', color: 'var(--cwm-panel)',
+                      fontWeight: 800, fontSize: 9, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginTop: 1,
+                    }}>{i + 1}</span>
+                    <p style={{ fontSize: 10, color: 'var(--cwm-text)', lineHeight: 1.5 }}>{s.trim()}.</p>
                   </div>
                 ))}
               </div>
@@ -484,7 +498,7 @@ export default function KPIDetailModal({ kpi, onClose, showAnalysis = true }) {
         </div>
 
         {/* ── FOOTER ─────────────────────────────────────────── */}
-        <div className="px-5 py-2.5 border-t border-cwm-border kpi-modal-card flex items-center justify-between" style={{ borderRadius: 0, flexShrink: 0 }}>
+        <div className="px-5 py-2.5 flex items-center justify-between" style={{ borderRadius: 0, flexShrink: 0, borderTop: isLight ? '1px solid var(--cwm-border)' : '1px solid rgba(255,255,255,0.09)' }}>
           <p className="text-[10px] text-slate-400">
             Last updated: {new Date().toLocaleTimeString()} · Smart SWM Platform · Colombo
           </p>

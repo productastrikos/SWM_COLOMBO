@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { getFacilities } from '../services/api';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
-import KPICard, { IcoRecycle, IcoBox, IcoRoute } from '../components/KPICard';
+import KPICard, { IcoRecycle, IcoBox, IcoRoute, IcoLeaf } from '../components/KPICard';
 import KPIDetailModal from '../components/KPIDetailModal';
 import { CHART_PALETTES, chartTooltip } from '../components/chartUtils';
 ChartJS.register(ArcElement, Tooltip);
 
 function FacilityCard({ facility }) {
   const typeIcons = {
-    recycling_center: 'RC',
-    transfer_station: 'TS',
-    composting: 'CP',
-    material_recovery: 'MR',
+    recycling_center: <IcoRecycle />,
+    transfer_station: <IcoRoute />,
+    composting:       <IcoLeaf />,
+    material_recovery: <IcoBox />,
   };
   // Known daily throughput values (t/day) keyed by facilityId — used as reliable fallback
   const KNOWN_THROUGHPUT = {
@@ -31,7 +31,7 @@ function FacilityCard({ facility }) {
     <div className="bg-cwm-panel border border-cwm-border rounded-lg p-3 hover:border-cwm-accent/30 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <span className="text-[10px] font-mono font-bold text-slate-500 w-8 text-center">{typeIcons[facility.type] || 'MR'}</span>
+          <span className="w-5 h-5 text-slate-400 flex items-center justify-center">{typeIcons[facility.type] || <IcoBox />}</span>
           <div>
             <p className="text-xs font-semibold text-white">{facility.name}</p>
             <p className="text-[10px] text-slate-500">{(facility.type || '').replace(/_/g, ' ')}</p>

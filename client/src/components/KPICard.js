@@ -51,28 +51,29 @@ export function deriveRag(color) {
 }
 
 /**
- * KPICard — enterprise-grade stat tile
+ * KPICard — enterprise-grade stat tile (3-column layout)
  *
  * Props:
- *   label   — card label text
- *   value   — main displayed value
- *   unit    — optional unit string appended to value
- *   icon    — emoji or JSX node shown in icon box
- *   color   — Tailwind text-* class (used to derive rag if rag prop not given)
- *   rag     — explicit rag key ('normal' | 'warning' | 'critical')
- *   trend   — percent change number (positive = up, negative = down)
- *   onClick — makes card clickable
+ *   label      — card title text (shown top-left alongside icon)
+ *   value      — main displayed value
+ *   unit       — optional unit string appended to value
+ *   icon       — emoji or JSX node shown in icon box
+ *   color      — Tailwind text-* class (used to derive rag if rag prop not given)
+ *   rag        — explicit rag key ('normal' | 'warning' | 'critical')
+ *   trend      — percent change number (positive = up, negative = down)
+ *   subValues  — array of { label, value } for secondary metrics row
+ *   onClick    — makes card clickable
  */
-export default function KPICard({ label, value, unit, icon, color, rag: ragProp, trend, onClick, detailBtn }) {
+export default function KPICard({ label, value, unit, icon, color, rag: ragProp, trend, onClick, subValues }) {
   const hasTrend = trend !== null && trend !== undefined;
   const isPos    = (trend || 0) >= 0;
   const rag      = ragProp || deriveRag(color);
 
   const ragStyles = {
-    normal:   { color: '#22c55e', label: 'NORMAL'  },
-    warning:  { color: '#f59e0b', label: 'WARNING' },
-    critical: { color: '#ef4444', label: 'CRITICAL'},
-  }[rag] || { color: '#22c55e', label: 'NORMAL' };
+    normal:   { color: '#22c55e', dot: '#16a34a', label: 'NORMAL'   },
+    warning:  { color: '#f59e0b', dot: '#d97706', label: 'WARNING'  },
+    critical: { color: '#ef4444', dot: '#dc2626', label: 'CRITICAL' },
+  }[rag] || { color: '#22c55e', dot: '#16a34a', label: 'NORMAL' };
 
   return (
     <div
@@ -81,107 +82,95 @@ export default function KPICard({ label, value, unit, icon, color, rag: ragProp,
         cursor: 'default',
         display: 'flex',
         flexDirection: 'column',
-        padding: '10px 12px 8px',
+        padding: '18px 20px 16px',
         overflow: 'hidden',
         minHeight: 0,
+        position: 'relative',
       }}
     >
-      {/* ── Row 1: icon left, trend badge right ─────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      {/* ── Row 1: icon + label + trend badge ───────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
         <div
           className="rounded-xl flex items-center justify-center leading-none cwm-kpi-icon"
-          style={{ width: '28px', height: '28px', fontSize: '1.1rem', flexShrink: 0 }}
+          style={{ width: '32px', height: '32px', fontSize: '1.15rem', flexShrink: 0 }}
         >
           {icon || '▣'}
         </div>
+        <p
+          className="font-semibold leading-tight flex-1"
+          style={{ color: 'var(--cwm-text-muted)', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
+          {label}
+        </p>
         {hasTrend && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span
-              className="kpi-trend-badge font-semibold flex items-center leading-tight gap-0.5"
-              style={{
-                fontSize: '10px',
-                color:      isPos ? '#22c55e' : '#ef4444',
-                background: isPos ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
-                padding: '2px 5px',
-                borderRadius: '5px',
-              }}
-            >
-              <span style={{ fontSize: '8px' }}>{isPos ? '▲' : '▼'}</span>
-              <span>{Math.abs(trend).toFixed(1)}%</span>
-            </span>
-            <span style={{ fontSize: '9px', color: 'var(--cwm-text-faint)', fontWeight: 500 }}>vs yesterday</span>
-          </div>
+          <span
+            className="kpi-trend-badge font-semibold flex items-center leading-tight gap-0.5"
+            style={{
+              fontSize: '10px',
+              color:      isPos ? '#22c55e' : '#ef4444',
+              background: isPos ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+              padding: '2px 6px',
+              borderRadius: '5px',
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: '8px' }}>{isPos ? '▲' : '▼'}</span>
+            <span>{Math.abs(trend).toFixed(1)}%</span>
+          </span>
         )}
       </div>
 
       {/* ── Row 2: large value ──────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, marginTop: '6px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+      <div style={{ flexShrink: 0, marginTop: '14px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
         <span
           className="font-bold leading-none tracking-tight"
-          style={{ color: 'var(--cwm-text)', fontSize: 'clamp(1.4rem, 3vw, 2.2rem)' }}
+          style={{ color: 'var(--cwm-text)', fontSize: 'clamp(2rem, 3.5vw, 2.8rem)' }}
         >
           {value}
         </span>
         {unit && (
-          <span style={{ color: 'var(--cwm-text-faint)', fontSize: '0.75rem', fontWeight: 500 }}>{unit}</span>
+          <span style={{ color: 'var(--cwm-text-faint)', fontSize: '0.85rem', fontWeight: 500 }}>{unit}</span>
         )}
       </div>
 
-      {/* ── Row 3: label ────────────────────────────────────────────────── */}
-      <p
-        className="font-medium leading-snug"
-        style={{ color: 'var(--cwm-text)', fontSize: '14px', marginTop: '3px', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-      >
-        {label}
-      </p>
+      {/* ── Row 3: sub-values ───────────────────────────────────────────── */}
+      {subValues && subValues.length > 0 && (
+        <div style={{ display: 'flex', gap: '20px', marginTop: '12px', flexShrink: 0, flexWrap: 'wrap' }}>
+          {subValues.map((sv, i) => (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontSize: '9px', color: 'var(--cwm-text-faint)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{sv.label}</span>
+              <span style={{ fontSize: '13px', color: 'var(--cwm-text-muted)', fontWeight: 600 }}>{sv.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Divider ─────────────────────────────────────────────────────── */}
-      <div className="kpi-card-divider" style={{ height: '1px', background: 'var(--cwm-border)', margin: '6px 0', flexShrink: 0 }} />
+      <div className="kpi-card-divider" style={{ height: '1px', background: 'var(--cwm-border)', margin: '14px 0 10px', flexShrink: 0 }} />
 
-      {/* ── Row 4: RAG badge ────────────────────────────────────────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0 }}>
-        <span
-          style={{
-            fontSize: '10px',
-            fontWeight: 700,
-            letterSpacing: '0.06em',
-            color: ragStyles.color,
-          }}
-        >
+      {/* ── Row 4: RAG badge left, detail action right ──────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.07em', color: ragStyles.color, display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: ragStyles.dot, display: 'inline-block', flexShrink: 0 }} />
           {ragStyles.label}
         </span>
+        {onClick && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
+            aria-label={`Details for ${label}`}
+            title={`Details for ${label}`}
+            style={{
+              background: 'none', border: 'none', padding: 0,
+              fontSize: '10px', fontWeight: 700, color: '#22d3ee',
+              textDecoration: 'underline', textUnderlineOffset: '2px',
+              cursor: 'pointer', letterSpacing: '0.05em', lineHeight: 1,
+            }}
+          >
+            VIEW DETAILS
+          </button>
+        )}
       </div>
-
-      {/* ── Action button — bottom-right corner ─────────────────────────── */}
-      {onClick && (detailBtn?.text ? (
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
-          aria-label={`Details for ${label}`}
-          title={`Details for ${label}`}
-          style={{
-            position: 'absolute', bottom: '8px', right: '10px',
-            background: 'none', border: 'none', padding: 0,
-            fontSize: '10px', fontWeight: 600, color: '#94a3b8',
-            textDecoration: detailBtn?.underline ? 'underline' : 'none',
-            cursor: 'pointer', display: 'flex', alignItems: 'center',
-            gap: '3px', letterSpacing: '0.01em', lineHeight: 1,
-          }}
-        >
-          {detailBtn.content}
-        </button>
-      ) : (
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          onKeyDown={(e) => e.key === 'Enter' && (e.stopPropagation(), onClick())}
-          aria-label={`Details for ${label}`}
-          className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 flex items-center justify-center transition-colors"
-          style={{ position: 'absolute', bottom: '8px', right: '10px', fontSize: '9px' }}
-          title={`Details for ${label}`}
-        >
-          {detailBtn?.content ?? 'ℹ'}
-        </button>
-      ))}
     </div>
   );
 }

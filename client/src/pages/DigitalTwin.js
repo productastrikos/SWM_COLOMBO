@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Polygon, Marker, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { IcoTruck, IcoTrash, IcoScale, IcoPeople, IcoAlert, IcoSignal, IcoGlobe, IcoPin, IcoCheck, IcoWrench, IcoClipboard } from '../components/KPICard';
 import roadCenterlines from '../data/colomboRoads.json';
 import precomputedRoutePaths from '../data/colomboRoutePaths.json';
 
@@ -1444,6 +1445,17 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
   const [actioned,    setActioned]    = useState({});   // alertId → label that was actioned
   const [alertToast,  setAlertToast]  = useState(null);
 
+  const DT_LAYER_ICONS = {
+    zones:        <IcoGlobe />,
+    wards:        <IcoPin />,
+    vehicles:     <IcoTruck />,
+    bins:         <IcoTrash />,
+    weighbridges: <IcoScale />,
+    staff:        <IcoPeople />,
+    complaints:   <IcoAlert />,
+    cameras:      <IcoSignal />,
+  };
+
   const dismiss = (id) => setDismissed(prev => new Set([...prev, id]));
   const doAction = (alert, label) => {
     setActioned(prev => ({ ...prev, [alert.id]: label }));
@@ -1488,7 +1500,7 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
         {tab === 'layers' && LAYER_CONFIG.map(lc => (
           <button key={lc.key} onClick={()=>setLayers(p=>({...p,[lc.key]:!p[lc.key]}))}
             className={'w-full flex items-center space-x-2 px-2 py-2 rounded-lg transition-all text-left ' + (layers[lc.key]?'bg-cwm-accent/15 border border-cwm-accent/30':'bg-white/[0.02] border border-transparent hover:bg-white/[0.04]')}>
-            <span className="text-[9px] font-mono font-bold text-slate-500 leading-none">{lc.icon}</span>
+            <span className="w-4 h-4 text-slate-400 flex items-center justify-center flex-shrink-0">{DT_LAYER_ICONS[lc.key]}</span>
             <span className="text-[11px] font-medium text-slate-300 flex-1">{lc.label}</span>
             <div className={'w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors ' + (layers[lc.key]?'bg-cyan-400':'bg-slate-700')} />
           </button>
@@ -1676,18 +1688,21 @@ function LeftPanel({ layers, setLayers, alerts, stats, wards, selectedWardId, on
         )}
 
         {tab === 'assets' && [
-          { icon:'V',  label:'Total Fleet',    v:stats.totalVehicles, vc:'text-white' },
-          { icon:'A',  label:'Active Now',     v:stats.activeVehicles, vc:'text-emerald-400' },
-          { icon:'X',  label:'Breakdown',      v:stats.breakdown, vc:'text-red-400' },
-          { icon:'B',  label:'Total Bins',     v:stats.totalBins, vc:'text-cyan-400' },
-          { icon:'!',  label:'Overflow Bins',  v:stats.overflow, vc:'text-amber-400' },
-          { icon:'S',  label:'Staff On Route', v:stats.staffOnRoute, vc:'text-emerald-400' },
-          { icon:'C',  label:'Open Cases',     v:stats.openComplaints, vc:'text-amber-400' },
-          { icon:'Cv', label:'Live Cameras',   v:stats.liveCameras, vc:'text-cyan-400' },
-          { icon:'Wb', label:'Weighbridges',   v:stats.liveWeighbridges, vc:'text-amber-400' },
+          { ico: <IcoTruck />,     label:'Total Fleet',    v:stats.totalVehicles,    vc:'text-white' },
+          { ico: <IcoCheck />,     label:'Active Now',     v:stats.activeVehicles,   vc:'text-emerald-400' },
+          { ico: <IcoWrench />,    label:'Breakdown',      v:stats.breakdown,        vc:'text-red-400' },
+          { ico: <IcoTrash />,     label:'Total Bins',     v:stats.totalBins,        vc:'text-cyan-400' },
+          { ico: <IcoAlert />,     label:'Overflow Bins',  v:stats.overflow,         vc:'text-amber-400' },
+          { ico: <IcoPeople />,    label:'Staff On Route', v:stats.staffOnRoute,     vc:'text-emerald-400' },
+          { ico: <IcoClipboard />, label:'Open Cases',     v:stats.openComplaints,   vc:'text-amber-400' },
+          { ico: <IcoSignal />,    label:'Live Cameras',   v:stats.liveCameras,      vc:'text-cyan-400' },
+          { ico: <IcoScale />,     label:'Weighbridges',   v:stats.liveWeighbridges, vc:'text-amber-400' },
         ].map(s => (
           <div key={s.label} className="flex items-center justify-between px-2 py-1.5 rounded bg-white/[0.02]">
-            <div className="flex items-center space-x-2"><span className="text-[9px] font-mono font-bold text-slate-500 w-5 text-center">{s.icon}</span><span className="text-[10px] text-slate-400">{s.label}</span></div>
+            <div className="flex items-center space-x-2">
+              <span className="w-4 h-4 text-slate-500 flex items-center justify-center flex-shrink-0">{s.ico}</span>
+              <span className="text-[10px] text-slate-400">{s.label}</span>
+            </div>
             <span className={'text-[11px] font-bold ' + s.vc}>{s.v}</span>
           </div>
         ))}
@@ -2558,7 +2573,6 @@ export default function DigitalTwin({ isPreview = false }) {
             { icon:'S',  label:'Staff On Route',   v: stats.staffOnRoute,   vc:'text-cyan-400' },
           ].map(s => (
             <div key={s.label} className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] shrink-0">
-              <span className="text-[9px] font-mono font-bold text-slate-500 w-4 text-center">{s.icon}</span>
               <div><p className={'text-sm font-bold leading-none ' + s.vc}>{s.v}</p><p className="text-[9px] text-slate-600 mt-0.5">{s.label}</p></div>
             </div>
           ))}

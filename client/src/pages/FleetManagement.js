@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getVehicles, dispatchVehicle } from '../services/api';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
-import KPICard, { IcoTruck, IcoCheck, IcoRoute, IcoTrash, IcoHourglass, IcoWrench, IcoFuel, IcoPin, IcoClock, IcoLeaf, IcoLink } from '../components/KPICard';
+import KPICard, { IcoTruck, IcoCheck, IcoRoute, IcoTrash, IcoHourglass, IcoWrench, IcoFuel, IcoPin, IcoClock, IcoLeaf } from '../components/KPICard';
 import { ChartTimeframeControl, TIMEFRAME_OPTIONS, getTimeframeOption, buildTimeframeLabels, resampleSeries, getChartTokens, chartTooltip, chartScales } from '../components/chartUtils';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -377,9 +377,9 @@ export default function FleetManagement() {
             { label: 'Time Saved',     value: '3.2 hrs',     sub: 'fleet-wide today',        rag: 'green',  icon: <IcoClock /> },
             { label: 'CO₂ Avoided',   value: '334 kg',      sub: 'vs. baseline routes',    rag: 'green',  icon: <IcoLeaf /> },
           ].map((m, i) => (
-            <div key={i} className={`rounded-xl p-3 border ${m.rag === 'green' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
-              <div className="flex items-center space-x-2 mb-1">
-                <div className="w-5 h-5 text-slate-400">{m.icon}</div>
+            <div key={i} className="rounded-xl p-3 bg-cwm-surface">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className={`w-5 h-5 flex items-center justify-center ${m.rag === 'green' ? 'text-emerald-400' : 'text-amber-400'}`}>{m.icon}</div>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider">{m.label}</p>
               </div>
               <p className={`text-lg font-bold ${m.rag === 'green' ? 'text-emerald-400' : 'text-amber-400'}`}>{m.value}</p>

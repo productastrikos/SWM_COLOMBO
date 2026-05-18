@@ -25,7 +25,7 @@ function GaugeCard({ label, value, max, unit, icon }) {
   return (
     <div className={`bg-white/[0.05] border border-white/[0.07] border-l-2 ${borderColor} rounded-xl p-3.5 text-center shadow-sm`}>
       <div className="flex items-start justify-between mb-2">
-        <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-base leading-none">{icon}</div>
+        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">{icon}</div>
         <div className={`w-2 h-2 rounded-full mt-1 ${dotColor}`} />
       </div>
       <div className="relative w-14 h-14 mx-auto mb-2">

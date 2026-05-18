@@ -335,11 +335,11 @@ export default function WasteCollection() {
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { label: 'Total Missed Points', value: totalMissed,                                                    color: 'text-red-400',   bg: 'bg-red-500/10',   border: 'border-red-500/30'   },
-              { label: 'Wards Below 85%',     value: filteredWardCoverage.filter(w => w.coverage < 85).length,  color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
-              { label: 'Critical Alerts',     value: filteredMissedAlerts.filter(a => a.priority === 'critical').length, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30' },
+              { label: 'Total Missed Points', value: totalMissed,                                                    color: 'text-red-400'   },
+              { label: 'Wards Below 85%',     value: filteredWardCoverage.filter(w => w.coverage < 85).length,      color: 'text-amber-400' },
+              { label: 'Critical Alerts',     value: filteredMissedAlerts.filter(a => a.priority === 'critical').length, color: 'text-red-400' },
             ].map((s, i) => (
-              <div key={i} className={`${s.bg} border ${s.border} rounded-xl p-3 text-center`}>
+              <div key={i} className="bg-cwm-surface rounded-xl p-3 text-center">
                 <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
                 <p className="text-[10px] text-slate-500 mt-1 leading-tight">{s.label}</p>
               </div>

@@ -553,7 +553,7 @@ export default function Dashboard() {
         );
       })()}
       {/* Top KPI Strip — SWM KPIs with RAG thresholds, definitions, analysis */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
         {/* 1. Collection Coverage */}
         {(() => { const col1 = (kz.collectionCoverage || 90.1) >= 95 ? 'text-emerald-400' : (kz.collectionCoverage || 90.1) >= 85 ? 'text-amber-400' : 'text-red-400'; return (
@@ -575,7 +575,6 @@ export default function Dashboard() {
         <KPICard icon={<IcoAlert />} label="Missed Collections" value={`${(kz.missedCollections || 9.9).toFixed(1)}%`}
           trend={-(kz.missedTrend || 0.4)} color={col2}
           subValues={[{ label: 'Points', value: kz.missedPoints || 457 }, { label: 'Alerts', value: kz.overdueAlerts || 8 }]}
-          detailBtn={{ content: 'VIEW DETAILS', text: true, underline: true }}
           onClick={() => showKPIDetail({
             icon: <IcoAlert />, label: 'Missed Collections', value: (kz.missedCollections || 9.9).toFixed(1), unit: '%',
             trend: -(kz.missedTrend || 0.4), color: col2,
@@ -591,7 +590,6 @@ export default function Dashboard() {
         <KPICard icon={<IcoRoute />} label="Route Savings" value={`${(k.routeSavings || 18.4).toFixed(1)}%`}
           trend={k.routeTrend || 2.3} color={col3}
           subValues={[{ label: 'Fuel', value: `Rs.${(k.fuelSaved || 42).toFixed(0)}k` }, { label: 'km saved', value: k.kmSaved || 312 }]}
-          detailBtn={{ content: 'VIEW DETAILS →', text: true }}
           onClick={() => showKPIDetail({
             icon: <IcoRoute />, label: 'Route Optimisation Savings', value: (k.routeSavings || 18.4).toFixed(1), unit: '%',
             trend: k.routeTrend || 2.3, color: col3,
@@ -607,7 +605,6 @@ export default function Dashboard() {
         <KPICard icon={<IcoTrash />} label="Daily Collection" value={(kz.dailyCollectionTons ?? 1247).toFixed(0)}
           unit="t/day" trend={kz.collectionTrend || 3.2} color={col4}
           subValues={[{ label: 'Target', value: zoneFilter === 'all' ? '1,400t' : `${Math.round((kz.dailyCollectionTons || 249) / (k.dailyCollectionTons || 1247) * 1400)}t` }, { label: 'Rate', value: `${(kz.collectionRate || 72).toFixed(0)}%` }]}
-          detailBtn={{ content: <IcoEyeSmall /> }}
           onClick={() => showKPIDetail({
             icon: <IcoTrash />, label: 'Total Waste Collected', value: (kz.dailyCollectionTons ?? 1247).toFixed(0), unit: 't/day',
             trend: kz.collectionTrend || 3.2, color: col4,
@@ -623,7 +620,6 @@ export default function Dashboard() {
         <KPICard icon={<IcoRecycle />} label="Recycling Rate" value={`${(k.recyclingRate || 23.0).toFixed(1)}%`}
           trend={k.recyclingTrend || 1.8} color={col5}
           subValues={[{ label: 'Material', value: '287t' }, { label: 'Revenue', value: 'Rs.2.1M' }]}
-          detailBtn={{ content: <><IcoEyeSmall />{' '}VIEW DETAILS</>, text: true }}
           onClick={() => showKPIDetail({
             icon: <IcoRecycle />, label: 'Recycling / Reuse Rate', value: (k.recyclingRate || 23.0).toFixed(1), unit: '%',
             trend: k.recyclingTrend || 1.8, color: col5,
@@ -639,7 +635,6 @@ export default function Dashboard() {
         <KPICard icon={<IcoBarChart />} label="Overflow Incidents" value={`${(bins.overflowPct || 1.8).toFixed(1)}%`}
           trend={-(k.overflowTrend || 0.3)} color={col6}
           subValues={[{ label: 'Bins', value: `${bins.overflow || 8}/${bins.total || 445}` }, { label: 'Alerts', value: bins.alerts || 8 }]}
-          detailBtn={{ content: <>VIEW DETAILS <span style={{ fontSize: '13px' }}>↘</span></>, text: true, underline: true }}
           onClick={() => showKPIDetail({
             icon: <IcoBarChart />, label: 'Bin Overflow Incidents', value: (bins.overflowPct || 1.8).toFixed(1), unit: '%',
             trend: -(k.overflowTrend || 0.3), color: col6,
